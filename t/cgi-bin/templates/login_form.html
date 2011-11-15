@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><title>Notice CRaAM login.cgi -  from 2001:0:5ef5:79fd:8000:1d3a:a29e:5445 </title>
+
+<meta name="description" content="IP database" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta name="keywords" content="extended, customer, resource, management,
+ system, for, internet, companies" /><link rel="stylesheet" media="all" type="text/css" href="/css/notice.css" />
+<script type="text/javascript">
+<!-- //
+function setFocus( field ) {
+ document.form.username.focus();
+}
+// --></script></head>
+<body class="nomenunotice" onload="setFocus('username')">
+<br />
+<table class="nomenunotice">
+<tr>
+<!-- did have this next td commented out but I don't remember why -->
+<td class="nomenuleft">
+
+</td>
+
+<td class="nomenuright">
+
+<!-- Main page -->
+
+Welcome to Notice
+<TMPL_IF ERROR>
+  <p style="color:red">ERROR - Please try again.</p>
+</TMPL_IF>
+
+
+<center>
+<form action="<TMPL_VAR MYURL>/mustlogin" name="loginform" method="post">
+<table>
+<tr><td>Email:</td><td><input type="text" name="authen_username" value=""/></td></tr>
+<tr><td>Password:</td><td><input type="password" id="password" name="authen_password" value=""/></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" name="submit" value="Submit"/></td></tr>
+</table>  
+<input type="hidden" name="destination" value="<TMPL_VAR DESTINATION>" />
+</form>
+
+</center>
+Message: <TMPL_IF MESSAGE><TMPL_VAR MESSAGE><TMPL_ELSE>'Please login'</TMPL_IF></td></tr></table><span id="orphus" class="hidden"><script type="text/javascript" src="/js/orphus.js"></script>
+<a href="http://notice.alexx.net" id="notice.alexx.net" target="_blank"><img alt="Orphus system" src="/images/orphus.gif" border="0" width="197" height="39" /></a></span>
+</body></html>

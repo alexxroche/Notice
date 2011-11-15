@@ -1,0 +1,175 @@
+[% WRAPPER Notice/C/Signup/wrapper.tmpl %]
+[% USE Dumper %]
+[% IF no_page %]
+[% message %]
+[% body %]
+[% ELSE %]
+
+[% #Dumper.dump(form); %]
+Please first create an account with GB.Com so that we know who you are... and then click the Add button at the bottom of this page.
+
+<form method="post" action="[% IF no_js; '?debug=1'; END %]" name="form">
+<table id="signup_table" class="stripe">
+
+    <thead>
+        <th colspan="2"> New User
+        </th>
+    </thead>
+    <tbody>
+      <tr>
+                <td class="edit">Title</td>
+                <td class="edit"><select name="pw_raid">
+[% FOREACH rank = ranks %]
+<option value="[% rank.ra_id %]"[% UNLESS rank.ra_name; 'selected="selected"'; END%]>[% rank.ra_name or '&lt;optional&gt;' %]</option>
+[% END # foreach rank %]
+</select></td>
+        </tr>
+
+    <tr>
+
+        <td>First Name</td>
+        <td><input type="text" id="pw_fname" name="pw_fname" value="[% form.param('pw_fname') %]" /></td>
+    </tr>
+    <tr>
+        <td>Last Name</td>
+        <td><input type="text" id="pw_lname" name="pw_lname" value="[% form.param('pw_lname') %]" /></td>
+    </tr>
+    <tr>
+
+                <td class="edit">Existing Email<font color="#ff0000">&#42;</font></td>
+                <td class="edit"><input id="email" type="text" name="pw_email" value="[% form.param('pw_email') %]" /></td>
+
+        </tr>
+        <tr>
+                <td nowrap="nowrap" class="edit">Password <font color="#ff0000">&#42;</font></td>
+                <td class="edit">
+            <input id="password" type="text" name="password" value="[% form.param('password') %]" onkeyup="obscure_this(event,'password','pw_hid');"/>
+
+            <input type="hidden" name="pw_hid" id="pw_hid" value="[% form.param('pw_hid') %]" />
+        </td>
+        </tr>
+        <tr>
+                <td nowrap="nowrap" class="edit">Re-enter Password <font color="#ff0000">&#42;</font></td>
+                <td class="edit">
+            <input id="password-check" type="text" name="password_check" value="[% form.param('password_check') %]" onkeyup="obscure_this(event,'password-check','pw_c_hid');"/>
+            <input type="hidden" name="pw_c_hid" id="pw_c_hid" value="[% form.param('pw_c_hid') %]" />
+
+        </td>
+        </tr>
+
+    <!--tr>
+                <td class="edit">Likes to be know as</td>
+                <td class="edit"><input type="text" name="pw_goesby" value=""/></td>
+        </tr-->
+        <th colspan="2"> Account Details</th>
+        <tr>
+                <td class="edit">Account </td>
+                [% #Dumper.dump(accounts) %]
+                <td><select id="ac_select" name="pw_acid">
+
+[% IF accounts.size == 0 %]
+<option value="" selected="selected">Create new account</option>
+[% ELSE %]
+[% IF new_account AND new_account >= 1 %]
+<option value="" selected="selected">Create new account</option>
+[% END # IF new_account %]
+[% FOREACH ac = accounts %]
+<option value="[% ac.ac_id %]" [% IF accounts.size == 0 OR ac_selected == ac.ac_name; 'selected="selected"'; END %]>[% ac.ac_name or 'Create new account' %]</option>
+[% END # foreach rank %]
+[% END # if accounts.size == 0 %]
+</select></td>
+        </tr>
+     <tr class="ac_ad">
+        <td class="address">Postcode 
+            <!--font color="#ff0000">&#42;</font-->
+        </td>
+    <td><input type="text" name="ad_adpostcode" size="8" maxlength="12" value="[% form.param('ad_adpostcode') %]" /></td>
+     </tr>
+     <tr class="ac_ad">
+    <td class="address">Group/Company/Family<br />(Name for the Account)</td>
+
+    <td><input type="text" name="ac_name" size="12" maxlength="30" value="[% form.param('ac_name') %]" /></td>
+     </tr>
+     <tr class="ac_ad">
+    <td class="address">Name or Number of House<br />or Building</td>
+    <td><input type="text" name="ad_adname" size="12" maxlength="30" value="[% form.param('ad_adname') %]" /></td>
+     </tr>
+     </tr>
+     <tr class="ac_ad">
+
+        <td class="address">Road or Village</td>
+    <td><input type="text" name="ad_adroad" size="12" maxlength="32" value="[% form.param('ad_adroad') %]" /></td>
+     </tr>
+     <tr class="ac_ad">
+        <td class="address">City</td>
+    <td><input type="text" name="ad_adcity" size="16" maxlength="32" value="[% form.param('ad_adcity') %]" /></td>
+
+     </tr>
+
+     <tr class="ac_ad">
+        <td class="address">County</td>
+    <td><input type="text" name="ad_adcounty" size="20" maxlength="64" value="[% form.param('ad_adcounty') %]" /></td>
+     </tr>
+     <tr class="ac_ad">
+        <td class="address">Country</td>
+     <td><select name="ad_adcountry">
+[% FOREACH cntr = countries %]
+<option value="[% cntr.iso %]" [% IF cntr.iso == 'GB'; 'selected="selected"'; END%]>[% cntr.iso %]</option>
+[% END # foreach cntr %]
+</select></td>
+
+     </tr>
+     <tr class="ac_ad">
+        <td class="address">Phone</td>
+        <td><input type="text" name="ad_phone" size="12" maxlength="32" value="[% form.param('ad_phone') %]" /></td>
+     </tr>
+
+     <tr class="ac_ad">
+    <td class="address">Fax</td>
+    <td><input type="text" name="ad_fax" size="12" maxlength="32" value="[% form.param('ad_fax') %]" /></td>
+
+     </tr>
+     <!--tr class="ac_ad">
+        <td class="address">Type of Address</td>
+    <td> <select name="ad_type">
+     <option value="1" [% IF form.param('ac_ad') == 'billing'; 'selected="selected"'; END %]>office</option>
+     <option value="4" [% IF form.param('ac_ad') == 'event'; 'selected="selected"'; END %]>event</option>
+     <option value="3" [% IF form.param('ac_ad') == 'holiday'; 'selected="selected"'; END %]>holiday</option>
+     <option value="2" [% IF form.param('ac_ad') == 'home'; 'selected="selected"'; END %]>home</option>
+     <option value="5" [% UNLESS form.param('ac_ad'); 'selected="selected"'; END %]>billing</option>
+     <option value="7" [% IF form.param('ac_ad') == 'other'; 'selected="selected"'; END %]>other</option>
+     <option value="6" [% IF form.param('ac_ad') == 'satellite'; 'selected="selected"'; END %]>satellite</option>
+    </select></td-->
+
+     </tr>
+     <!--tr class="ac_ad">
+        <td class="address">Notes</td>
+    <td><textarea name="ad_notes" cols="20" rows="3">[% form.param('ad_notes') %]</textarea></td>
+     </tr-->
+
+    <tr class="stripe">
+        <th class="edit" colspan="2"><input type="submit" id="submit" value="Add" name="Add" class="big button" /></th>
+    </tr>
+
+
+    </tbody>
+</table>
+<span id="msgdiv"></span>
+    <div id="pwc">
+        The password must:
+        <span id="pwc_1">contain lowercase and uppercase letters</span>
+        <span id="pwc_j">and</span>
+
+        <span id="pwc_2"> contain at least one digit</span>
+        <span id="pwc_j2">and</span>
+        <span id="pwc_l"> be six characters or longer</span>
+    </div>
+    <div id="approval_req">
+        Some accounts may require approval from an administrator
+    </div>
+
+<font color="#ff0000">&#42;</font> Required field<!--span><font color="#00ff00">&#42;</font>One of these is required </span -->
+</form>
+</center>
+[% END #no_page %]
+[% END #wrapper %]

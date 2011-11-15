@@ -1,0 +1,21 @@
+Notice
+
+Notice is interesting for at least two reasons, (possibly more).
+
+First it is an example of a light MVC framework. I started out by looking at the larest most popular MVC framework in CPAN; 
+it is great, but I needed something lighter, so I started looking for the lightest. I found a collection of tutorials, but
+never quite the full combination that I needed, (actually I wanted L18n as well but I did not have time when I was creating
+this third incarnation for Notice. xkcd.com/974/)
+
+Second I was spending a weekend building a domain registry, (it really isn't that hard) and needed a whois server; I could
+find an almost endless collection of code to talk to/with a whois server, but not actually a whois daemon. So in the S of 
+Model, View, Control, Sundries is a little RFC3912 compliant whois daemon. If you create a CDB file with a key of 
+awesome.gb.com and a value of "Why YOU are my friend, you are!" this daemon will serve it up for you. 
+
+The unsuspecting world should know that this version is NOT an example of perfect code, (feel free to improve it or make a
+version with the features that you need, e.g. L18n) but it will save you time if you need an example of these features, or
+a whois server.
+
+Catalyst seems like the daddy-bear of frame-works, and all the others seemed like mummy-bear, so Notice is my baby-bear;
+  I hope that someone else will think that it is 'just right'.
+

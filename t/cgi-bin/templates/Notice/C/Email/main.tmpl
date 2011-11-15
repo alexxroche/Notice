@@ -1,0 +1,14 @@
+[% WRAPPER 'site_wrapper.tmpl' %]
+        <h1>[% heading %]</h1>
+        <span class="page">[% page %]</span>
+
+ [% IF domains %]
+    <br />
+    <br /> You can add email forwardings (aliases) by using the following form
+    <br />
+  [% INCLUDE 'Notice/C/Email/add_alias_form.tmpl' %]
+  <br />
+  [% INCLUDE 'Notice/C/Email/list_aliases.tmpl' %]
+ [% END #IF %]
+
+[% END %]

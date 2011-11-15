@@ -1,0 +1,30 @@
+<html>
+<head>
+<META HTTP-EQUIV="Expires" CONTENT="Tue, 04 Dec 1993 21:29:02 GMT">
+<title>
+<TMPL_IF NAME> <TMPL_VAR NAME> </TMPL_IF>
+</title>
+</head>
+<body>
+<TMPL_IF NAME>
+  <p>This is the <TMPL_VAR NAME> page. </p>
+</TMPL_IF>
+<p> <hr/> </p>
+<TMPL_IF MESSAGE>
+  <p> <TMPL_VAR MESSAGE> </p>
+</TMPL_IF>
+<TMPL_IF USER>
+  <p> User: <TMPL_VAR USER> is logged in. </p>
+  <p> Click <a href="<TMPL_VAR MYURL>/logout">here</a> to logout. </p>
+<TMPL_ELSE>
+  <p> Click <a href="<TMPL_VAR MYURL>/mustlogin">here</a> to login. </p>
+</TMPL_IF>
+<p> <hr/> </p>
+<p><a href="<TMPL_VAR MYURL>/public">public</a></p>
+<p><a href="<TMPL_VAR MYURL>/public2">public2</a></p>
+<p><a href="<TMPL_VAR MYURL>/private">private</a></p>
+<p><a href="<TMPL_VAR MYURL>/private2">private2</a></p>
+<p> <hr/> </p>
+</body>
+</html>
+

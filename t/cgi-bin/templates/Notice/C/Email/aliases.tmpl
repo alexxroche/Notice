@@ -1,0 +1,50 @@
+[% WRAPPER site_wrapper.tmpl %]
+ [% USE Dumper %]
+        <h1>[% heading %]</h1>
+        <span class="body">[% body %]</span>
+        <span class="page">[% page %]</span>
+ [% IF error=='' %]
+  [% IF heading; '<h1>'; heading; '</h1>'; END %]
+  [% IF alias.0 %]
+<table class="email">
+<tr valign="top">
+        <th class="ip"><a href="$page?sort=ipp_name$col_order&amp;ud=$ud">Alias</a></th>
+        <th class="ip"></th>
+        <th class="ip">Destination</th>
+        <th colspan="2" class="ip">Action</th>
+        <!--th class="ip"><a href="$page?sort=ipp_VLAN$col_order&amp;ud=$ud">destination</a></th-->
+     </tr>
+      [% SET last_alias = '' %]
+      [% FOREACH f = alias %]
+         <tr class="nowrap [% loop.parity; IF f.ea_suspended; ' strike'; END %]">
+            <td[%- IF f.ea_suspended; ' class="strike"'; END -%]>
+           [% IF last_alias == f.ea_userid;  %]
+            <span class="center">--------- " ---------- (see above) -- ditto</span>
+            [% ELSE %]
+         [% f.ea_userid %]@[% key = 'do_name'; f.domains.$key || c.param('id'); %]
+        [% END #UNLESS %]
+            </td><td>
+            [% UNLESS last_alias == f.ea_userid; '=&gt;'; END %]</td>
+           <td class="[% IF f.ea_suspended; 'strike '; END %]">[% f.ea_touser %]@[% f.ea_at %]</td>
+           <td>
+        <form method="POST" action="/cgi-bin/index.cgi/email/edit_alias/[% f.ea_userid %]/[% f.ea_doid %]/">
+        <input type="submit" name="Edit" value="Edit Details" class="small edit button [% IF f.aliasdetails.ead_date; 'orange'; ELSE; 'blue'; END %]" />
+        </form>
+       </td><td>
+        <form method="POST" action="/cgi-bin/index.cgi/email/aliases/[% do_name %]">
+        <input type="submit" name="Delete" value="Delete Alias" class="small button [%- IF f.ea_suspended -%]orange[%- ELSE -%]del red[%- END -%]" />
+        </form>
+       </td>
+        </tr>
+        [% SET last_alias = f.ea_userid %]
+    [% END #FOREACH %]
+</table>
+[% END #IF alias %]
+  [% #Dumper.dump(alias) %]
+<br />
+<table class="alias_key"><tr><td>
+  [% INCLUDE 'Notice/C/Email/add_alias_form.tmpl' %]
+</td><td>Key: <button class="small button orange">Edit Details</button> = additional data<br />
+ &nbsp; &nbsp; &nbsp; &nbsp;  <button class="small button orange">Delete Alias</button> = Suspended</td></tr></table>
+ [% END #IF %]
+[% END #WRAPPER %]

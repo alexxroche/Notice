@@ -1,0 +1,88 @@
+[% USE cgi = CGI %]
+
+[% page_js = BLOCK %]
+    [% ajax_js # this is code built by CGI::Ajax.pm
+               # and inserted by perl app runmode;
+               # it includes enclosing "<script>" tags
+    %]
+
+    <script language="JavaScript" type="text/javascript">
+
+    <!--
+    // "hash" in which to list fields that have changed
+    var changed_fields = new Object;
+
+    // onChange handler for input fields
+    function note_change(myObj){
+        var myID = myObj.id;
+        if (myID){
+           changed_fields[myID] = 1;
+        }
+    }
+
+    // onClick handler for submit button
+    // "submit" only changed fields, not the whole form
+    function doSubmit(){
+    // CGI::Ajax wants an array to send to the server
+    // include run mode contained in hidden field "rm"
+    var myList = ["rm"];
+
+    // add the other fields
+        for ( var myField in changed_fields ){
+            myList.push(myField);
+            delete changed_fields[myField];
+        }
+        if ( myList.length == 1 ){ // nothing but the runmode
+           alert ("No changes to process");
+           return false;
+        }
+        submit_formdata( myList, ['resultdiv'] );
+        // "resultdiv" is where we're going to write the html
+        //  the perl app we're sending this to sends back
+        return false;
+    }
+
+    // -->
+    </script>
+
+[% END #page_js block %]
+
+
+[% # write the page HTML %]
+<html>
+<head>
+    [% page_js %]
+    <title>Test Page</title>
+</head>
+<body >
+    <div id="page">
+        <h4>Test</h4>
+        [% cgi.start_form(name=>"testform") %]
+            <div id="form_inputs">
+
+                <!-- Note that each of the form elems must have an "id",
+                     the name doesn't matter.
+                     CGI::Ajax uses getElementByID -->
+
+                [% cgi.hidden( id=>"rm", name=>"Some name",
+                   value=>"process_formdata",override=>1)
+                   #run mode for cgiapp %]
+
+                Field "Bert"&nbsp;&nbsp;
+                [% cgi.textfield( onChange=>"note_change(this)",
+           id=>"Bert",name=>"Some other name") %]<br /><br />
+
+                Field "Ernie"&nbsp;
+                [% cgi.textfield( onChange=>"note_change(this)",
+                   id=>"Ernie", name=>"No name") %]<br /><br />
+
+                [% cgi.submit( onClick=>"return doSubmit()" )  %]
+            </div>
+             <div id="resultdiv">
+             <!-- ajax stuff should appear here -->
+             </div>
+        [% message %]
+        [% cgi.end_form.join("") %]
+    </div>
+</body>
+</html>

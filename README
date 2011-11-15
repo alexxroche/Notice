@@ -1,0 +1,72 @@
+Notice
+
+Notice - A MVC (DBIC,TT,CAS) CGI::Application Customer Resource and Account Manager inspired by C:A:Structured
+
+C:A:S got a lot of things right but I prefer not to name my runmodes after perl functions. i.e. 
+<<<<<<< HEAD:README
+sub main: StartRunmode{ } #seems better than the default of sub index: StartRunmode{ }
+=======
+sub main: StartRunmode{ } #seems better than the default
+sub index: StartRunmode{ } #seems better than the default
+>>>>>>> master:README
+
+I had a hard time getting sessions; authentication; dispatch; query (the cgi query) all working at
+the same time with C:A:S. That said I'm very greatful for C:A:S in my transition from Catalyst to CGI:App
+
+Is it $self or $c ? I've chosen $self
+
+INSTALLATION
+    
+Create a database called notice and use the details from config/config.pl to grant a user then
+    mysql notice < config/notice.mysql
+You create the DBIC::schema using
+    ./script/create_dbic_schema.pl
+Then 
+    cp config t/cgi-bin/* /var/www/sites/www.example.com/cgi-bin/  #or where ever your cgi-bin is
+    cp t/www/* /var/www/sites/www.example.com/www/          #or where ever your www is
+
+To install this module, I run the following commands:
+
+	perl Makefile.PL
+	make
+	make test
+	sudo make install
+
+Test the install (default login is with a@b.com with a password of 123Abc) and if it works
+CHANGE the password in ~www/cgi-bin/config/config.pl and in the the db to match:
+    mysql -p mysql
+    mysql> update user set password=PASSWORD('NEW-PASSWORD') where User='notice_adminuser';
+
+SUPPORT AND DOCUMENTATION
+
+After installing, you can find documentation for this module with the
+perldoc command.
+
+    perldoc Notice
+
+You could also look for information at:
+
+    Notice@GitHub
+        http://github.com/alexxroche/Notice
+
+    RT, CPAN's request tracker
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Notice
+
+    AnnoCPAN, Annotated CPAN documentation
+        http://annocpan.org/dist/Notice
+
+    CPAN Ratings
+        http://cpanratings.perl.org/d/Notice
+
+    Search CPAN
+        http://search.cpan.org/dist/Notice/
+
+LICENSE AND COPYRIGHT
+
+Copyright (C) 2011 Alexx Roche
+
+This program is free software; you can redistribute it and/or modify it
+under the following license: Eclipse Public License, Version 1.0
+or the Artistic License.
+
+See http://www.opensource.org/licenses/ for more information.

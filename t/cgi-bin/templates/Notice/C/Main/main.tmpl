@@ -1,0 +1,6 @@
+[% WRAPPER 'site_wrapper.tmpl' %]
+[% greeting %]
+[% UNLESS greeting OR message; 'This is the Main Page. If you add modules you can enable them per user and then they will be displayed in the navigation menu on the left.'; END #or UNLESS %]
+<br />
+[% welcome %]
+[% END #WRAPPER %]

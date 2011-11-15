@@ -1,0 +1,7 @@
+This is just one script (whois.pl) that reads a CDB_File database (/var/lib/whois/whois.cdb)
+and binds to port 43
+
+# root crontab
+# Rebuild the whois database (move to the config/config.pl dir OR copy it to a useful location
+*/15 * * * * pushd /var/www/sites/Notice; /usr/local/sbin/whois.pl /var/lib/whois/whois.cdb ;popd
+

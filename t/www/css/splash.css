@@ -1,0 +1,341 @@
+/**********************************
+
+Use: Reset Styles for all browsers
+
+***********************************/
+	
+
+#outer {
+    width:50%;
+    margin: 0 auto;
+    /*
+    background:url("/images/smooth_blueprint_gradient.png") repeat-x scroll 0 -10px #999999; 
+    */
+    background: #999999;
+    z-index: 100;
+    display: block;
+    height: 300px;
+
+}
+
+.rounded-corners {
+     -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    -khtml-border-radius: 20px;
+    border-radius: 20px;
+}
+
+.shadow {
+        margin: 40px;
+        background-color: rgb(68,68,68); /* Needed for IEs */
+
+        -moz-box-shadow: -5px -5px 5px rgba(68,68,68,0.6);
+        -webkit-box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
+        box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
+
+        filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30);
+        -ms-filter: "progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)";
+        zoom: 1;
+}
+
+
+.login-caption { font-size: 175%; text-shadow:0 2px 6px #000000; }
+
+.login-form { 
+    margin: 40px auto;
+    -moz-box-shadow: -5px 0px 5px rgba(68,68,68,0.6);
+    -webkit-box-shadow: -5px 0px 5px rgba(68,68,68,0.6);
+    box-shadow: -5px 0px 5px rgba(68,68,68,0.6);
+
+        filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30);
+        -ms-filter: "progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)";
+        zoom: 1;
+
+    position: relative; /* This protects the inner element from being blurred */
+    padding: 8px;  
+    background-color: #DDD;
+    z-index: 90;
+    width: 100px;
+}
+#content.shadow {
+        position: relative; /* This protects the inner element from being blurred */
+        padding: 100px;
+        background-color: #DDD;
+}
+
+#top{
+    display:block;
+    height: auto;
+}
+#content {
+	color: #00B0A8;
+	background: #0099FF ;
+    width:950px;
+    margin: 0 auto;
+    display: block;
+    z-index: 110;
+    border:2px solid #CCCCCC;
+    padding:12px 17px 17px;
+}
+
+
+a img, iframe { border: none; }
+	
+/* Headers
+------------------------------*/
+
+h1, h2, h3, h4, h5, h6 {
+	margin: 0;
+	padding: 0;
+}
+
+.h1, h1 { font-size: 150%; font-weight: bold; text-align: center; }
+.h2, h2 { font-size: 140%; }
+.h3, h3 { font-size: 130%; }
+.h4, h4 { font-size: 120%; }
+.h5, h5 { font-size: 110%; }
+	
+/* Lists
+------------------------------*/
+	
+ul, ol, dl, li, dt, dd {
+	margin: 0;
+	padding: 0;
+}
+	
+/* Links
+------------------------------*/
+
+a, a:link {}
+a:visited {}
+a:hover {}
+a:active {}
+
+/* Forms
+------------------------------*/
+
+form, fieldset {
+	margin: 0;
+	padding: 0;
+}
+	
+fieldset { border: 1px solid #000; }
+
+legend {
+	padding: 0;
+	color: #000;
+}
+
+input, textarea, select {
+	margin: 0;
+	padding: 0px;
+	font-size: 80%;
+	font-family: inherit;
+}
+	
+select { padding: 0 0px; }
+
+.navigation {
+	color: #00CCCC;
+}
+
+blockquote {
+	margin: 0;
+	padding: 0;
+	background: #00B0A8;
+}
+
+body {
+    margin: 0;
+	padding: 0 10px;
+	font: normal 82.5% "Lucida Grande", Helvetica, Verdana, Arial;
+    /*
+    background:url("/images/smooth_blueprint_gradient.png") repeat-x scroll 0 -10px #00B0A8 ; 
+    */
+    background:url("/images/top_background.png") repeat-x scroll 0 -10px #00B0A8 ; 
+}
+table #body, div #content { height: 100%; }
+	
+p { margin: 10px 0; background: #00B0A8; padding: 0;}
+
+li { margin-left: 10px; }
+
+h3 { margin: 5px 0; }
+
+.red { background-color: red; }
+.blue { color: blue; }
+.green { color: green; }
+
+#rating {
+	border: 1px solid black;
+	margin: 5px;
+	padding: 5px;
+}
+
+div #menu {
+	border: 1px solid #666;
+	margin: 0 0 0 0 !important;
+	padding: 5px;
+}
+
+.top_logo { 
+	padding: 0px;
+	margin: 0 0 0 0 !important;
+}
+
+table.headtable {
+	border: 1px solid #666;
+	margin: 2px 0 2px 0 !important;
+	background: #FEFEFF none;
+}
+
+span.headtable-links {
+        line-height: 1.4em;
+        font-size: 78%;
+        font-family: sans-serif;
+        font-weight: lighter;
+        text-align:right;
+        color: #009;
+}
+
+td.headtable {
+        text-align:right;
+        width: 2%;
+        color: #0f0;
+        border-left-color: #Fff;
+        padding-left: 0px;
+        padding-right: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        vertical-align:middle;
+}
+
+td.headtable-links {
+        text-align:right;
+        vertical-align:top;
+        color: #f00;
+}
+
+
+th.headtable, td.headtable {
+	padding: 0px 0px 0px 0px !important;
+	text-align: left;
+	vertical-align: middle;
+}
+th, td {
+	padding: 2px 4px 2px 4px !important;
+	text-align: left;
+	vertical-align: top;
+}
+
+th {
+	background-color: #fc0;
+}
+
+th:hover {
+	background-color: #fc7;
+}
+
+tbody tr.even {
+	background-color: #fea
+}
+
+tr a.even {
+	color: rgb(000, 000, 000);
+	text-decoration: none;
+}
+tr a {
+	color: rgb(255, 255, 255);
+	text-decoration: none;
+}
+tr a:hover {
+	text-decoration: underline;
+}
+
+dl dd {
+	margin-left: 10px;
+}
+
+dl dt {
+	font-weight: bold;
+}
+
+dl {
+	border: 1px solid black;
+	margin: 5px;
+}
+
+.highlight {
+	border: 5px dotted #eee;
+}
+
+.error {
+	background-color: #fee;
+}
+
+.warn {
+        color: #630; /*dark blue*/
+        font-weight: normal;
+        font-family: monospace;
+        font-size: 145%;
+        text-decoration: underline;
+}
+
+.qwide { width:25%; }
+
+.opthi {
+display: block;
+background-color: #ffcc00;
+border: solid 2px #e2c822;
+}
+
+.blacktext { color: rgb(000, 000, 000); text-decoration: none; }
+
+table.stripe {
+        border-collapse: collapse;
+        /* width: 50%; */
+        padding: 0px 0px;
+        margin: 2px;
+        font-size: 1.1em;
+}
+
+table.stripe th {
+        background: #3e83c9;
+        color: #fff;
+        font-weight: bold;
+        padding: 2px 1px;
+        text-align: left;
+        border-right: 1px solid #fff;
+        line-height: 1.2;
+}
+
+table.stripe td {
+        padding: 6px 1px;
+        border-bottom: 1px solid #95bce2;
+        vertical-align: top;
+}
+
+table.stripe td * {
+        padding: 0px 21px;
+}
+
+table.stripe tr.alt td {
+        background: #ecf6fc;
+}
+
+table.stripe tr.over td {
+        background: #bcd4ec;
+}
+span.message {
+        color: #60c; /*dark blue*/
+        font-weight: bold;
+        font-family: monospace;
+        font-size: 145%;
+}
+
+a.logout {
+color:#999900;
+font-family:sans-serif;
+font-size:138%;
+font-weight:bold;
+}

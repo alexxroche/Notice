@@ -1,0 +1,15 @@
+Revision history for Notice
+
+3.00    Thu Nov 23 15:58:39 2011
+        First public release of Notice
+
+2.00    Thu Jun 23 15:56:41 2011
+        Beta release, used to run a (subzone) registry, using CGI::App
+
+1.00    2009-12-05 18:14
+        Written from the ground up as a single module, using as few
+        as possible from CPAN, (just DBI,CGI_Lite).
+
+0.01    2001-01-28 16:49:12
+        First version, never released on an unsuspecting world.
+

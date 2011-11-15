@@ -1,0 +1,52 @@
+[% WRAPPER 'site_wrapper.tmpl' %] 
+    <style type="text/css">
+   /* table {border-collapse:collapse;} */
+    tr th.under { border-bottom-style:dotted; }
+    tr.asset th { border-bottom-style:solid; }
+    tr.odd td { background-color: #999; color: white; }
+    tr.even td { background-color: #909; color: black; }
+    .as_data { border-collapse:collapse; border: 1px; padding: 0px; margin: 0; color: black; }
+    tr.as_data_even td.bg { background-color: #9cc; }
+    tr.as_data_odd td.bg { background-color: #cc9; }
+    .error { color: orange; size:20px; }
+    </style>
+[% UNLESS error; %]
+ <h1>[% submit or 'submit' %] [% ning; ' '; type or asc.assetcategory.asc_name or asc.type or asc.asc_name %] to the Asset Database</h1>
+    [% headmsg %][%# IF warning; '&lt;WARNING&gt;'; warning; '&lt;/WARNING&gt;'; END %]<form method="POST" action="[% action %]">
+    <table>
+      <tr class="asset">
+    <th>Asset Keys</th>
+    <th>Data Values</th>
+    <th>Data Restrictions</th>
+     </tr>
+      [% FOREACH ac = asc %]
+         <tr class="as_data as_data_[% loop.parity %]">
+           <td class="bg">[% ac.ac_name  or '' %]</td>
+           <td class="bg">[% IF ac.ac_type=='text';
+            '<input type="text" name="'; ac.ac_id; '" value="'; ac.ac_value; '" />';
+        ELSIF ac.ac_type=='textarea';
+            '<textarea name="'; ac.ac_id; '">'; ac.ac_value; '</textarea>';
+        ELSIF ac.ac_type=='checkbox';
+            '<input type="checkbox" name="'; ac.ac_id; '" />';
+        END %]
+        </td>
+        <td class="bg_white">
+        [% IF ac.ac_regexp; %] ( [% ac.ac_regexp %] ) [% END %]
+       </td>
+         </tr>
+      [% END %]
+    </table>
+    [% IF create == 'new' %]
+    <input type="hidden" name="create" value="new" />
+    [% END %]
+    [% IF update == 'update' %]
+    <input type="hidden" name="update" value="update" />
+    [% END %]
+    [% FOREACH ach = ach %]
+    <input type="hidden" name="[% ach.name %]" value="[% ach.value %]" />
+    [% END %]
+    <input type="submit" name="Add" value="[% submit or 'Add' %] [% type %]" />
+    </form>
+[% END #of UNLESS %]
+[% END #of WRAPPER %]
+

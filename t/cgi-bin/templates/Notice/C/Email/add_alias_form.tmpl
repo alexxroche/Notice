@@ -1,0 +1,36 @@
+<!-- add a new alias -->
+
+[% IF domains %]
+<form method="post" action="[% action %]">
+<table class="green">
+  <tr valign="top">
+    <th class="ip">User</a></th>
+        <th class="ip">@</th>
+        <th class="ip">Domain</th>
+        <th class="ip">=&gt;</th>
+        <th class="ip">Destination</th>
+        <th class="ip">Action</th>
+     </tr>
+  </tr>
+  <tr>
+        <td><input type="text" name="userid" maxlength="128" /></td>
+        <td>@</td>
+        <td>
+         [% IF domains.size >= 2 %]
+            <select name="doid">
+           [% FOREACH dom = domains %]
+            <option value="[% dom.do_id %]"[% IF dom.do_name == do_name; ' selected="selected"'; END %]>[% dom.do_name %]</option>
+            [% END #FOREACH %]
+            </select>
+         [% ELSE %]
+            <input type="hidden" name="do_id" value="[% domains.0.do_id %]" />[% domains.0.do_name %]
+         [% END #IF-ELSE %]
+        </td>
+        <td>=&gt;</td>
+        <td><input type="text" name="to" /></td>
+        <td><input type="submit" value="Add" class="small button green"/></td>
+  </tr>
+</table>
+</form>
+[% END #IF %]
+

@@ -1,0 +1,6 @@
+#!/bin/sh
+# 20100128 notice-dev at alexx dot net
+# pin Perl INstaller
+# This builds and installs the perl module that you are in
+perl Makefile.PL && make && make manifest && cpansign -s && make test && sudo make install
+

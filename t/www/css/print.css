@@ -1,0 +1,22 @@
+#outer { width:50%; margin: 0 auto; }
+.login-form { 
+    margin: 40px;
+    -moz-box-shadow: -5px 0px 5px rgba(68,68,68,0.6);
+    -webkit-box-shadow: -5px 0px 5px rgba(68,68,68,0.6);
+    box-shadow: -5px 0px 5px rgba(68,68,68,0.6);
+
+        filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30);
+        -ms-filter: "progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)";
+        zoom: 1;
+
+    position: relative; /* This protects the inner element from being blurred */
+    padding: 8px;  
+    background-color: #DDD;
+    z-index: 90;
+    width: 100px;
+}
+
+.login-caption { font-size: 175%; text-shadow:0 2px 6px #000000; }
+
+#top{ display:block; }
+body { background: #CCCCCC ; }

@@ -1,0 +1,155 @@
+[% WRAPPER site_wrapper.tmpl %]
+<link rel="stylesheet" media="all" type="text/css" href="/css/domain_edit.css" />
+
+
+[% USE Dumper %]
+[% #Dumper.dump(d) %]
+<script type="text/javascript">
+<!--
+function insertTab(o, e)
+{
+   if(document.zonefile.tabenabled.checked){
+        var kC = e.keyCode ? e.keyCode : e.charCode ? e.charCode : e.which;
+        if (kC == 9 && !e.shiftKey && !e.ctrlKey && !e.altKey)
+        {
+                var oS = o.scrollTop;
+                if (o.setSelectionRange)
+                {
+                        var sS = o.selectionStart;
+                        var sE = o.selectionEnd;
+                        o.value = o.value.substring(0, sS) + "  " + o.value.substr(sE);
+                        o.setSelectionRange(sS + 1, sS + 1);
+                        o.focus();
+                }
+                else if (o.createTextRange)
+                {
+                        document.selection.createRange().text = "   ";
+                        e.returnValue = false;
+                }
+                o.scrollTop = oS;
+                if (e.preventDefault)
+                {
+                        e.preventDefault();
+                }
+                return false;
+        }
+    }
+        return true;
+}
+var cron=[10,25,40,55]; //every cron minutes past the hour
+var field;
+//function toSt(n) { s=""; if(n<10) s+="0"; return s+n.toString(); }
+function toSt(n) { if(n<10) n='0'+n; return n}
+function countdown(c,f){ var now=new Date();cron=c;field=f;var m=now.getMinutes();
+  var now_secs = now.getSeconds();
+  var secs = toSt(60-now_secs);
+  var mins = cron[cron.length-1];
+  for (var i=0; i<cron.length; i++) {
+   if(m>cron[i]){ 
+    tmins=toSt((60+cron[i])-m); 
+   }else{ 
+    tmins=toSt(cron[i]-m); 
+   }
+   if(!mins || tmins<mins){ mins=tmins;}
+  }
+  var time_left = "00:" + mins + ":" + secs
+  if(document.getElementById(field)){
+   document.getElementById(field).innerHTML="DNS reload in: " + time_left;
+  }
+  setTimeout("countdown(cron,field)",800);
+}
+document.onload=countdown(cron,'countdown');
+//-->
+</script>
+
+[% IF no_display %]
+Domain [% domain %] not found in this account
+<a href="/cgi-bin/index.cgi/domains">&lt;&lt;Back</a>
+[% ELSE %]
+
+<form method="post" action="">
+<table>
+
+     <tr>
+        <th class="ip">Domain</th>
+        <th class="ip">Status</th>
+        <th class="ip">Account</th>
+        <!--th class="ip">Hidden Master</th>
+        <th class="ip">Group</th-->
+
+     </tr>
+
+        <tr>
+                <td><input type="hidden" name="id" value="[% d.do_id %]"/><input type="hidden" name="name" value="[% d.do_name %]"/>[% d.do_name %]</td>
+                <td><select name="do_status">
+<option [% IF d.do_status == 'enabled'; 'selected="selected"'; END %]>enabled</option>
+<option [% IF d.do_status == 'suspended'; 'selected="selected"'; END %]>suspended</option>
+<option [% IF d.do_status == 'disabled'; 'selected="selected"'; END %]>disabled</option>
+<option [% IF d.do_status == 'migrating in'; 'selected="selected"'; END %]>migrating in</option>
+<option [% IF d.do_status == 'migrating out'; 'selected="selected"'; END %]>migrating out</option>
+<option [% IF d.do_status == 'registering'; 'selected="selected"'; END %]>registering</option>
+<option [% IF d.do_status == 'desired'; 'selected="selected"'; END %]>desired</option>
+<option [% IF d.do_status == 'disputed'; 'selected="selected"'; END %]>disputed</option>
+<option [% IF d.do_status == 'remote'; 'selected="selected"'; END %]>remote</option>
+        </select> 
+        </td>
+                <td>
+[% IF accounts %]
+[% # NTS if accounts is an array of one then replace the select with text %]
+<select name="do_acid">
+[% FOREACH a = accounts %]
+[% # NTS need to add selected and replage account name with "Your Account" if a.ac_id == c.param('ef_acid') %]
+<option value="[% a.ac_id %]">[% a.ac_name %]</option>
+[% END #FOREACH %]
+</select>
+[% ELSE %]
+<!--input type="text" name="do_acid" value="GB.com customer" disabled="disabled" /-->
+[% c.param('ac_name') || 'Your Account'%]
+<input type="hidden" name="do_acid" value="[% d.do_acid || c.param('ef_acid') %]" />
+[% END #IF-ELSE %]
+
+</td>
+                <!--td><input type="text" name="do_masters" value=""/></td>
+                <td><input type="text" name="do_group" value=""/></td -->
+
+                <td><input type=submit value="Change" name="Change" class="edituser" onmouseover="this.className='edituser edituserhov'" onmouseout="this.className='edituser'" onclick="this.className='edituser'"/></td>
+        </tr>
+        </table></form>
+[% nts %]
+<br/><span class='message'>
+[% IF type == 'subzone' %]
+	Enter the nameservers for this subzone (either as text or a zonefile fragment)
+[% ELSE %]
+	You can Change this domain here (above) OR update its zone file (below)
+[% END #IF-ELSE %]
+</span>
+<br/>
+<br/> <form name="zonefile" method="post" action="" >
+<input type="hidden" name="domain" value="[% d.do_name %]" />
+<input type="hidden" name="id" value="[% d.do_id %]" />
+<input type="hidden" name="Update" value="1" />
+<table>
+    <tr> <td>Enable Tab in Text area <input type="checkbox" name="tabenabled" value="" checked="checked" /><td></td><td><span id="countdown"></span></td></tr>
+        <tr><td><textarea class="zonefile" onkeydown="insertTab(this, event);" name="zone" style="overflow-x: hidden; overflow-y: scroll" cols="92" rows="85">[% zone %]
+</textarea></td></tr><tr><td>
+[% UNLESS type == 'subzone' %]
+	{Publish now? <input type="checkbox" name="publish"/>}
+[% END #UNLESS %]
+<input type='submit' name='update' value='update' class="edituser" onmouseover="this.className='edituser edituserhov'" onmouseout="this.className='edituser'" onclick="this.className='edituser'">
+[% UNLESS type == 'subzone' %]
+	 <span class='warn'>This is a raw zone file, get it wrong and the zone</span> <span class='error'>will</span> <span class='warn'>break</span>
+[% END #UNLESS %]
+</td></tr></table></form>
+
+[% IF type == 'subzone' %]
+<span class="warn">You can include a DS record if you have one</span>
+[% ELSE %]
+<span class='message'>You can add the notify key as a comment in the form <br />; secret: "ASDGFdsgsdgdghdfg="<br />provide-xfr: and allow-transfer { ip; } notify: will also be extracted and used where appropriate</span>
+[% END #IF-ELSE %]
+
+</td></tr></table>
+[% END #IF-ELSE no_display%]
+<span id="orphus" class="hidden"><script type="text/javascript" src="/js/orphus.js"></script>
+<a href="http://notice.alexx.net" id="notice.alexx.net" target="_blank"><img alt="Orphus system" src="/images/orphus.gif" border="0" width="197" height="39" /></a></span>
+[% END #of wrapper%]
+

@@ -1,0 +1,117 @@
+[% WRAPPER site_wrapper.tmpl %]
+<br />
+[% USE Dumper %]
+[% SET D = 0 %]
+[% # IF c.param('debug') == 1; D = 1;  END %]
+[% # IF c.query.param('debug') == 1;  D = 1; END %]
+[% IF D == 1 %]
+    [% FOREACH que = c.query.param %]
+        [% que; ' = '; c.query.param(que) %] <br />
+    [% END #FOREACH %]
+    [% c.query.url %]
+[% END #IF %]
+[% IF D >= 1 %]
+ [% FOREACH p = c.param %]
+	Param: [% p %] = [% c.param(p) %] <br />
+ [% END #FOREACH %]
+. > [% c.query.self_url %]<br />
+ [% FOREACH mi = c.param('menu') %]
+Menu Item: [% mi.key; %] [% IF mi.value.hidden; 'is hidden'; ELSE; '='; Dumper.dump(mi); END #IF %] <br />
+ [% END #FOREACH %]
+
+<br />
+ [% count=0; FOREACH m = c.param('menu_order') %]
+ Menu Item: [% count; ' is '; m; count = count + 1; %] <br />
+ [% END #FOREACH %]
+[% c.query.url %]/domains/edit?domain=[% d.do_name %]&amp;id=[% do_id || ' ' %]&amp;1=Edit
+[% END #IF debug %]
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr valign="top">
+    <td class="content" height="2">
+    <br />
+[% IF domain_list.0 %]
+<table class="ip">
+      <tr>
+        <th class="ip">Domain</th>
+        <th class="ip">Status</th>
+        <th class="ip">Added</th>
+        <th class="ip">Renewal</th>
+        <!--th class="ip">Account</th-->
+        <th colspan="2" class="ip action">Action</th>
+      </tr>
+[% FOREACH d = domain_list %]
+ <tr class="[% loop.parity %]-stripe">
+    <td>[% d.do_name || 'Domain Name' %]</td>
+    <td>[% d.do_status || 'Domain Status' %]</td>
+    <td>[% d.do_added || 'Domain Added' %]</td>
+    <td>[% d.rent_end || 'Not paid' || '&#8734;' %]</td>
+    <td><form method="post" action="[%
+           c.query.url %]/domains/edit?domain=[% d.do_name %]&amp;id=[% d.do_id || ' ' %]&amp;1=Edit">
+	<input type="hidden" value="[% d.do_id %]" name="id" />
+	<input type="submit" value="Edit" name="1" class="small blue button" />
+	</form></td>
+                <td><form method="post" action="domains/delete?domain=[% d.do_name %]&amp;id=[% d.do_id || ' ' %]&amp;1=Delete">
+    <input type="hidden" value="[% d.do_id %]" name="id" />
+    <input type="hidden" value="[% d.do_name %]" name="name" />
+    <input type="submit" value="Delete" name="[% d.do_name || '1' %]" class="small red button" /></form></td>
+ </tr>
+[% END #FOREACH %]
+        </table>
+(Offset: 0; Limit: 15)
+[% END #IF domains %]
+</td></tr><tr><td>You can add a new Domain here:
+
+[% IF c.param('ef_acid') # The add domain table %]
+<form method="post" action="[%
+           c.query.url %]/domains/add">
+<table>
+     <tr>
+        <th class="ip">Domain</th>
+        <th class="ip">Status</th>
+        <th class="ip">Account</th>
+        <!--th class="ip">Hidden Master</th-->
+        <!--th class="ip">Group</th-->
+        <!--th colspan="2" class="ip action">Action</th-->
+     </tr>
+     <tr>
+        <td><input type="text" name="do_name" value=""/></td>
+        <td><select name="do_status">
+            <option>enabled</option>
+            <option>suspended</option>
+            <option>disabled</option>
+            <option>migrating in</option>
+            <option>migrating out</option>
+            <option selected="selected">registering</option>
+            <option>desired</option>
+            <option>disputed</option>
+            <option>remote</option>
+        </select>
+        </td>
+        <td>
+[% IF accounts %]
+[% # NTS if accounts is an array of one then replace the select with text %]
+<select name="do_acid">
+[% FOREACH a = accounts %]
+[% # NTS need to add selected and replage account name with "Your Account" if a.ac_id == c.param('ef_acid') %]
+<option value="[% a.ac_id %]">[% a.ac_name %]</option>
+[% END #FOREACH %]
+</select>
+[% ELSE %]
+<!--input type="text" name="do_acid" value="GB.com customer" disabled="disabled" /-->
+[% c.param('ac_name') || 'Your Account'%]
+<input type="hidden" name="do_acid" value="[% c.param('ef_acid') %]" />
+[% END #IF-ELSE %]
+</td>
+
+                <td><input type=submit value="Add" name="Add" class="small green button" /></td>
+        </tr>
+        </table></form> 
+[% END #IF %]
+<br/>
+[% IF explanation %]
+<span class="highlight nb"><span class="warning">N.B.</span>[% explanation %]</span>
+[% END #IF %]
+</td></tr></table><br /></td></tr></table><span id="orphus" class="hidden"><script type="text/javascript" src="/js/orphus.js"></script>
+<a href="http://notice.alexx.net" id="notice.alexx.net" target="_blank"><img alt="Orphus system" src="/images/orphus.gif" border="0" width="197" height="39" /></a></span>
+[% END %]

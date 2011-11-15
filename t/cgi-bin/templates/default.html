@@ -1,0 +1,30 @@
+<html>
+<head>
+<META HTTP-EQUIV="Expires" CONTENT="Tue, 04 Dec 1993 21:29:02 GMT">
+<title>
+<TMPL_IF NAME> <TMPL_VAR NAME> </TMPL_IF>
+</title>
+</head>
+<body>
+<TMPL_IF NAME>
+<p>This is the <TMPL_VAR NAME> page. </p>
+</TMPL_IF>
+
+<TMPL_IF MESSAGE>
+<p> <TMPL_VAR MESSAGE> </p>
+</TMPL_IF>
+
+<TMPL_IF USER>
+<p> and as you (<TMPL_VAR USER>) are logged in you can. </p>
+</TMPL_IF>
+<TMPL_IF DEBUG>
+<p> DEBUG: [<TMPL_VAR DEBUG>] </p>
+</TMPL_IF>
+
+<TMPL_IF MYURL>
+<p> <a href="<TMPL_VAR MYURL>">Back</a> </p>
+</TMPL_IF>
+<hr/>
+</body>
+</html>
+

@@ -1,0 +1,134 @@
+[% WRAPPER site_wrapper.tmpl %]
+
+[% IF no_wrapper %]
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+        <title>[% title %]</title>
+[% END %]
+    <style type="text/css">
+
+   table {
+    /* border-collapse:collapse; */
+    white-space:nowrap;
+    }
+    tr th.under { border-bottom-style:dotted; }
+    tr.asset th { border-bottom-style:solid; }
+    tr.odd td { background-color: #999; color: white; }
+    tr.even td { background-color: #909; color: black; }
+    .as_data { border-collapse:collapse; border: 1px; padding: 0px; margin: 0; color: black; }
+    tr.as_data_even td.bg { background-color: #9cc; }
+    tr.as_data_odd td.bg { background-color: #cc9; }
+    </style>
+[% IF no_wrapper %]
+ </head>
+ <body>
+[% END %]
+
+[% IF error=='' or error<=0; %]
+ [% IF heading; '<h1>'; heading; '</h1>'; END %]
+    <table>
+      <tr class="asset nowrap">
+    <th>Asset ID</th>
+    <th>Category ID</th>
+    <th>Account ID</th>
+    <th>Owner (pe_id)</th>
+    <th>User (pe_id)</th>
+    <th>Date Added</th>
+    <th>Container</th>
+    <th>Notes</th>
+    <th colspan="3">Action</th>
+     </tr>
+      [% USE Dumper %]
+      [% FOREACH asset = assets %]
+         <tr class="[% loop.parity %] nowrap">
+           <td>[% asset.as_id  or '' %]</td>
+           <td><a class="[% loop.parity %]" title="[% asset.category.asc_description %]">[% asset.category.asc_name or asset.as_cid or '---------' %]</a></td>
+           <td>[% asset.as_acid or '' %]</td>
+           <td>[% IF asset.as_owner_name %]
+            [% asset.as_owner_name %]
+        [% ELSIF asset.as_owner %]
+            &nbsp;([% asset.as_owner %])
+        [% END %]
+        </td>
+           <td>[% asset.as_user_name or '' %]</td>
+           <td>[% asset.as_date or '' %]</td>
+           <td>[% IF asset.as_in_asid; '<a href="/cgi-bin/index.cgi/assets/list/'; asset.as_in_asid; '">'; asset.as_in_asid; '</a>'; END %]</td>
+           <td>[% IF asset.as_notes; 
+            IF asset.as_notes.length >= 12; 
+                '<a title="'; asset.as_notes; '">';
+                asset.as_notes.substr(0, 12); '...</a>'; 
+                
+            ELSE; 
+                asset.as_notes; 
+            END; 
+        END %]</td>
+           <td class="nowrap">
+        <form method="POST" action="/cgi-bin/index.cgi/assets/details/[% asset.as_cid %]/[% asset.as_id %]/">
+        <input class="edit button green" type="submit" name="Edit" value="Edit Details" />
+        </form>
+       </td><td>
+        <form method="POST" action="/cgi-bin/index.cgi/assets/data/[% asset.as_cid %]/[% asset.as_id %]/">
+        <input class="edit button blue" type="submit" name="Edit" value="Edit Data" />
+        </form>
+       </td>
+       <td>
+        <form method="POST" action="/cgi-bin/index.cgi/assets/delete/[% asset.as_id %]/">
+        <input class="del button red small" type="submit" name="Delete" value="Delete" />
+        </form>
+       </td>
+         </tr>
+    [% key = asset.as_id %]
+       [% IF asd.$key %]
+    <tr>
+     <th class="under">Data ID</th>
+     <th colspan="2" class="under">Attribute</th>
+     <th colspan="2" class="under">Value</th>
+     <th class="under">Date Changed</th>
+    </tr>
+    [% FOREACH d IN asd.$key %]
+     <tr class="as_data as_data_[% loop.parity %]">
+       <!--td class="as_data bg_white" colspan="2">&nbsp; [% 
+        #Dumper.dump(d.value.asd_date) 
+        #Dumper.dump(d(asd_date)) 
+        #Dumper.dump(d) 
+        %]</td-->
+       <td class="as_data bg">[% d.asd_id or '' %] </td>
+       <td colspan="2" class="as_data bg">[% cid = d.asd_cid;  IF cid;
+            IF ac.$cid.length and ac.$cid.length >=35;
+                ac.$cid.substr(0, 35); '...';
+                #ac.$cid.substr(0, 15); '...';  ac.$cid.substr(-15);
+            ELSE;
+                ac.$cid;
+            END;
+             ELSE; d.asd_cid or ''; END; %]</td>
+       <td colspan="2" class="as_data bg">[% IF d.asd_value;
+            anchor = d.asd_value.replace('^<a [^>]*>([^<]*)<.*', '$1');
+                        IF anchor.length >= 37;
+                                fix = anchor.substr(0,43);
+                                this = d.asd_value.replace(anchor, fix);
+                IF this.match('<a title');
+                    this.replace('<a title="', '<a class="blacktext" title="anchor ');
+                ELSE;
+                    '<a class="blacktext" title="'; anchor; '">'; this; '...</a>';
+                END;
+                        ELSE;
+                                d.asd_value;
+                        END;
+                END %]</td>
+       <td class="as_data bg">[% d.asd_date or d.date.asd_value or '' %]</td>
+       <td class="as_data bg_white"></td>
+    </tr>
+        [% END %]
+       [% END %]
+      [% END %]
+    </table>
+[% ELSE %]
+    [% message %]
+[% END %]
+[% IF heading; %]
+ </body>
+</html>
+[% END %]
+[% END %][%# end of WRAPPER %]
+

@@ -1,0 +1,1050 @@
+-- MySQL dump 10.11
+--
+-- Host: localhost    Database: notice
+-- ------------------------------------------------------
+-- Server version	5.0.77-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `CRM`
+--
+
+DROP TABLE IF EXISTS `SSLcerts`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `SSLcerts` (
+  `ssl_id` int(255) NOT NULL auto_increment,
+  `ssl_peid` int(255) default NULL COMMENT 'NTS change this to ssl_grid',
+  `ssl_cn` varchar(255) NOT NULL default '',
+  `ssl_crt` blob,
+  `ssl_key` blob NOT NULL,
+  `ssl_csr` blob,
+  `ssl_location` varchar(255) default NULL,
+  `ssl_public` enum('0','1') default '0',
+  `ssl_acid` int(255) default NULL,
+  PRIMARY KEY  (`ssl_cn`),
+  UNIQUE KEY `ssl_id` (`ssl_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `SSLhistory`
+--
+
+DROP TABLE IF EXISTS `SSLhistory`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `SSLhistory` (
+  `rh_id` int(255) unsigned NOT NULL auto_increment,
+  `rh_peid` int(128) unsigned default '0',
+  `rh_what` mediumtext,
+  `rh_when` datetime default NULL,
+  `rh_towhat` mediumtext,
+  PRIMARY KEY  (`rh_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=57 DEFAULT CHARSET=latin1 COMMENT='SSLcerts History';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `accounts`
+--
+
+DROP TABLE IF EXISTS `accounts`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `accounts` (
+  `ac_id` int(255) NOT NULL auto_increment,
+  `ac_name` varchar(128) default NULL,
+  `ac_parent` varchar(255) default NULL,
+  `ac_useradd` tinyint(4) default '0',
+  `ac_tree` varchar(255) NOT NULL,
+  `ac_notes` blob,
+  `ac_min` int(255) default NULL COMMENT 'Used for nesting accounts',
+  `ac_max` int(255) default NULL COMMENT 'within other accounts',
+  PRIMARY KEY  (`ac_id`),
+  UNIQUE KEY `id` (`ac_id`,`ac_tree`)
+) ENGINE=MyISAM AUTO_INCREMENT=569 DEFAULT CHARSET=latin1 COMMENT='These are the companies, or family that people belong to';
+SET character_set_client = @saved_cs_client;
+
+
+--
+-- Dumping data for table `accounts`
+--
+
+LOCK TABLES `accounts` WRITE;
+/*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
+
+
+INSERT INTO `accounts` VALUES (2,'L','1',0,'1.1','LastFirst',4,5),(1,'Chairvalla Publications',NULL,0,'1','',1,1126);
+
+/*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+--
+-- Table structure for table `achistory`
+--
+
+DROP TABLE IF EXISTS `achistory`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `achistory` (
+  `ch_id` int(255) NOT NULL auto_increment,
+  `ch_acid` varchar(255) default NULL,
+  `ch_what` mediumtext,
+  `ch_when` datetime default NULL,
+  `ch_bywhom` int(128) unsigned default '0',
+  `ch_towhat` varchar(128) default NULL,
+  PRIMARY KEY  (`ch_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='account history';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `address`
+--
+
+DROP TABLE IF EXISTS `address`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `address` (
+  `ad_id` int(128) NOT NULL auto_increment,
+  `ad_acid` varchar(255) default NULL,
+  `ad_adname` varchar(32) default NULL,
+  `ad_adnumber` varchar(128) default '0',
+  `ad_adroad` varchar(128) default NULL,
+  `ad_adcity` varchar(32) default NULL,
+  `ad_adcounty` varchar(64) default NULL,
+  `ad_adpostcode` varchar(16) default NULL,
+  `ad_adcountry` char(2) default 'UK',
+  `ad_phone` varchar(32) default NULL,
+  `ad_fax` varchar(32) default NULL,
+  `ad_type` int(16) default '1',
+  `ad_notes` mediumblob,
+  PRIMARY KEY  (`ad_id`),
+  KEY `cu_id` (`ad_id`,`ad_adcity`,`ad_adpostcode`)
+) ENGINE=MyISAM AUTO_INCREMENT=449 DEFAULT CHARSET=latin1 COMMENT='Addresses';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `adhistory`
+--
+
+DROP TABLE IF EXISTS `adhistory`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `adhistory` (
+  `ah_id` int(255) unsigned NOT NULL auto_increment,
+  `ah_adid` int(128) unsigned default '0',
+  `ah_what` mediumblob,
+  `ah_when` datetime default NULL,
+  `ah_bywhom` int(128) unsigned default '0',
+  PRIMARY KEY  (`ah_id`),
+  KEY `ah_id` (`ah_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Address History';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `alhistory`
+--
+
+DROP TABLE IF EXISTS `alhistory`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `alhistory` (
+  `al_id` int(255) unsigned NOT NULL auto_increment,
+  `al_peid` int(128) unsigned default '0',
+  `al_what` mediumtext,
+  `al_when` datetime default NULL,
+  PRIMARY KEY  (`al_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=372 DEFAULT CHARSET=latin1 COMMENT='Email aliase History';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `alias_details`
+--
+
+DROP TABLE IF EXISTS `alias_details`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `alias_details` (
+  `ead_userid` varchar(128) default NULL,
+  `ead_doid` int(255) default NULL,
+  `ead_website` varchar(128) default NULL,
+  `ead_password` varchar(255) default NULL,
+  `ead_date` datetime default NULL,
+  `ead_notes` blob,
+  KEY `alias` (`ead_userid`,`ead_doid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='email alias details - passwords will be hashed somehow';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `aliases`
+--
+
+DROP TABLE IF EXISTS `aliases`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `aliases` (
+  `ea_id` int(255) NOT NULL auto_increment,
+  `ea_userid` varchar(128) NOT NULL default '',
+  `ea_touser` varchar(255) NOT NULL default '' COMMENT 'touser or pipe',
+  `ea_at` varchar(128) default '',
+  `ea_doid` int(255) NOT NULL COMMENT 'link to domains.do_id',
+  `ea_suspended` tinyint(1) default NULL,
+  PRIMARY KEY  (`ea_id`),
+  KEY `ea_userid` (`ea_userid`,`ea_doid`,`ea_touser`,`ea_at`)
+) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `asset_cat_data`
+--
+
+DROP TABLE IF EXISTS `asset_cat_data`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `asset_cat_data` (
+  `acd_id` int(255) NOT NULL auto_increment COMMENT 'used to group categories',
+  `acd_cid` int(255) NOT NULL COMMENT 'used to group categories',
+  `acd_name` varchar(255) default NULL,
+  `acd_order` int(255) default NULL COMMENT 'so we know what order to display them in',
+  `acd_type` varchar(255) default NULL COMMENT 'so we know how to deal with this',
+  `acd_regexp` varchar(255) default NULL COMMENT 'so we can control the data',
+  `acd_grid` int(255) default NULL,
+  PRIMARY KEY  (`acd_id`),
+  UNIQUE KEY `acd_id` (`acd_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=67 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `asset_categories`
+--
+
+DROP TABLE IF EXISTS `asset_categories`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `asset_categories` (
+  `asc_id` int(255) NOT NULL auto_increment,
+  `asc_name` varchar(255) NOT NULL,
+  `asc_description` varchar(255) default NULL,
+  `asc_grid` int(255) default NULL COMMENT 'group id',
+  PRIMARY KEY  (`asc_id`),
+  UNIQUE KEY `asc_id` (`asc_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `asset_data`
+--
+
+DROP TABLE IF EXISTS `asset_data`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `asset_data` (
+  `asd_id` int(255) NOT NULL auto_increment,
+  `asd_asid` int(255) NOT NULL,
+  `asd_cid` int(255) NOT NULL,
+  `asd_value` varchar(255) default NULL,
+  `asd_date` datetime default NULL COMMENT 'for measurements that change',
+  PRIMARY KEY  (`asd_id`),
+  UNIQUE KEY `asd_id` (`asd_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `asset_location`
+--
+
+DROP TABLE IF EXISTS `asset_location`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `asset_location` (
+  `al_id` int(255) NOT NULL auto_increment,
+  `al_asid` int(255) default NULL,
+  `al_assetid` int(255) default NULL,
+  `al_ascompartment` int(32) default NULL,
+  `al_width` int(11) default NULL,
+  `al_height` int(11) default NULL,
+  `al_depth` int(11) default NULL,
+  `al_heightunit` varchar(16) default 'cm',
+  `al_widthunit` varchar(16) default 'cm',
+  `al_depthunit` varchar(16) default 'cm',
+  `al_compartmentX` tinyint(4) default '1',
+  `al_compartmentY` tinyint(4) default '1',
+  PRIMARY KEY  (`al_id`),
+  UNIQUE KEY `al_id` (`al_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `assets`
+--
+
+DROP TABLE IF EXISTS `assets`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `assets` (
+  `as_id` int(255) NOT NULL auto_increment,
+  `as_cid` int(255) NOT NULL,
+  `as_date` datetime default NULL COMMENT 'date added',
+  `as_acid` varchar(255) default NULL,
+  `as_owner` int(255) default NULL COMMENT 'peid',
+  `as_user` int(255) default NULL COMMENT 'peid, who has borrowed it',
+  `as_adid` int(255) default NULL COMMENT 'address location',
+  `as_grid` int(255) default NULL COMMENT 'a more specific group than the as_cid',
+  `as_in_asid` int(255) default NULL COMMENT 'as in asset',
+  `as_notes` blob,
+  PRIMARY KEY  (`as_id`),
+  UNIQUE KEY `as_id` (`as_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=32 DEFAULT CHARSET=latin1 COMMENT='a more specific group than the as_cid';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `conf_data`
+--
+
+DROP TABLE IF EXISTS `conf_data`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `conf_data` (
+  `cfd_id` int(255) NOT NULL auto_increment,
+  `cfd_key` varchar(64) default NULL,
+  `cfd_value` blob,
+  `cfd_cfid` int(255) NOT NULL,
+  `cfd_peid` int(255) default NULL,
+  `cfd_acid` int(255) default NULL,
+  `cfd_grid` int(255) default NULL,
+  PRIMARY KEY  (`cfd_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=latin1 COMMENT='config data for the config table';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `config`
+--
+
+DROP TABLE IF EXISTS `config`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `config` (
+  `cf_id` int(255) NOT NULL auto_increment,
+  `cf_name` varchar(255) default NULL,
+  `cf_moid` varchar(64) default NULL,
+  `cf_type` varchar(64) default NULL,
+  `cf_grid` int(255) default NULL,
+  PRIMARY KEY  (`cf_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=latin1 COMMENT='general config for this install of notice';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `country`
+--
+
+DROP TABLE IF EXISTS `country`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `country` (
+  `iso` char(2) NOT NULL,
+  `name` varchar(80) NOT NULL,
+  `printable_name` varchar(80) NOT NULL,
+  `iso3` char(3) default NULL,
+  `numcode` smallint(6) default NULL,
+  `curid` int(255) default NULL,
+  `flag` blob,
+  `sigup` tinyint(1) default NULL,
+  PRIMARY KEY  (`iso`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `country`
+--
+
+LOCK TABLES `country` WRITE;
+/*!40000 ALTER TABLE `country` DISABLE KEYS */;
+INSERT INTO `country` VALUES ('AF','AFGHANISTAN','Afghanistan','AFG',4,NULL,NULL,NULL),('GB','Great Britain','Great Britain','GBR',320,1,NULL,NULL);
+/*!40000 ALTER TABLE `country` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+--
+-- Table structure for table `currency`
+--
+
+DROP TABLE IF EXISTS `currency`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `currency` (
+  `cur_id` int(255) NOT NULL AUTO_INCREMENT,
+  `cur_name` char(64) NOT NULL,
+  `cur_short` char(3) NOT NULL,
+  `cur_territory` varchar(64) DEFAULT NULL,
+  `cur_htmlsymbol` char(32) DEFAULT NULL,
+  `cur_gold_standard` decimal(20,20) DEFAULT NULL,
+  `cur_iso4217` int(4) DEFAULT NULL,
+  PRIMARY KEY (`cur_id`),
+  KEY `key` (`cur_name`,`cur_short`,`cur_territory`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=302 DEFAULT CHARSET=latin1 COMMENT='Money and how they fair against each other ISO 4217';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `currency`
+--
+
+LOCK TABLES `currency` WRITE;
+/*!40000 ALTER TABLE `currency` DISABLE KEYS */;
+INSERT INTO `currency` VALUES (1,'Afghani','AFN','Afghanistan','&curren;','0.99999999999999999999',NULL),(2,'Lek','ALL','Albania','&curren;','0.99999999999999999999',NULL),(3,'Dinár','DZD','Algeria','&curren;','0.99999999999999999999',NULL),(4,'Dollar','USD','America (United States)','&#36;','0.00124023000000000000',840),(5,'Dollar','USD','American Samoa','&#36;','0.00124023000000000000',840),(6,'Euro','EUR','Andorra','&euro;','0.00201737000000000000',978),(7,'Kwanza','AOA','Angola','&curren;','0.99999999999999999999',NULL),(8,'East Caribbean Dollar','XCD','Anguilla','&curren;','0.99999999999999999999',NULL),(9,'East Caribbean Dollar','XCD','Antigua and Barbuda','&curren;','0.99999999999999999999',NULL),(10,'Peso','ARS','Argentina','&curren;','0.99999999999999999999',NULL),(11,'Dram','AMD','Armenia','&curren;','0.99999999999999999999',NULL),(12,'Florin','AWG','Aruba','&curren;','0.00222059000000000000',NULL),(13,'Australian Dollar','AUD','Ashmore and Cartier Islands','&curren;','0.99999999999999999999',NULL),(14,'Australian Dollar','AUD','Australia','&curren;','0.99999999999999999999',NULL),(15,'Euro','EUR','Austria','&euro;','0.00201737000000000000',978),(16,'New Manat','AZN','Azerbaijan','&curren;','0.99999999999999999999',NULL),(17,'Euro','EUR','Azores','&euro;','0.00201737000000000000',978),(18,'Bahamian dollar','BSD','Bahamas','&curren;','0.99999999999999999999',NULL),(19,'Bahrain, Dinar','BHD','Bahrain','&curren;','0.99999999999999999999',NULL),(20,'Euro','EUR','Balearic Islands','&euro;','0.00201737000000000000',978),(21,'Bangladesh, Taka','BDT','Bangladesh','&curren;','0.99999999999999999999',NULL),(22,'Barbados, Dollar','BBD','Barbados','&curren;','0.99999999999999999999',NULL),(23,'Belarus, Ruble','BYR','Belarus','&curren;','0.99999999999999999999',NULL),(24,'Euro','EUR','Belgium','&euro;','0.00201737000000000000',978),(25,'Belize, Dollar','BZD','Belize','&curren;','0.99999999999999999999',NULL),(26,'Benin, CFA Franc BCEAO','XOF','Benin','&curren;','0.99999999999999999999',NULL),(27,'Bermuda, Dollar','BMD','Bermuda','&curren;','0.99999999999999999999',NULL),(28,'Bhutan, India Rupee','INR','Bhutan','&curren;','0.99999999999999999999',NULL),(29,'Bhutan, Ngultrum','BTN','Bhutan','&curren;','0.99999999999999999999',NULL),(30,'Bolivia, Boliviano','BOB','Bolivia','&curren;','0.99999999999999999999',NULL),(31,'Netherlands Antilles Guilder','ANG','Bonaire','&curren;','0.99999999999999999999',NULL),(32,'Convertible Marka','BAM','Bosnia and Herzegovina','&curren;','0.99999999999999999999',NULL),(33,'Pula','BWP','Botswana','&curren;','0.99999999999999999999',NULL),(34,'Real','BRL','Brazil','&curren;','0.99999999999999999999',NULL),(35,'Pound','GBP','British Indian Ocean Territory','&pound;','0.00082341400000000000',826),(36,'Dollar','USD','British Indian Ocean Territory','&#36;','0.00124023000000000000',840),(37,'Dollar','USD','British Virgin Islands','&#36;','0.00124023000000000000',840),(38,'Brunei, Dollar','BND','Brunei','&curren;','0.99999999999999999999',NULL),(39,'Brunei, Singapore Dollar','SGD','Brunei','&curren;','0.99999999999999999999',NULL),(40,'Bulgaria, Lev','BGN','Bulgaria','&curren;','0.99999999999999999999',NULL),(41,'CFA Franc BCEAO','XOF','Burkina Faso','&curren;','0.99999999999999999999',NULL),(42,'Burundi, Franc','BIF','Burundi','&curren;','0.99999999999999999999',NULL),(43,'Pound','GBP','Britain (United Kingdom)','&pound;','0.00082341400000000000',826),(44,'Burma (Myanmar), Kyat','MMK','Burma (Myanmar)','&curren;','0.99999999999999999999',NULL),(45,'Burma (Myanmar), Kyat','MMK','Burma (Myanmar)','&curren;','0.99999999999999999999',NULL),(46,'Bajan (Barbados), Dollar','BBD','Bajan (Barbados)','&curren;','0.99999999999999999999',NULL),(47,'Cambodia, Riel','KHR','Cambodia','&curren;','0.99999999999999999999',NULL),(48,'CFA Franc BEAC','XAF','Cameroon','&curren;','0.99999999999999999999',NULL),(49,'Canada, Dollar','CAD','Canada','&curren;','0.99999999999999999999',NULL),(50,'Euro','EUR','Canary Islands','&euro;','0.00201737000000000000',978),(51,'Cape Verde, Escudo','CVE','Cape Verde','&curren;','0.99999999999999999999',NULL),(52,'Cayman Islands, Dollar','KYD','Cayman Islands','&curren;','0.99999999999999999999',NULL),(53,'CFA Franc BEAC','XAF','Central African Republic','&curren;','0.99999999999999999999',NULL),(54,'BEAC Franc','XAF','Communaut&#233; Financi&#232;re Africaine','&curren;','0.99999999999999999999',NULL),(55,'BCEAO Franc','XOF','Communaut&#233; Financi&#232;re Africaine','&curren;','0.99999999999999999999',NULL),(56,'CFA Franc BEAC','XAF','Chad','&curren;','0.99999999999999999999',NULL),(57,'Chile, Peso','CLP','Chile','&curren;','0.99999999999999999999',NULL),(58,'China, Yuan Renminbi','CNY','China','&curren;','0.99999999999999999999',NULL),(59,'Australia Dollar','AUD','Christmas Island','&curren;','0.99999999999999999999',NULL),(60,'Colombia, Peso','COP','Colombia','&curren;','0.99999999999999999999',NULL),(61,'BEAC Franc','XAF','Communaute Financiere Africaine','&curren;','0.99999999999999999999',NULL),(62,'BCEAO Franc','XOF','Communaute Financiere Africaine','&curren;','0.99999999999999999999',NULL),(63,'Comoros, Franc','KMF','Comoros','&curren;','0.99999999999999999999',NULL),(64,'Franc','XPF','Comptoirs Fran&#231;ais du Pacifique','&curren;','0.99999999999999999999',NULL),(65,'CFA Franc BEAC','XAF','Congo/Brazzaville','&curren;','0.99999999999999999999',NULL),(66,'Franc','CDF','Congo/Kinshasa','&curren;','0.99999999999999999999',NULL),(67,'New Zealand Dollar','NZD','Cook Islands','&curren;','0.99999999999999999999',NULL),(68,'Australia Dollar','AUD','Coral Sea Islands','&curren;','0.99999999999999999999',NULL),(69,'Costa Rica, Colon','CRC','Costa Rica','&curren;','0.99999999999999999999',NULL),(70,'CFA Franc BCEAO','XOF','C&#244;te d\'Ivoire','&curren;','0.99999999999999999999',NULL),(71,'Croatia, Kuna','HRK','Croatia','&curren;','0.99999999999999999999',NULL),(72,'Cuba, Convertible Peso','CUC','Cuba','&curren;','0.99999999999999999999',NULL),(73,'Cuba, Peso','CUP','Cuba','&curren;','0.99999999999999999999',NULL),(74,'Netherlands Antilles Guilder','ANG','Cura&#231;o','&curren;','0.99999999999999999999',NULL),(75,'Euro','EUR','Cyprus','&euro;','0.00201737000000000000',978),(76,'Czech Republic, Koruna','CZK','Czech Republic','&curren;','0.99999999999999999999',NULL),(77,'Denmark, Krone','DKK','Denmark','&curren;','0.99999999999999999999',NULL),(78,'Djibouti, Franc','DJF','Djibouti','&curren;','0.99999999999999999999',NULL),(79,'East Caribbean Dollar','XCD','Dominica','&curren;','0.99999999999999999999',NULL),(80,'Dominican Republic, Peso','DOP','Dominican Republic','&curren;','0.99999999999999999999',NULL),(81,'East Caribbean Dollar','XCD','East Caribbean Dollar','&curren;','0.99999999999999999999',NULL),(82,'Dollar','USD','East Timor','&#36;','0.00124023000000000000',840),(83,'Dollar','USD','Ecuador','&#36;','0.00124023000000000000',840),(84,'Egypt, Pound','EGP','Egypt','&curren;','0.99999999999999999999',NULL),(85,'El Salvador, Colon','SVC','El Salvador','&curren;','0.99999999999999999999',NULL),(86,'Dollar','USD','El Salvador','&#36;','0.00124023000000000000',840),(87,'CFA Franc BEAC','XAF','Equatorial Guinea','&curren;','0.99999999999999999999',NULL),(88,'Eritrea, Nakfa','ERN','Eritrea','&curren;','0.99999999999999999999',NULL),(89,'Estonia, Kroon','EEK','Estonia','&curren;','0.99999999999999999999',NULL),(90,'Ethiopia, Birr','ETB','Ethiopia','&curren;','0.99999999999999999999',NULL),(91,'Euro','EUR','Euro','&euro;','0.00201737000000000000',978),(92,'Euro','EUR','Europa Island','&euro;','0.00201737000000000000',978),(93,'Pound','FKP','Falkland Islands','&curren;','0.99999999999999999999',826),(94,'Denmark Krone','DKK','Faroe Islands','&curren;','0.99999999999999999999',NULL),(95,'Fiji, Dollar','FJD','Fiji','&curren;','0.99999999999999999999',NULL),(96,'Pound','GBP','England (United Kingdom)','&pound;','0.00082341400000000000',826),(97,'Euro','EUR','Finland','&euro;','0.00201737000000000000',978),(98,'Euro','EUR','France','&euro;','0.00201737000000000000',978),(99,'Euro','EUR','French Guiana','&euro;','0.00201737000000000000',978),(100,'CFP Franc','XPF','French Polynesia','&curren;','0.99999999999999999999',953),(101,'Euro','EUR','French Southern and Antarctic Lands','&euro;','0.00201737000000000000',978),(102,'CFA Franc BEAC','XAF','Gabon','&curren;','0.99999999999999999999',NULL),(103,'Gambia, Dalasi','GMD','Gambia','&curren;','0.99999999999999999999',NULL),(104,'Israel New Shekel','ILS','Gaza Strip','&curren;','0.99999999999999999999',NULL),(105,'Georgia, Lari','GEL','Georgia','&curren;','0.99999999999999999999',NULL),(106,'Euro','EUR','Germany','&euro;','0.00201737000000000000',978),(107,'Ghana, Cedi','GHS','Ghana','&curren;','0.99999999999999999999',NULL),(108,'Gibraltar, Pound','GIP','Gibraltar','&curren;','0.99999999999999999999',NULL),(109,'Gold Ounce','XAU','International Monetary Fund','Au','0.00000100000000000000',NULL),(110,'Pound','GBP','Great Britain (United Kingdom)','&pound;','0.00082341400000000000',826),(111,'Euro','EUR','Greece','&euro;','0.00201737000000000000',978),(112,'Danish Krone','DKK','Greenland','&curren;','0.99999999999999999999',208),(113,'East Caribbean Dollar','XCD','Grenada','&curren;','0.99999999999999999999',NULL),(114,'Euro','EUR','Guadeloupe','&euro;','0.00201737000000000000',978),(115,'Dollar','USD','Guam','&#36;','0.00124023000000000000',840),(116,'Guatemala, Quetzal','GTQ','Guatemala','&curren;','0.99999999999999999999',NULL),(117,'Guernsey, Pound','GGP','Guernsey','&curren;','0.99999999999999999999',NULL),(118,'Guinea, Franc','GNF','Guinea','&curren;','0.99999999999999999999',NULL),(119,'CFA Franc BCEAO','XOF','Guinea-Bissau','&curren;','0.99999999999999999999',NULL),(120,'Guyana, Dollar','GYD','Guyana','&curren;','0.99999999999999999999',NULL),(121,'Haiti, Gourde','HTG','Haiti','&curren;','0.99999999999999999999',NULL),(122,'Euro','EUR','Holland (Netherlands)','&euro;','0.00201737000000000000',978),(123,'Honduras, Lempira','HNL','Honduras','&curren;','0.99999999999999999999',NULL),(124,'Dollar','HKD','Hong Kong','$','0.99999999999999999999',344),(125,'Hungary, Forint','HUF','Hungary','&curren;','0.99999999999999999999',NULL),(126,'Euro','EUR','Holy See (Vatican City)','&euro;','0.00201737000000000000',978),(127,'Iceland, Krona','ISK','Iceland','&curren;','0.99999999999999999999',NULL),(128,'India, Rupee','INR','India','&curren;','0.99999999999999999999',NULL),(129,'Indonesia, Rupiah','IDR','Indonesia','&curren;','0.99999999999999999999',NULL),(130,'Special Drawing Right','XDR','International Monetary Fund','&curren;','0.99999999999999999999',NULL),(131,'Iran, Rial','IRR','Iran','&curren;','0.99999999999999999999',NULL),(132,'Iraq, Dinar','IQD','Iraq','&curren;','0.99999999999999999999',NULL),(133,'Euro','EUR','Ireland','&euro;','0.00201737000000000000',978),(134,'Pound','FKP','Islas Malvinas (Falkland Islands)','&curren;','0.99999999999999999999',NULL),(135,'Pound','IMP','Isle of Man','&curren;','0.99999999999999999999',NULL),(136,'New Shekel','ILS','Israel','&curren;','0.99999999999999999999',376),(137,'Euro','EUR','Italy','&euro;','0.00201737000000000000',978),(138,'CFA Franc BCEAO','XOF','Ivory Coast (C&#244;te d\'Ivoire)','&curren;','0.99999999999999999999',NULL),(301,'Euro','EUR','ALAND ISLANDS',NULL,NULL,978),(139,'Jamaica, Dollar','JMD','Jamaica','&curren;','0.99999999999999999999',NULL),(140,'Yen','JPY','Japan','&yen;','0.99999999999999999999',392),(141,'Jersey, Pound','JEP','Jersey','&curren;','0.99999999999999999999',NULL),(143,'Jordan, Dinar','JOD','Jordan','&curren;','0.99999999999999999999',NULL),(144,'Euro','EUR','Juan de Nova','&euro;','0.00201737000000000000',978),(145,'Kazakhstan, Tenge','KZT','Kazakhstan','&curren;','0.99999999999999999999',NULL),(146,'Kenya, Shilling','KES','Kenya','&curren;','0.99999999999999999999',NULL),(147,'Kiribati, Australia Dollar','AUD','Kiribati','&curren;','0.99999999999999999999',NULL),(148,'Kuwait, Dinar','KWD','Kuwait','&curren;','0.99999999999999999999',NULL),(149,'Kyrgyzstan, Som','KGS','Kyrgyzstan','&curren;','0.99999999999999999999',NULL),(150,'Laos, Kip','LAK','Laos','&curren;','0.99999999999999999999',NULL),(151,'Latvia, Lat','LVL','Latvia','&curren;','0.99999999999999999999',NULL),(152,'Lebanon, Pound','LBP','Lebanon','&curren;','0.99999999999999999999',NULL),(153,'Lesotho, Loti','LSL','Lesotho','&curren;','0.99999999999999999999',NULL),(154,'Liberia, Dollar','LRD','Liberia','&curren;','0.99999999999999999999',NULL),(155,'Libya, Dinar','LYD','Libya','&curren;','0.99999999999999999999',NULL),(156,'Switzerland Franc','CHF','Liechtenstein','&curren;','0.99999999999999999999',756),(157,'Lithuania, Litas','LTL','Lithuania','&curren;','0.99999999999999999999',NULL),(158,'Euro','EUR','Luxembourg','&euro;','0.00201737000000000000',978),(159,'Macau, Pataca','MOP','Macau','&curren;','0.99999999999999999999',NULL),(160,'Macedonia, Denar','MKD','Macedonia','&curren;','0.99999999999999999999',NULL),(161,'Madagascar, Ariary','MGA','Madagascar','&curren;','0.99999999999999999999',NULL),(162,'Euro','EUR','Madeira Islands','&euro;','0.00201737000000000000',978),(163,'Malawi, Kwacha','MWK','Malawi','&curren;','0.99999999999999999999',NULL),(164,'Malaysia, Ringgit','MYR','Malaysia','&curren;','0.99999999999999999999',NULL),(165,'Maldives, Rufiyaa','MVR','Maldives','&curren;','0.99999999999999999999',NULL),(166,'Mali, CFA Franc BCEAO','XOF','Mali','&curren;','0.99999999999999999999',NULL),(167,'Euro','EUR','Malta','&euro;','0.00201737000000000000',978),(168,'Pound','FKP','Malvinas (Falkland Islands)','&curren;','0.99999999999999999999',NULL),(169,'Dollar','USD','Marshall Islands','&#36;','0.00124023000000000000',840),(170,'Euro','EUR','Martinique','&euro;','0.00201737000000000000',978),(171,'Mauritania, Ouguiya','MRO','Mauritania','&curren;','0.99999999999999999999',NULL),(172,'Mauritius, Rupee','MUR','Mauritius','&curren;','0.99999999999999999999',NULL),(173,'Euro','EUR','Mayotte','&euro;','0.00201737000000000000',978),(174,'Mexico, Peso','MXN','Mexico','&curren;','0.99999999999999999999',484),(175,'Dollar','USD','Micronesia','&#36;','0.00124023000000000000',840),(176,'Dollar','USD','Midway Islands','&#36;','0.00124023000000000000',840),(177,'Moldova, Leu','MDL','Moldova','&curren;','0.99999999999999999999',NULL),(178,'Euro','EUR','Monaco','&euro;','0.00201737000000000000',978),(179,'Mongolia, Tughrik','MNT','Mongolia','&curren;','0.99999999999999999999',NULL),(180,'Euro','EUR','Montenegro','&euro;','0.00201737000000000000',978),(181,'East Caribbean Dollar','XCD','Montserrat','&curren;','0.99999999999999999999',951),(182,'Morocco, Dirham','MAD','Morocco','&curren;','0.99999999999999999999',NULL),(183,'Mozambique, Metical','MZN','Mozambique','&curren;','0.99999999999999999999',NULL),(184,'Myanmar (Burma), Kyat','MMK','Myanmar (Burma)','&curren;','0.99999999999999999999',NULL),(185,'Namibia, Dollar','NAD','Namibia','&curren;','0.99999999999999999999',NULL),(186,'Nauru, Australia Dollar','AUD','Nauru','&curren;','0.99999999999999999999',NULL),(187,'Navassa, Haiti Gourde','HTG','Navassa','&curren;','0.99999999999999999999',NULL),(188,'Dollar','USD','Navassa','&#36;','0.00124023000000000000',840),(189,'Nepal, Rupee','NPR','Nepal','&curren;','0.99999999999999999999',NULL),(190,'Guilder','ANG','Netherlands Antilles','&curren;','0.99999999999999999999',NULL),(191,'Euro','EUR','Netherlands','&euro;','0.00201737000000000000',978),(192,'CFP Franc','XPF','New Caledonia','&curren;','0.99999999999999999999',953),(193,'Dollar','NZD','New Zealand','$','0.99999999999999999999',NULL),(194,'Cordoba','NIO','Nicaragua','&curren;','0.99999999999999999999',NULL),(195,'CFA Franc BCEAO','XOF','Niger','&curren;','0.99999999999999999999',NULL),(196,'Naira','NGN','Nigeria','&curren;','0.99999999999999999999',NULL),(197,'New Zealand Dollar','NZD','Niue','&curren;','0.99999999999999999999',NULL),(198,'Australia Dollar','AUD','Norfolk Island','&curren;','0.99999999999999999999',NULL),(199,'North Korea, Won','KPW','North Korea','&curren;','0.99999999999999999999',NULL),(200,'Dollar','USD','Northern Mariana Islands','&#36;','0.00124023000000000000',840),(201,'Norway, Krone','NOK','Norway','&curren;','0.99999999999999999999',NULL),(202,'Oman, Rial','OMR','Oman','&curren;','0.99999999999999999999',NULL),(203,'Pakistan, Rupee','PKR','Pakistan','&curren;','0.99999999999999999999',NULL),(204,'Dollar','USD','Palau','&#36;','0.00124023000000000000',840),(205,'Palladium Ounce','XPD','International Monetary Fund','&curren;','0.99999999999999999999',NULL),(206,'Panama, Balboa','PAB','Panama','&curren;','0.99999999999999999999',NULL),(207,'Dollar','USD','Panama','&#36;','0.00124023000000000000',840),(208,'Papua New Guinea, Kina','PGK','Papua New Guinea','&curren;','0.99999999999999999999',NULL),(209,'Yuan Renminbi','CNY','Paracel Islands','&curren;','0.99999999999999999999',156),(211,'Paraguay, Guarani','PYG','Paraguay','&curren;','0.99999999999999999999',NULL),(212,'Peru, Nuevo Sol','PEN','Peru','&curren;','0.99999999999999999999',NULL),(213,'Philippines, Peso','PHP','Philippines','&curren;','0.99999999999999999999',NULL),(214,'Pitcairn, New Zealand Dollar','NZD','Pitcairn','&curren;','0.99999999999999999999',NULL),(215,'Platinum Ounce','XPT','International Monetary Fund','&curren;','0.99999999999999999999',NULL),(216,'Poland, Zloty','PLN','Poland','&curren;','0.99999999999999999999',NULL),(217,'Euro','EUR','Portugal','&euro;','0.00201737000000000000',978),(218,'Dollar','USD','Puerto Rico','&#36;','0.00124023000000000000',840),(219,'Qatar, Riyal','QAR','Qatar','&curren;','0.99999999999999999999',NULL),(220,'Euro','EUR','Reunion','&euro;','0.00201737000000000000',978),(221,'Romania, New Leu','RON','Romania','&curren;','0.99999999999999999999',NULL),(222,'Russia, Ruble','RUB','Russia','&curren;','0.99999999999999999999',NULL),(223,'Rwanda, Franc','RWF','Rwanda','&curren;','0.99999999999999999999',NULL),(224,'Netherlands Antilles Guilder','ANG','Saba','&curren;','0.99999999999999999999',NULL),(225,'Saint Helena, Pound','SHP','Saint Helena','&curren;','0.99999999999999999999',NULL),(226,'East Caribbean Dollar','XCD','Saint Kitts and Nevis','&curren;','0.99999999999999999999',NULL),(227,'East Caribbean Dollar','XCD','Saint Lucia','&curren;','0.99999999999999999999',NULL),(228,'Euro','EUR','Saint Pierre and Miquelon','&euro;','0.00201737000000000000',978),(229,'East Caribbean Dollar','XCD','Saint Vincent and The Grenadines','&curren;','0.99999999999999999999',NULL),(230,'Euro','EUR','Saint-Martin','&euro;','0.00201737000000000000',978),(231,'Samoa, Tala','WST','Samoa','&curren;','0.99999999999999999999',NULL),(232,'Euro','EUR','San Marino','&euro;','0.00201737000000000000',978),(233,'Dobra','STD','S&#227;o Tome and Principe','&curren;','0.99999999999999999999',NULL),(234,'Saudi Arabia, Riyal','SAR','Saudi Arabia','&curren;','0.99999999999999999999',NULL),(235,'Pound','GBP','Scotland (United Kingdom)','&pound;','0.00082341400000000000',826),(236,'Seborga, Luigino','SPL','Seborga','&curren;','0.99999999999999999999',NULL),(237,'CFA Franc BCEAO','XOF','Senegal','&curren;','0.99999999999999999999',NULL),(238,'Serbia, Dinar','RSD','Serbia','&curren;','0.99999999999999999999',NULL),(239,'Seychelles, Rupee','SCR','Seychelles','&curren;','0.99999999999999999999',NULL),(240,'Sierra Leone, Leone','SLL','Sierra Leone','&curren;','0.99999999999999999999',NULL),(241,'Silver Ounce','XAG','International Monetary Fund','Ag','0.00006702530000000000',961),(242,'Singapore, Dollar','SGD','Singapore','&curren;','0.99999999999999999999',NULL),(243,'Netherlands Antilles Guilder','ANG','Sint Eustatius','&curren;','0.99999999999999999999',NULL),(244,'Netherlands Antilles Guilder','ANG','Sint Maarten','&curren;','0.99999999999999999999',NULL),(245,'Euro','EUR','Slovakia','&euro;','0.00201737000000000000',978),(246,'Euro','EUR','Slovenia','&euro;','0.00201737000000000000',978),(247,'Solomon Islands, Dollar','SBD','Solomon Islands','&curren;','0.99999999999999999999',NULL),(248,'Somalia, Shilling','SOS','Somalia','&curren;','0.99999999999999999999',NULL),(249,'South Africa, Rand','ZAR','South Africa','&curren;','0.99999999999999999999',NULL),(250,'Pound','GBP','South Georgia','&pound;','0.00082341400000000000',826),(251,'South Korea, Won','KRW','South Korea','&curren;','0.99999999999999999999',NULL),(252,'Pound','GBP','South Sandwich Islands','&pound;','0.00082341400000000000',826),(253,'Euro','EUR','Spain','&euro;','0.00201737000000000000',978),(254,'Sri Lanka, Rupee','LKR','Sri Lanka','&curren;','0.99999999999999999999',NULL),(255,'Sudan, Pound','SDG','Sudan','&curren;','0.99999999999999999999',NULL),(256,'Suriname, Dollar','SRD','Suriname','&curren;','0.99999999999999999999',NULL),(257,'Norway Krone','NOK','Svalbard and Jan Mayen','&curren;','0.99999999999999999999',NULL),(258,'Swaziland, Lilangeni','SZL','Swaziland','&curren;','0.99999999999999999999',NULL),(259,'South Africa Rand','ZAR','Swaziland','&curren;','0.99999999999999999999',NULL),(260,'Sweden, Krona','SEK','Sweden','&curren;','0.99999999999999999999',NULL),(261,'Switzerland, Franc','CHF','Switzerland','&curren;','0.99999999999999999999',NULL),(262,'Syria, Pound','SYP','Syria','&curren;','0.99999999999999999999',NULL),(263,'Taiwan, New Dollar','TWD','Taiwan','&curren;','0.99999999999999999999',NULL),(264,'Tajikistan, Somoni','TJS','Tajikistanoni','&curren;','0.99999999999999999999',NULL),(265,'Tajikistan, Russia Ruble','RUB','Tajikistan','&curren;','0.99999999999999999999',NULL),(266,'Tanzania, Shilling','TZS','Tanzania','&curren;','0.99999999999999999999',NULL),(267,'Thailand, Baht','THB','Thailand','&curren;','0.99999999999999999999',NULL),(268,'Togo, CFA Franc BCEAO','XOF','Togo','&curren;','0.99999999999999999999',NULL),(269,'New Zealand Dollar','NZD','Tokelau','&curren;','0.99999999999999999999',NULL),(270,'Tonga, Pa\'anga','TOP','Tonga','&curren;','0.99999999999999999999',NULL),(271,'Moldova Leu','MDL','Transnistria','&curren;','0.99999999999999999999',NULL),(272,'Dollar','TTD','Trinidad and Tobago','$','0.99999999999999999999',780),(273,'Tunisia, Dinar','TND','Tunisia','&curren;','0.99999999999999999999',NULL),(274,'Turkey, Lira','TRY','Turkey','&curren;','0.99999999999999999999',NULL),(275,'New Manat','TMT','Turkmenistan','&curren;','0.99999999999999999999',NULL),(276,'Turkmenistan, Manat','TMM','Turkmenistan','&curren;','0.99999999999999999999',NULL),(277,'Dollar','USD','Turks and Caicos Islands','&#36;','0.00124023000000000000',840),(278,'Australia Dollar','AUD','Tuvalu','&curren;','0.99999999999999999999',NULL),(279,'Tuvalu, Dollar','TVD','Tuvalu','&curren;','0.99999999999999999999',NULL),(280,'Uganda, Shilling','UGX','Uganda','&curren;','0.99999999999999999999',NULL),(281,'Ukraine, Hryvna','UAH','Ukraine','&curren;','0.99999999999999999999',NULL),(282,'Dirham','AED','United Arab Emirates','&curren;','0.99999999999999999999',NULL),(283,'Pound','GBP','United Kingdom','&pound;','0.00082341400000000000',826),(284,'Dollar','USD','United States','&#36;','0.00124023000000000000',840),(285,'Uruguay, Peso','UYU','Uruguay','&curren;','0.99999999999999999999',NULL),(286,'Uzbekistan, Som','UZS','Uzbekistan','&curren;','0.99999999999999999999',NULL),(287,'Vanuatu, Vatu','VUV','Vanuatu','&curren;','0.99999999999999999999',NULL),(288,'Euro','EUR','Vatican City','&euro;','0.00201737000000000000',978),(289,'Bolivar Fuerte','VEF','Venezuela','&curren;','0.99999999999999999999',NULL),(290,'Vietnam, Dong','VND','Vietnam','&curren;','0.99999999999999999999',NULL),(291,'Dollar','USD','Virgin Islands','&#36;','0.00124023000000000000',840),(292,'Dollar','USD','Wake Island','&#36;','0.00124023000000000000',840),(293,'CFP Franc','XPF','Wallis and Futuna Islands','&curren;','0.99999999999999999999',NULL),(294,'Israel New Shekel','ILS','West Bank','&curren;','0.99999999999999999999',NULL),(295,'Jordan Dinar','JOD','West Bank','&curren;','0.99999999999999999999',NULL),(296,'Morocco Dirham','MAD','Western Sahara','&curren;','0.99999999999999999999',NULL),(297,'Samoa, Tala','WST','Samoa','&curren;','0.99999999999999999999',NULL),(298,'Yemen, Rial','YER','Yemen','&curren;','0.99999999999999999999',NULL),(299,'Zambia, Kwacha','ZMK','Zambia','&curren;','0.99999999999999999999',NULL),(300,'Zimbabwe, Dollar','ZWD','Zimbabwe','&curren;','0.99999999999999999999',NULL);
+/*!40000 ALTER TABLE `currency` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `domain_modification`
+--
+
+DROP TABLE IF EXISTS `domain_modification`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `domain_modification` (
+  `dm_id` int(255) NOT NULL auto_increment,
+  `dm_doid` int(255) NOT NULL,
+  `dm_action` enum('adding','removing','updating','incrementing') default NULL,
+  `dm_when` datetime NOT NULL,
+  `dm_by` int(255) NOT NULL,
+  `dm_data` longtext,
+  `dm_dostatus` enum('disabled','suspended','enabled','migrating out','migrating in','registering','desired','disputed') default NULL,
+  PRIMARY KEY  (`dm_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='these are pending changes, could be a state change ';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `domain_modification_history`
+--
+
+DROP TABLE IF EXISTS `domain_modification_history`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `domain_modification_history` (
+  `dmh_id` int(255) NOT NULL auto_increment,
+  `dmh_doid` int(255) NOT NULL,
+  `dmh_peid` int(255) NOT NULL,
+  `dmh_bulk` tinyint(1) default NULL,
+  `dmh_date` datetime NOT NULL,
+  `dmh_action` longtext NOT NULL,
+  `dmh_rollback` longtext,
+  PRIMARY KEY  (`dmh_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='record of actions';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `domains`
+--
+
+DROP TABLE IF EXISTS `domains`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `domains` (
+  `do_id` int(255) NOT NULL auto_increment,
+  `do_name` varchar(255) NOT NULL,
+  `do_status` enum('disabled','suspended','enabled','migrating out','migrating in','registering','desired','disputed','remote') NOT NULL default 'remote',
+  `do_added` datetime NOT NULL,
+  `do_acid` varchar(255) default NULL,
+  `do_group` int(255) default NULL,
+  `do_peid` int(255) default NULL,
+  `do_location` varchar(255) default NULL,
+  `do_masters` varchar(255) default NULL COMMENT 'a ; delimited list of ip addresses',
+  PRIMARY KEY  (`do_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=7577 DEFAULT CHARSET=latin1 COMMENT='Domains';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `domains_history`
+--
+
+DROP TABLE IF EXISTS `domains_history`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `domains_history` (
+  `dh_id` int(255) NOT NULL auto_increment,
+  `dh_doid` int(255) NOT NULL,
+  `dh_peid` int(255) NOT NULL,
+  `dh_bulk` tinyint(1) default NULL,
+  `dh_date` datetime NOT NULL,
+  `dh_action` longtext NOT NULL,
+  `dh_rollback` longtext,
+  PRIMARY KEY  (`dh_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2581 DEFAULT CHARSET=latin1 COMMENT='record of actions';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `email_control`
+--
+
+DROP TABLE IF EXISTS `email_control`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `email_control` (
+  `ec_doid` int(255) NOT NULL,
+  `ec_max_imap` int(255) default NULL,
+  `ec_max_aliases` int(255) default NULL,
+  `ec_aliases_group` int(255) default NULL,
+  `ec_imap_group` int(255) default NULL,
+  PRIMARY KEY  (`ec_doid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `group_cascade`
+--
+
+DROP TABLE IF EXISTS `group_cascade`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `group_cascade` (
+  `gc_id` int(255) NOT NULL auto_increment,
+  `gc_table` varchar(64) NOT NULL default '',
+  `gc_taid` int(255) NOT NULL default '0',
+  `gc_enabled` enum('0','1') default '1',
+  PRIMARY KEY  (`gc_table`,`gc_taid`),
+  UNIQUE KEY `gc_id` (`gc_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='data that is available to all child accounts';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `group_members`
+--
+
+DROP TABLE IF EXISTS `group_members`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `group_members` (
+  `gg_id` int(255) NOT NULL auto_increment,
+  `gg_peid` int(255) NOT NULL,
+  `gg_grid` int(255) NOT NULL,
+  `gg_miag` int(255) NOT NULL,
+  `gg_state` enum('0','1','2','3','4') default '1',
+  `gg_date_added` datetime default NULL,
+  `gg_date_changed` datetime default NULL,
+  PRIMARY KEY  (`gg_peid`,`gg_grid`),
+  UNIQUE KEY `gg_id` (`gg_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1 COMMENT='who is in what group';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `groups`
+--
+
+DROP TABLE IF EXISTS `groups`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `groups` (
+  `gr_id` int(255) NOT NULL auto_increment,
+  `gr_acid` int(255) NOT NULL default '0',
+  `gr_name` varchar(255) NOT NULL,
+  `gr_function` mediumtext,
+  `gr_public` enum('0','1') default '0',
+  `gr_modid` varchar(16) default NULL,
+  `gr_category` varchar(8) default NULL,
+  PRIMARY KEY  (`gr_acid`,`gr_name`),
+  UNIQUE KEY `gr_id` (`gr_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1 COMMENT='groups';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `imap`
+--
+
+DROP TABLE IF EXISTS `imap`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `imap` (
+  `im_userid` varchar(128) NOT NULL COMMENT 'the bit before the at sign',
+  `im_doid` int(255) NOT NULL COMMENT 'link to domains.do_id',
+  `im_passwd` varchar(74) default NULL COMMENT '{HASH}string e.g. {SHA1}shy75adsgf=',
+  `im_home` varchar(255) NOT NULL COMMENT 'explicit path on im_server',
+  `im_uid` int(11) NOT NULL COMMENT 'probably 8 (mail) though for shell users set it to their uid',
+  `im_gid` int(11) NOT NULL COMMENT 'probably 12 (mail) or 8 on some systems',
+  `im_server` varchar(128) default NULL COMMENT 'mostly this will be the localhost or hostname',
+  `im_quota` int(255) default NULL COMMENT 'In Megs: 2 petabyte limit',
+  `im_peid` int(255) default NULL COMMENT 'links to people table',
+  `im_pkid` int(255) default NULL COMMENT 'link to PGPkeys',
+  `im_auth` varchar(255) default NULL COMMENT 'exim authenticates from this if it does not understand im_passwd',
+  `im_mode` char(4) default '0640' COMMENT 'smallint seems wrong',
+  `im_dir_mode` char(4) default NULL COMMENT 'exim file and dir modes',
+  PRIMARY KEY  (`im_userid`,`im_doid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='imap account';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `imaphistory`
+--
+
+DROP TABLE IF EXISTS `imaphistory`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `imaphistory` (
+  `mh_id` int(255) unsigned NOT NULL auto_increment,
+  `mh_peid` int(128) unsigned default '0',
+  `mh_what` mediumtext,
+  `mh_when` datetime default NULL,
+  PRIMARY KEY  (`mh_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=latin1 COMMENT='imap History';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `ip`
+--
+
+DROP TABLE IF EXISTS `ip`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `ip` (
+  `ip_o1` varchar(4) NOT NULL default '',
+  `ip_o2` varchar(4) default NULL,
+  `ip_o3` varchar(4) default NULL,
+  `ip_o4` varchar(4) default NULL,
+  `ip_o5` varchar(4) default NULL,
+  `ip_o6` varchar(4) default NULL,
+  `ip_o7` varchar(4) default NULL,
+  `ip_o8` varchar(4) default NULL,
+  `ip_slash` tinyint(4) unsigned default NULL,
+  `ip_type` enum('IPv4','IPv6') default 'IPv4',
+  `ip_usedfor` varchar(128) default NULL,
+  `ip_network` varchar(255) default NULL,
+  `ip_stockref` int(128) default NULL,
+  `ip_notes` blob,
+  KEY `ip_o1` (`ip_o2`,`ip_o3`,`ip_o4`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `iphistory`
+--
+
+DROP TABLE IF EXISTS `iphistory`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `iphistory` (
+  `ih_id` int(255) unsigned NOT NULL auto_increment,
+  `ih_peid` int(128) unsigned default '0',
+  `ih_what` mediumtext,
+  `ih_when` datetime default NULL,
+  `ih_bywhom` int(128) unsigned default '0',
+  `ih_towhat` varchar(255) default NULL,
+  PRIMARY KEY  (`ih_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1694 DEFAULT CHARSET=latin1 COMMENT='IP History';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `ipphistory`
+--
+
+DROP TABLE IF EXISTS `ipphistory`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `ipphistory` (
+  `pp_id` int(255) unsigned NOT NULL auto_increment,
+  `pp_peid` int(128) unsigned default '0',
+  `pp_what` mediumtext,
+  `pp_when` datetime default NULL,
+  `pp_bywhom` int(128) unsigned default '0',
+  `pp_towhat` varchar(255) default NULL,
+  PRIMARY KEY  (`pp_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=499 DEFAULT CHARSET=latin1 COMMENT='IP Pool History';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `ippool`
+--
+
+DROP TABLE IF EXISTS `ippool`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `ippool` (
+  `ipp_name` varchar(40) NOT NULL default '',
+  `ipp_subnet` varchar(12) default NULL,
+  `ipp_RIR` enum('IANA','ARIN','RIPE','APNIC','LACNIC','AfriNIC','RFC1918','RFC3330','RFC3849') default NULL,
+  `ipp_assigned_to` varchar(128) default NULL,
+  `ipp_network` varchar(255) default NULL,
+  `ipp_VLAN` int(8) default NULL,
+  `ipp_notes` blob,
+  KEY `ipp_unique` (`ipp_name`,`ipp_subnet`,`ipp_network`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `menu`
+--
+
+DROP TABLE IF EXISTS `menu`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `menu` (
+  `pe_id` int(255) unsigned NOT NULL default '0',
+  `menu` varchar(32) NOT NULL default '1' COMMENT 'this is a module ID',
+  `pref` int(64) unsigned default NULL COMMENT 'used in the "order by" so users can chose their order',
+  `hidden` tinyint(1) default '0' COMMENT 'an entry here gives them the right, but they may not want it',
+  PRIMARY KEY  (`pe_id`,`menu`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Menu items that a user has a write to have';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `module_product_catagory`
+--
+
+DROP TABLE IF EXISTS `module_product_catagory`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `module_product_catagory` (
+  `mc_id` int(255) NOT NULL auto_increment,
+  `mc_name` varchar(255) default NULL,
+  `mc_table` varchar(128) default NULL COMMENT 'which table to change',
+  `mc_type` enum('insert','update','delete') default NULL COMMENT 'how to change',
+  `mc_what` varchar(255) default NULL COMMENT 'row or cell',
+  `mc_isnumeric` tinyint(1) default '0' COMMENT 'can we add this to others?',
+  PRIMARY KEY  (`mc_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='config for types of products';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `module_products`
+--
+
+DROP TABLE IF EXISTS `module_products`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `module_products` (
+  `mp_id` int(255) NOT NULL auto_increment,
+  `mp_moid` int(255) NOT NULL,
+  `mp_key` varchar(64) default NULL,
+  `mp_value` varchar(255) default NULL,
+  `mp_hierarchy` int(32) default NULL,
+  `mp_catagory` int(255) default NULL,
+  PRIMARY KEY  (`mp_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='What each module brings to the table... to sell';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `modules`
+--
+
+DROP TABLE IF EXISTS `modules`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `modules` (
+  `mo_id` int(255) NOT NULL auto_increment,
+  `mo_name` varchar(255) NOT NULL,
+  `mo_description` varchar(255) NOT NULL,
+  `mo_uuid` char(36) default NULL COMMENT 'has to be globally unique',
+  `mo_menu` varchar(36) default NULL COMMENT 'link to menu table',
+  `mo_default_hierarchy` int(32) default NULL COMMENT 'smaller the number the higher up it goes',
+  `mo_author` varchar(128) default NULL COMMENT 'the first maintainer',
+  `mo_maintainers` blob,
+  `mo_dependencies` varchar(128) default NULL COMMENT 'CSV of mo_id',
+  `mo_catagorie` varchar(255) default NULL COMMENT 'short name',
+  `mo_src_url` varchar(255) default NULL,
+  `mo_update_url` varchar(255) default NULL,
+  `mo_version` varchar(128) default NULL,
+  `mo_user_use` enum('none','use','access','limited read','read','insert','update','admin_read','admin_write') default 'none',
+  `mo_notes` blob,
+  PRIMARY KEY  (`mo_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COMMENT='The modules';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `pehistory`
+--
+
+DROP TABLE IF EXISTS `pehistory`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `pehistory` (
+  `ph_id` int(255) unsigned NOT NULL auto_increment,
+  `ph_peid` int(128) unsigned default '0',
+  `ph_what` mediumtext,
+  `ph_when` datetime default NULL,
+  `ph_bywhom` int(128) unsigned default '0',
+  `ph_towhat` varchar(128) default NULL,
+  PRIMARY KEY  (`ph_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=130 DEFAULT CHARSET=latin1 COMMENT='People History';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `people`
+--
+
+DROP TABLE IF EXISTS `people`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `people` (
+  `pe_id` int(255) NOT NULL auto_increment,
+  `pe_raid` int(255) NOT NULL default '1',
+  `pe_fname` varchar(32) default NULL,
+  `pe_lname` varchar(32) default NULL,
+  `pe_mname` varchar(32) default NULL,
+  `pe_uname` varchar(32) default NULL,
+  `pe_alias` int(255) default NULL,
+  `pe_goesby` varchar(32) default NULL,
+  `pe_dob` datetime default NULL,
+  `pe_dod` datetime default NULL,
+  `pe_mobile` tinytext,
+  `pe_email` varchar(128) default NULL,
+  `pe_password` varchar(32) default NULL,
+  `pe_acid` varchar(255) default NULL,
+  `pe_level` int(11) default NULL,
+  `pe_loggedin` varchar(90) default NULL,
+  `pe_menu` varchar(512) default '1',
+  `pe_confirmed` varchar(100) default NULL,
+  `pe_passwd` varchar(256) default NULL,
+  PRIMARY KEY  (`pe_id`),
+  UNIQUE KEY `pe_id` (`pe_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=562 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `people`
+--
+
+LOCK TABLES `people` WRITE;
+/*!40000 ALTER TABLE `people` DISABLE KEYS */;
+
+
+INSERT INTO `people` VALUES (2,23,'The','Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'a@b.com','876dfefef3ef6f4548f48bbddd856cef','2',NULL,NULL,'1',NULL,'876dfefef3ef6f4548f48bbddd856cef'),(1,24,'Alexx','Roche',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'notice-dev@alexx.net','','1',101,'20110723083628_2001:0:beef:79fb:1234:193a:a29e:5445_4878ba34353c75e82ef73d6a21c2a8c3_1',',0,1,1.1,1.2,1.2.1,1.2.2,1.2.2.1,1.2.2.2,1.2.3,1.2.4,1.3,1.3.1,1.3.2,1.3.3,2,3,3.1,3.2,4,5,5.1,6,7,7.1,7.2,8,9,10,11,12,13,14,15',NULL,'f3d9d042b89daf317475c95049c347f6');
+
+/*!40000 ALTER TABLE `people` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+--
+-- Table structure for table `people_openids`
+--
+
+DROP TABLE IF EXISTS `people_openids`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `people_openids` (
+  `openid_url` varchar(255) NOT NULL,
+  `pe_id` int(255) NOT NULL COMMENT 'links to people table',
+  PRIMARY KEY  (`openid_url`),
+  KEY `pe_id` (`pe_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `permission`
+--
+
+DROP TABLE IF EXISTS `permission`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `permission` (
+  `mi_id` int(255) NOT NULL auto_increment,
+  `mi_peid` int(255) NOT NULL default '0',
+  `mi_asid` int(255) default NULL,
+  `mi_contactsystem` int(11) default '0',
+  `mi_startdata` datetime default NULL,
+  `mi_enddate` datetime default NULL,
+  `mi_passphrase` blob,
+  PRIMARY KEY  (`mi_id`),
+  UNIQUE KEY `mi_id` (`mi_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `price_list`
+--
+
+DROP TABLE IF EXISTS `price_list`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `price_list` (
+  `pri_id` int(255) NOT NULL auto_increment,
+  `pri_mpid` int(255) default NULL,
+  `pri_acid` varchar(255) default NULL,
+  `pri_item` char(16) NOT NULL,
+  `pri_description` varchar(255) default NULL,
+  `pri_unitprice` decimal(10,4) default NULL,
+  `pri_period` char(16) default '1y' COMMENT 'D=decade,b=biennial,y=year,h=biannial,m=month,d=day,W=Week,H=Hour,M=Minute,S=Secont',
+  `pri_curid` int(255) NOT NULL,
+  PRIMARY KEY  (`pri_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=124 DEFAULT CHARSET=latin1 COMMENT='What each thing costs';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `promotion`
+--
+
+DROP TABLE IF EXISTS `promotion`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `promotion` (
+  `promo_id` int(255) NOT NULL auto_increment,
+  `promo_name` varchar(255) default NULL,
+  `promo_startdate` datetime NOT NULL,
+  `promo_enddate` datetime NOT NULL,
+  `promo_priid` int(255) NOT NULL COMMENT 'what we are reducing',
+  `promo_reduction` decimal(10,4) default '0.0000' COMMENT 'how much we take off',
+  `promo_ter` int(255) NOT NULL COMMENT 'pe_id who entered this promotion',
+  `promo_approver` int(255) NOT NULL COMMENT 'pe_id who approved this',
+  PRIMARY KEY  (`promo_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='-20% off! limited time only';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `ranks`
+--
+
+DROP TABLE IF EXISTS `ranks`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `ranks` (
+  `ra_id` int(255) unsigned NOT NULL auto_increment,
+  `ra_precedence` int(255) default NULL,
+  `ra_name` varchar(128) NOT NULL default '',
+  `ra_boatn` enum('before',' after') default 'before',
+  PRIMARY KEY  (`ra_id`),
+  UNIQUE KEY `ra_id` (`ra_id`),
+  UNIQUE KEY `ra_name` (`ra_name`)
+) ENGINE=MyISAM AUTO_INCREMENT=37 DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `ranks`
+--
+
+LOCK TABLES `ranks` WRITE;
+/*!40000 ALTER TABLE `ranks` DISABLE KEYS */;
+INSERT INTO `ranks` VALUES (1,0,'Goddess',' after'),(2,0,'God',' after'),(3,0,'King',' after'),(4,0,'Queen',' after'),(5,0,'Prince','before'),(6,0,'Princess',''),(7,0,'Duke',' after'),(8,0,'Dutchess',' after'),(9,0,'Marquis',' after'),(10,0,'Marchioness',' after'),(11,0,'Earl',' after'),(12,0,'Viscount','before'),(13,0,'Viscountess',' after'),(14,0,'Baron','before'),(15,0,'Baronet',' after'),(16,0,'Baroness',' after'),(17,0,'Knight',' after'),(18,0,'The Hon','before'),(19,0,'Mr','before'),(20,0,'Mrs','before'),(21,0,'Miss','before'),(22,0,'Ms','before'),(23,0,'','before'),(24,0,'Dr','before'),(25,0,'Prof','before'),(26,0,'Sir','before'),(27,0,'Lord','before'),(28,0,'Lady','before'),(29,0,'H.R.H.','before'),(30,0,'Esq',' after'),(31,0,'BA',' after'),(32,0,'BSc',' after'),(33,0,'(Hons)\n',' after'),(34,0,'FCA',' after'),(35,0,'Bart',' after'),(36,0,'Bt',' after');
+/*!40000 ALTER TABLE `ranks` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+--
+-- Table structure for table `rental`
+--
+
+DROP TABLE IF EXISTS `rental`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `rental` (
+  `rent_id` int(255) NOT NULL auto_increment,
+  `rent_peid` int(255) NOT NULL,
+  `rent_priid` int(255) NOT NULL,
+  `rent_period` char(16) default NULL COMMENT 'D=decade,b=biennial,y=year,h=biannial,m=month,d=day,W=Week,H=Hour,M=Minute,S=Secont',
+  `rent_promoid` int(255) default NULL,
+  `rent_tableid` varchar(255) default NULL COMMENT 'which row in tri_priid->{pri_mpid}->{mp_catagory}->{mc_table}[.{mc_what}] for fungible non assets',
+  `rent_asid` int(255) default NULL COMMENT 'OR we are selling an asset from the asset database',
+  `rent_start` datetime default NULL COMMENT 'when rent started',
+  `rent_end` datetime default NULL COMMENT 'when expires.',
+  `rent_paid` tinyint(1) default '0' COMMENT 'has this been paid for?',
+  `rent_cleared` tinyint(1) default '0' COMMENT 'have we actioned this purchase (have we given them what they have paid for?)',
+  `rent_transaction` varchar(255) default NULL COMMENT 'a unique id for this rental',
+  PRIMARY KEY  (`rent_id`),
+  UNIQUE KEY `rent_id` (`rent_id`),
+  KEY `rent_once` (`rent_transaction`,`rent_peid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='What you bough and when it expires';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `sessions`
+--
+
+DROP TABLE IF EXISTS `sessions`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `sessions` (
+  `id` char(32) NOT NULL,
+  `a_session` text NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `titles`
+--
+
+DROP TABLE IF EXISTS `titles`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `titles` (
+  `ti_id` int(255) NOT NULL auto_increment,
+  `ti_raid` int(255) default NULL,
+  `ti_name` varchar(128) default NULL,
+  `ti_hereditory` enum('0','1') default '0',
+  `ti_female_line` enum('0','1') default '0',
+  `ti_issue` int(16) default NULL,
+  `ti_dateofcreation` date default NULL,
+  PRIMARY KEY  (`ti_id`),
+  UNIQUE KEY `ti_id` (`ti_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `trolly`
+--
+
+DROP TABLE IF EXISTS `trolly`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `trolly` (
+  `tro_id` int(255) NOT NULL auto_increment,
+  `tro_peid` int(255) NOT NULL,
+  `tro_startdate` datetime NOT NULL,
+  `tro_expires` datetime default NULL,
+  PRIMARY KEY  (`tro_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1 COMMENT='Thing to put the shopping in';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `trolly_items`
+--
+
+DROP TABLE IF EXISTS `trolly_items`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `trolly_items` (
+  `tri_id` int(255) NOT NULL auto_increment,
+  `tri_troid` int(255) NOT NULL,
+  `tri_priid` int(255) NOT NULL,
+  `tri_promoid` int(255) default NULL,
+  `tri_tableid` varchar(255) default NULL COMMENT 'which row in tri_priid->{pri_mpid}->{mp_catagory}->{mc_table}[.{mc_what}] for fungible non assets',
+  `tri_asid` int(255) default NULL COMMENT 'it we are selling an asset from the asset database',
+  PRIMARY KEY  (`tri_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=184 DEFAULT CHARSET=latin1 COMMENT='What you want to buy (tri_tableid might point to varchar not';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `weblogins`
+--
+
+DROP TABLE IF EXISTS `weblogins`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `weblogins` (
+  `site` varchar(255) NOT NULL,
+  `username` varchar(128) default NULL,
+  `password` varchar(74) default NULL,
+  `userid` varchar(128) default NULL,
+  `domain` varchar(128) default NULL,
+  `notes` blob
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+SET character_set_client = @saved_cs_client;
+
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2011-11-15 16:14:19

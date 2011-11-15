@@ -1,0 +1,14 @@
+<!-- list aliases -->
+
+[% IF domains %]
+         [% IF domains.size >= 2 %]
+<!-- if there are more than $too_manu we should break them down by letter or something -->
+            The following links will list the existing aliases:<br />
+           [% FOREACH dom = domains %]
+            <a href="email/aliases/[% dom.do_name %]" class="small button blue">[% dom.do_name %]</a><br />
+            [% END #FOREACH %]
+         [% ELSE %]
+            Aliases: <a href="email/aliases/[% domains.0.do_id %]" class="small button blue">[% domains.0.do_name %]</a>
+         [% END #IF-ELSE %]
+[% END #IF %]
+

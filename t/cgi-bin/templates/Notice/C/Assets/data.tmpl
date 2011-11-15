@@ -1,0 +1,58 @@
+[% #WRAPPER 'Notice/C/Assets/wrapper.tmpl' %]
+[% WRAPPER 'site_wrapper.tmpl' %]
+    <style type="text/css">
+   /* table {border-collapse:collapse;} */
+    tr th.under { border-bottom-style:dotted; }
+    tr.asset th { border-bottom-style:solid; }
+    tr.odd td { background-color: #999; color: white; }
+    tr.even td { background-color: #909; color: black; }
+    .as_data { border-collapse:collapse; border: 1px; padding: 0px; margin: 0; color: black; }
+    tr.as_data_even td.bg { background-color: #9cc; }
+    tr.as_data_odd td.bg { background-color: #cc9; }
+    .error { color: orange; size:20px; }
+    </style>
+[% IF error; error; ELSE; %]
+ <span class="h1">Asset Data for [% ning; ' '; type or asc.assetcategory.asc_name or asc.type or asc.asc_name; IF asd.cid or asid; ' <a href="/cgi-bin/index.cgi/assets/list/'; asd.cid or asid; '">(Asset '; asd.cid or asid; ')</a>'; END %]</span>
+    <span class="headmsg">[% headmsg %]</span>
+    <form method="POST" action="[% action %]">
+    <table>
+      <tr class="asset">
+    <th>Asset Category</th>
+    <th>Data Values</th>
+    <th>Data Restrictions</th>
+     </tr>
+      [% USE Dumper %]
+      [% FOREACH ac = asc; cid = ac.acd_cid %]
+         <tr class="as_data as_data_[% loop.parity %]">
+           <td class="bg">[% ac.acd_name  or '' %]</td>
+           <td class="bg">[% v = ac.acd_id; IF ac.acd_type=='text';
+            '<input type="text" name="'; ac.acd_id; '" value="'; asd.$v; '" />';
+        ELSIF ac.acd_type=='textarea';
+            '<textarea name="'; ac.acd_id; '">'; asd.$v; '</textarea>';
+        ELSIF ac.acd_type=='checkbox';
+            '<input type="checkbox" name="'; ac.acd_id; '" />';
+        ELSIF ac.acd_type=='select';
+            '<select name="'; ac.acd_id; '">'; asd.$v; '</select>';
+        END %]
+        </td>
+        <td class="bg_white">
+        [% IF ac.acd_regexp; %] ( [% ac.acd_regexp %] ) [% END %]
+       </td>
+         </tr>
+      [% END %]
+    </table>
+    [%# Dumper.dump(asd) %]
+    [% IF cid and asid and type %]
+    <input type="hidden" name="id" value="[% cid %]" />
+    <input type="hidden" name="sid" value="[% asid %]" />
+    <input type="hidden" name="do" value="[% submit or 'Add' %]" />
+    <input type="submit" name="[% submit or 'Add' %]" value="[% submit; ' (this) '; type.replace('^An?', '') %]" class="button [% IF submit.match('Update'); 'blue'; ELSE; 'green'; END; %]"/>
+    [% ELSE %]
+    Which asset is this data for?
+    [% END %]
+    </form>
+[% END %]
+    [% message %]
+[% END %]
+
+
