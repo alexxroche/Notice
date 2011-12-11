@@ -243,6 +243,16 @@ CREATE TABLE `asset_categories` (
 SET character_set_client = @saved_cs_client;
 
 --
+-- Dumping data for table `asset_categories`
+--
+
+LOCK TABLES `asset_categories` WRITE;
+/*!40000 ALTER TABLE `asset_categories` DISABLE KEYS */;
+INSERT INTO `asset_categories` VALUES (18,'Laptop','A Laptop computer',NULL),(19,'A Tree','Tall thing with leaves',NULL),(20,'A Field','Thing with plants or animals in',NULL),(21,'Server','A type of computer',NULL),(1,'A Painting','Picture, Portrait or Landscape',NULL),(2,'A Book','Printed reading material',NULL),(3,'A CD','Music or data',NULL),(4,'A DVD','Music or data',NULL),(5,'A House','Building with rooms for people',NULL),(6,'A Room','Part of a House',NULL),(7,'A Bookcase','Like shelves but for for books',NULL),(8,'A Table','Flat surface supported by legs',NULL),(9,'A Chair','Moveable sitting device',NULL);
+/*!40000 ALTER TABLE `asset_categories` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `asset_data`
 --
 
