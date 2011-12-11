@@ -3,12 +3,7 @@ Notice
 Notice - A MVC (DBIC,TT,CAS) CGI::Application Customer Resource and Account Manager inspired by C:A:Structured
 
 C:A:S got a lot of things right but I prefer not to name my runmodes after perl functions. i.e. 
-<<<<<<< HEAD:README
 sub main: StartRunmode{ } #seems better than the default of sub index: StartRunmode{ }
-=======
-sub main: StartRunmode{ } #seems better than the default
-sub index: StartRunmode{ } #seems better than the default
->>>>>>> master:README
 
 I had a hard time getting sessions; authentication; dispatch; query (the cgi query) all working at
 the same time with C:A:S. That said I'm very greatful for C:A:S in my transition from Catalyst to CGI:App
@@ -25,6 +20,8 @@ Then
     cp config t/cgi-bin/* /var/www/sites/www.example.com/cgi-bin/  #or where ever your cgi-bin is
     cp t/www/* /var/www/sites/www.example.com/www/          #or where ever your www is
 
+(This is why the TT templates are in t/cgi-bin/templates.)
+
 To install this module, I run the following commands:
 
 	perl Makefile.PL
@@ -36,6 +33,10 @@ Test the install (default login is with a@b.com with a password of 123Abc) and i
 CHANGE the password in ~www/cgi-bin/config/config.pl and in the the db to match:
     mysql -p mysql
     mysql> update user set password=PASSWORD('NEW-PASSWORD') where User='notice_adminuser';
+
+BUGS and LIMITATIONS
+
+The DB install should be a single script and then a default error page if $CFG{installing}=1;
 
 SUPPORT AND DOCUMENTATION
 
