@@ -759,6 +759,17 @@ CREATE TABLE `modules` (
 SET character_set_client = @saved_cs_client;
 
 --
+-- Dumping data for table `modules`
+--
+
+LOCK TABLES `modules` WRITE;
+/*!40000 ALTER TABLE `modules` DISABLE KEYS */;
+INSERT INTO `modules` VALUES (1,'IMAP/POP','Storage for email messages; An email account','e13a9120-de9a-4ec1-877d-34c4f719b538','3.1',2,'alexx at alexx dot net','','0,1,3','','https://notice.alexx.net/modules/3/3.1/src/','https://notice.alexx.net/modules/3/3.1/update/','0.0.2','insert',''),(2,'Assets','Asset inventory and manangement','756b67a0-9cb6-11e0-aedf-00188bba79ac','8',3,'alexx at alexx dot net','','1','asset','https://notice.alexx.net/modules/8/src/','https://notice.alexx.net/modules/8/update/','0.02','insert',''),(3,'Domains','Domain names','8cf15874-9cb8-11e0-beed-00188bba79ac','3',1,'alexx at alexx dot net','','1','domains','https://notice.alexx.net/modules/3/src/','https://notice.alexx.net/modules/3/update/','0.02','insert','');
+/*!40000 ALTER TABLE `modules` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+--
 -- Table structure for table `pehistory`
 --
 
