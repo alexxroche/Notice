@@ -14,6 +14,12 @@ __PACKAGE__->load_namespaces;
 # Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-06-23 16:12:06
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:IjVWjg092psDJNcNjDnjnA
 
+our $VERSION = 0.01; # version of the database schema, not Notice itself.
+
+1;
+
+__END__
+
 =head1 NAME
 
 Notice::DB
@@ -61,20 +67,17 @@ Gordon Van Amburg for taking the right stand with CAS
 
 =head1 AUTHOR
 
-Alexx Roche, C<< <notice-dev at alexx.net> >>
+Alexx Roche, C<alexx@cpan.org>
 
 =head1 LICENSE AND COPYRIGHT
 
 Copyright (C) 2011 Alexx Roche, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
-under the following license: Eclipse Public License, Version 1.0 ; 
- the GNU Lesser General Public License as published 
-by the Free Software Foundation; or the Artistic License.
+under the following license: Eclipse Public License, Version 1.0 or
+the Artistic License.
 
 See http://www.opensource.org/licenses/ for more information.
 
-
 =cut
 
-1;

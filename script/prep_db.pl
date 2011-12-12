@@ -7,16 +7,20 @@ use warnings;
  
 use lib 'lib';
  
+use Notice::DB;
+use Config::Auto;
 use DBIx::Class::DeploymentHandler;
 use SQL::Translator;
- 
-my $schema = 'Notice::DB';
- 
-my $version = eval "use $schema; $schema->VERSION" or die $@;
+
+my $cfg = Config::Auto::parse("config/config.pl", format => "perl");
+my %CFG = %{ $cfg };
+
+my $schema = $CFG{'db_schema'};
+my $version = eval "use $schema; $schema->VERSION" or die "Can't find VERSION in $schema $@";
  
 say "processing version $version of $schema...";
  
-my $s = $schema->connect('dbi:mysql:database=notice','notice_adminuser','12345678-abcd-1234-a693-00188bba79ac');
+my $s = Notice::DB->connect($CFG{'db_dsn'},$CFG{'db_user'},$CFG{'db_pw'});
  
 my $dh = DBIx::Class::DeploymentHandler->new( {
         schema              => $s,
