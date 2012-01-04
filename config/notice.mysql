@@ -55,13 +55,13 @@ CREATE TABLE `SSLhistory` (
 SET character_set_client = @saved_cs_client;
 
 --
--- Table structure for table `accounts`
+-- Table structure for table `account`
 --
 
-DROP TABLE IF EXISTS `accounts`;
+DROP TABLE IF EXISTS `account`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-CREATE TABLE `accounts` (
+CREATE TABLE `account` (
   `ac_id` int(255) NOT NULL auto_increment,
   `ac_name` varchar(128) default NULL,
   `ac_parent` varchar(255) default NULL,
@@ -77,16 +77,16 @@ SET character_set_client = @saved_cs_client;
 
 
 --
--- Dumping data for table `accounts`
+-- Dumping data for table `account`
 --
 
-LOCK TABLES `accounts` WRITE;
-/*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
+LOCK TABLES `account` WRITE;
+/*!40000 ALTER TABLE `account` DISABLE KEYS */;
 
 
-INSERT INTO `accounts` VALUES (2,'L','1',0,'1.1','LastFirst',4,5),(1,'Chairvalla Publications',NULL,0,'1','',1,1126);
+INSERT INTO `account` VALUES (2,'L','1',0,'1.1','LastFirst',4,5),(1,'Chairvalla Publications',NULL,0,'1','',1,1126);
 
-/*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
+/*!40000 ALTER TABLE `account` ENABLE KEYS */;
 UNLOCK TABLES;
 
 

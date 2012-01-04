@@ -10,6 +10,14 @@ the same time with C:A:S. That said I'm very greatful for C:A:S in my transition
 
 Is it $self or $c ? I've chosen $self
 
+If you have just cloned this from github then you might have to install the deps; You can do this with
+
+    sudo cpanm --installdeps .  
+
+If you have that installed or 
+
+    for i in `grep :: Makefile.PL|grep -v '>='|sed -e 's/^use //g' -e "s/^\s*'//g" -e "s/'.*//g" -e 's/;$//'`;do sudo perl -MCPAN -e "install $i"; done
+
 INSTALLATION
 
 CHANGE the default password in config/config.pl
