@@ -11,11 +11,13 @@ the same time with C:A:S. That said I'm very greatful for C:A:S in my transition
 Is it $self or $c ? I've chosen $self
 
 INSTALLATION
+
+CHANGE the default password in config/config.pl
     
-Create a database called notice and use the details from config/config.pl to grant a user then
-    mysql notice < config/notice.mysql
-You create the DBIC::schema using
-    ./script/create_dbic_schema.pl
+Create the database:
+
+    ./script/create_notice_db.pl
+
 Then 
     cp config t/cgi-bin/* /var/www/sites/www.example.com/cgi-bin/  #or where ever your cgi-bin is
     cp t/www/* /var/www/sites/www.example.com/www/          #or where ever your www is
@@ -29,14 +31,17 @@ To install this module, I run the following commands:
 	make test
 	sudo make install
 
-Test the install (default login is with a@b.com with a password of 123Abc) and if it works
+Test the install (default login is with a@b.com with a password of 123Abc).
+
+If you forgot to change the db_pw in config:
+
 CHANGE the password in ~www/cgi-bin/config/config.pl and in the the db to match:
     mysql -p mysql
     mysql> update user set password=PASSWORD('NEW-PASSWORD') where User='notice_adminuser';
 
 BUGS and LIMITATIONS
 
-The DB install should be a single script and then a default error page if $CFG{installing}=1;
+Notice should check for a valid DB and offer to install via https if $CFG{installing}=1;
 
 SUPPORT AND DOCUMENTATION
 
