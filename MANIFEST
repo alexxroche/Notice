@@ -20,14 +20,12 @@ lib/Notice/C/Okay.pm
 lib/Notice/C/Signup.pm
 lib/Notice/DB.pm
 lib/Notice/DB/Result/Account.pm
-lib/Notice/DB/Result/Account2Coid.pm
 lib/Notice/DB/Result/Achistory.pm
 lib/Notice/DB/Result/Address.pm
 lib/Notice/DB/Result/Adhistory.pm
 lib/Notice/DB/Result/Alhistory.pm
 lib/Notice/DB/Result/AliasDetail.pm
 lib/Notice/DB/Result/Aliase.pm
-lib/Notice/DB/Result/Artist.pm
 lib/Notice/DB/Result/Asset.pm
 lib/Notice/DB/Result/AssetCatData.pm
 lib/Notice/DB/Result/AssetCatDataGroupEntry.pm
@@ -35,7 +33,6 @@ lib/Notice/DB/Result/AssetCatDataGroupMembers.pm
 lib/Notice/DB/Result/AssetCategory.pm
 lib/Notice/DB/Result/AssetData.pm
 lib/Notice/DB/Result/AssetLocation.pm
-lib/Notice/DB/Result/Cd.pm
 lib/Notice/DB/Result/ConfData.pm
 lib/Notice/DB/Result/Config.pm
 lib/Notice/DB/Result/Country.pm
@@ -61,15 +58,11 @@ lib/Notice/DB/Result/Menu.pm
 lib/Notice/DB/Result/Module.pm
 lib/Notice/DB/Result/ModuleProduct.pm
 lib/Notice/DB/Result/ModuleProductCatagory.pm
-lib/Notice/DB/Result/NoticeOxcid.pm
 lib/Notice/DB/Result/Order.pm
 lib/Notice/DB/Result/Pehistory.pm
 lib/Notice/DB/Result/People.pm
 lib/Notice/DB/Result/PeopleOpenid.pm
 lib/Notice/DB/Result/Permission.pm
-lib/Notice/DB/Result/Pgpfriend.pm
-lib/Notice/DB/Result/Pgphistory.pm
-lib/Notice/DB/Result/Pgpkey.pm
 lib/Notice/DB/Result/PriceList.pm
 lib/Notice/DB/Result/Promotion.pm
 lib/Notice/DB/Result/Rank.pm
@@ -98,6 +91,7 @@ script/build_dns.pl
 script/cdbdump.pl
 script/create_controller.pl
 script/create_dbic_schema.pl
+script/create_notice_db.pl
 script/create_whois_cdb.pl
 script/pin
 script/prep_db.pl

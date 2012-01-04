@@ -16,15 +16,15 @@ Hash: SHA1
 
 SHA1 91b02739431d11333d97a1c317b51b129c089ca9 ABOUT
 SHA1 87467d1636b75fa4e25eb0a7a6d8e40d1a519e8a Changes
-SHA1 be5a9330767939b528491d8791d4b38c95a36dfd MANIFEST
+SHA1 ff639452670a1f61c960e5c986aa373a0dcde212 MANIFEST
 SHA1 f45a89654b926fe753218eef91639df99b93d53d META.yml
 SHA1 4bc9cbd0d11063d641addf85b0f59c77418a9a22 Makefile.PL
-SHA1 914568deadd1c520cdcd6b410048a03702b90218 README
+SHA1 baf7d2c7409e2a3238573f906030192cefef4a66 README
 SHA1 378a9927a24e2ab7c6e116b09bff53828da8fb6f README.whois
 SHA1 c7339f4fcb71296dc0ddfbd7504c2b01dd885d5d config/config.pl
-SHA1 a902437f7729abb2e82cb66dddd2859b2273cb43 config/notice.mysql
+SHA1 f1fab1a6d6f4cfd533db1ba8bcda0d1c9af80814 config/notice.mysql
 SHA1 50c5b506d52aa63cda67d936e31dca6ffd8b290f debug.sh
-SHA1 de73f17b623634f28d49040915b0924f463f2c6b lib/Notice.pm
+SHA1 50a7a8ef987b3fc40449b7b4caa286cebedbd983 lib/Notice.pm
 SHA1 f3cbf6214e9a1ec8a57a115fa618bd021945c40c lib/Notice/Base.pm
 SHA1 855617fa77781c6a18478e8bf3063a5554d19113 lib/Notice/C/Account.pm
 SHA1 0c1e59a70d3ff79967acacda0fb75841e9e63ee9 lib/Notice/C/Addresses.pm
@@ -39,16 +39,14 @@ SHA1 3e3228fe7ff22b9bf32bcf7e008736b3f360dc1c lib/Notice/C/Mustlogin.pm
 SHA1 b7614c10b3e3803845dc3186930719fc8493e148 lib/Notice/C/Myerror.pm
 SHA1 963c1a50a8f251e6b6e63f0c9c61db77a52e946f lib/Notice/C/Okay.pm
 SHA1 ffbf5ff6611f328c991b097218e63b695adb2166 lib/Notice/C/Signup.pm
-SHA1 551a5b7a4f576329cff9dddb68226cad22d8f226 lib/Notice/DB.pm
+SHA1 96a493d0ae7dc3398531109b7b764252ca777277 lib/Notice/DB.pm
 SHA1 63c16ec0c52b449f81e13bd48522cc3e8dcbe13e lib/Notice/DB/Result/Account.pm
-SHA1 dd4ed106f84f8b92974a04b8da70e0d4b5e735e3 lib/Notice/DB/Result/Account2Coid.pm
 SHA1 b1d399cc5642f911b925d1e7817cc02a964b7b61 lib/Notice/DB/Result/Achistory.pm
 SHA1 35c0a1d71e8984bbdaaa147d5dcbdfc55a78a4f0 lib/Notice/DB/Result/Address.pm
 SHA1 6553fcdef34ba39832b32f08959a91f469bf7e5c lib/Notice/DB/Result/Adhistory.pm
 SHA1 748db6aee3fe2c33678b9e9a65f9341e7342532e lib/Notice/DB/Result/Alhistory.pm
 SHA1 51558e61a36d18e0f3be103452bacefadf2a79af lib/Notice/DB/Result/AliasDetail.pm
 SHA1 8261c9c04ef6ce1aca8a6b9cbc299053dc5130c5 lib/Notice/DB/Result/Aliase.pm
-SHA1 c4e05f922d7c9b1e34f34d1ca8d4aca15dca4762 lib/Notice/DB/Result/Artist.pm
 SHA1 413daf67bc241d6372a76b4282ecd8b01aeeb205 lib/Notice/DB/Result/Asset.pm
 SHA1 d0dabbf5b3b8582d15c1fd4f9fde1f5fe223e84b lib/Notice/DB/Result/AssetCatData.pm
 SHA1 f71326ca300cd87e8c4bb7724bb927220fa4fddd lib/Notice/DB/Result/AssetCatDataGroupEntry.pm
@@ -56,7 +54,6 @@ SHA1 9917831bac3c67f0f75e51fbc9de8dfda13b84e2 lib/Notice/DB/Result/AssetCatDataG
 SHA1 63eeca6bea1cb6fcab421884aef81f608127abfc lib/Notice/DB/Result/AssetCategory.pm
 SHA1 2f2c1cf71dc5811f8dbd235e7b3d32358554ab86 lib/Notice/DB/Result/AssetData.pm
 SHA1 3b84d59b84c70e1419e93d1ca9d7ba892a9cfa04 lib/Notice/DB/Result/AssetLocation.pm
-SHA1 4a03a1e126e65b8597375a5382a37584e963f35a lib/Notice/DB/Result/Cd.pm
 SHA1 5152390152b3103439b924cdcd3b57fad3ba89fb lib/Notice/DB/Result/ConfData.pm
 SHA1 81d6c6381d46b927d9bb47da618fde307cede60a lib/Notice/DB/Result/Config.pm
 SHA1 c8e804306cb21f8df51f1c39a8917c871b212e86 lib/Notice/DB/Result/Country.pm
@@ -82,15 +79,11 @@ SHA1 b7602dba6136fe1804f15aa6a3d3d74223e64558 lib/Notice/DB/Result/Menu.pm
 SHA1 0a2afd2a0c5109d1aa9e4aec6d988c398d683ae1 lib/Notice/DB/Result/Module.pm
 SHA1 daebf543ef2ac158a19ed3dce127d1fa4a55d384 lib/Notice/DB/Result/ModuleProduct.pm
 SHA1 c8285b32f0170d2495383fcca9aa5938cb5ea7ae lib/Notice/DB/Result/ModuleProductCatagory.pm
-SHA1 411b27a3f077cd74c89370ba823ffec393ef0759 lib/Notice/DB/Result/NoticeOxcid.pm
 SHA1 324edbdff19a09346a505771261e6d8ccac67de4 lib/Notice/DB/Result/Order.pm
 SHA1 5e9395141bac684795f7509783e5ae7be3e6ba27 lib/Notice/DB/Result/Pehistory.pm
 SHA1 2226f2a466d787c975f4f730c81616fc567e879e lib/Notice/DB/Result/People.pm
 SHA1 a85728f72412aacc2f64b78bd7c44e5fcd9e4a61 lib/Notice/DB/Result/PeopleOpenid.pm
 SHA1 4a0e9ccf7800e90891360308b91d9f63d8be3eb4 lib/Notice/DB/Result/Permission.pm
-SHA1 8179e23b16bb42105d9842e0304ec6b01ce6d665 lib/Notice/DB/Result/Pgpfriend.pm
-SHA1 39bc42c2f822f813a07813c30b85ab32e08f64ba lib/Notice/DB/Result/Pgphistory.pm
-SHA1 427c62a689e7cb300348b0b573fbc6cec1042067 lib/Notice/DB/Result/Pgpkey.pm
 SHA1 824e8e8b7390174c83b08ead845a310caadc4e99 lib/Notice/DB/Result/PriceList.pm
 SHA1 9c0eb97d33939277c01c5d548151212e2db8677a lib/Notice/DB/Result/Promotion.pm
 SHA1 6cd3359be353e8575a922516139508231d3e6350 lib/Notice/DB/Result/Rank.pm
@@ -114,9 +107,10 @@ SHA1 560ba8b08c1cfa19a3407e43123c7ef0acece4e6 script/build_dns.pl
 SHA1 75ee859b1c514aa0b3812eb03612ade28adf7deb script/cdbdump.pl
 SHA1 3dbef02d2b5c5a8641851c33fd4afa5e11f69589 script/create_controller.pl
 SHA1 53eeb6d9e8d5b9d299d631ca6d94a893ccef0c4c script/create_dbic_schema.pl
+SHA1 1598d1b6f57f90eef2b61fa0e339124ec62ef095 script/create_notice_db.pl
 SHA1 2c08e5da4cf7259baab0feccde97e9e1bc51c483 script/create_whois_cdb.pl
 SHA1 b115b971a72f81303cd711ef96983308833e6d24 script/pin
-SHA1 cb6fca1fbec27f35f793ef0d2ec3548130b987f8 script/prep_db.pl
+SHA1 05bc34cd6ba7e20c63f1a7cae3f961e3dea9977e script/prep_db.pl
 SHA1 6d52fe6735a97b420b11f1ae2b61b092305e90c1 script/publish_zone.pl
 SHA1 19352be490a2650f8487b071ffc7e6127c3dfccd script/sign_zone.pl
 SHA1 90af8ae0adad53c0c374e1b017bab9f229a9dc38 script/test_db.pl
@@ -201,7 +195,7 @@ SHA1 da39a3ee5e6b4b0d3255bfef95601890afd80709 t/www/robots.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (GNU/Linux)
 
-iEYEARECAAYFAk7lIN0ACgkQAR68wSDJd65gZgCgotgKxEYUeGnfNF97GMcq/Run
-ttMAn0cvgtGAddAa2b4Z+bIX7DoHDioy
-=kpHr
+iEYEARECAAYFAk8ESGYACgkQAR68wSDJd65/BACeJv1/ySgio9Q13XDJy34gVhfb
+BBcAoMHHGtW+Q3GGKaZ+8AO1gXbgyBTh
+=8XE0
 -----END PGP SIGNATURE-----

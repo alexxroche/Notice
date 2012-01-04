@@ -17,7 +17,7 @@ use CGI::Application::Plugin::Forward;
 use CGI::Application::Plugin::TT;
 use Data::Dumper;
 
-our $VERSION = 3.00;
+our $VERSION = 3.01;
 
 =head1 NAME
 
