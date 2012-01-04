@@ -705,6 +705,21 @@ CREATE TABLE `menu` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Menu items that a user has a write to have';
 SET character_set_client = @saved_cs_client;
 
+
+--
+-- Dumping data for table `menu`
+--
+
+LOCK TABLES `menu` WRITE;
+/*!40000 ALTER TABLE `menu` DISABLE KEYS */;
+INSERT INTO `menu` VALUES (1,'3.1',NULL,NULL),(1,'1',2,NULL),(1,'2',NULL,NULL),(1,'4',NULL,NULL),(1,'8',NULL,NULL),(1,'3',NULL,NULL),(1,'17.1',90,1);
+/*!40000 ALTER TABLE `menu` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `module_product_catagory`
+--
+
 --
 -- Table structure for table `module_product_catagory`
 --
