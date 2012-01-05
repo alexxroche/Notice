@@ -1,8 +1,8 @@
--- MySQL dump 10.11
+-- MySQL dump 10.13  Distrib 5.1.37, for debian-linux-gnu (i486)
 --
 -- Host: localhost    Database: notice
 -- ------------------------------------------------------
--- Server version	5.0.77-log
+-- Server version	5.1.37-1ubuntu5.5-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,65 +16,82 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `CRM`
+-- Table structure for table `SSLcerts`
 --
 
 DROP TABLE IF EXISTS `SSLcerts`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `SSLcerts` (
-  `ssl_id` int(255) NOT NULL auto_increment,
-  `ssl_peid` int(255) default NULL COMMENT 'NTS change this to ssl_grid',
-  `ssl_cn` varchar(255) NOT NULL default '',
+  `ssl_id` int(255) NOT NULL AUTO_INCREMENT,
+  `ssl_peid` int(255) DEFAULT NULL COMMENT 'NTS change this to ssl_grid',
+  `ssl_cn` varchar(255) NOT NULL DEFAULT '',
   `ssl_crt` blob,
   `ssl_key` blob NOT NULL,
   `ssl_csr` blob,
-  `ssl_location` varchar(255) default NULL,
-  `ssl_public` enum('0','1') default '0',
-  `ssl_acid` int(255) default NULL,
-  PRIMARY KEY  (`ssl_cn`),
+  `ssl_location` varchar(255) DEFAULT NULL,
+  `ssl_public` enum('0','1') DEFAULT '0',
+  `ssl_acid` int(255) DEFAULT NULL,
+  PRIMARY KEY (`ssl_cn`),
   UNIQUE KEY `ssl_id` (`ssl_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `SSLcerts`
+--
+
+LOCK TABLES `SSLcerts` WRITE;
+/*!40000 ALTER TABLE `SSLcerts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `SSLcerts` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `SSLhistory`
 --
 
 DROP TABLE IF EXISTS `SSLhistory`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `SSLhistory` (
-  `rh_id` int(255) unsigned NOT NULL auto_increment,
-  `rh_peid` int(128) unsigned default '0',
+  `rh_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `rh_peid` int(128) unsigned DEFAULT '0',
   `rh_what` mediumtext,
-  `rh_when` datetime default NULL,
+  `rh_when` datetime DEFAULT NULL,
   `rh_towhat` mediumtext,
-  PRIMARY KEY  (`rh_id`)
+  PRIMARY KEY (`rh_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=57 DEFAULT CHARSET=latin1 COMMENT='SSLcerts History';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `SSLhistory`
+--
+
+LOCK TABLES `SSLhistory` WRITE;
+/*!40000 ALTER TABLE `SSLhistory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `SSLhistory` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `account`
 --
 
 DROP TABLE IF EXISTS `account`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `account` (
-  `ac_id` int(255) NOT NULL auto_increment,
-  `ac_name` varchar(128) default NULL,
-  `ac_parent` varchar(255) default NULL,
-  `ac_useradd` tinyint(4) default '0',
+  `ac_id` int(255) NOT NULL AUTO_INCREMENT,
+  `ac_name` varchar(128) DEFAULT NULL,
+  `ac_parent` varchar(255) DEFAULT NULL,
+  `ac_useradd` tinyint(4) DEFAULT '0',
   `ac_tree` varchar(255) NOT NULL,
   `ac_notes` blob,
-  `ac_min` int(255) default NULL COMMENT 'Used for nesting accounts',
-  `ac_max` int(255) default NULL COMMENT 'within other accounts',
-  PRIMARY KEY  (`ac_id`),
+  `ac_min` int(255) DEFAULT NULL COMMENT 'Used for nesting accounts',
+  `ac_max` int(255) DEFAULT NULL COMMENT 'within other accounts',
+  PRIMARY KEY (`ac_id`),
   UNIQUE KEY `id` (`ac_id`,`ac_tree`)
 ) ENGINE=MyISAM AUTO_INCREMENT=569 DEFAULT CHARSET=latin1 COMMENT='These are the companies, or family that people belong to';
-SET character_set_client = @saved_cs_client;
-
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `account`
@@ -82,165 +99,224 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `account` WRITE;
 /*!40000 ALTER TABLE `account` DISABLE KEYS */;
-
-
 INSERT INTO `account` VALUES (2,'L','1',0,'1.1','LastFirst',4,5),(1,'Chairvalla Publications',NULL,0,'1','',1,1126);
-
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 UNLOCK TABLES;
-
 
 --
 -- Table structure for table `achistory`
 --
 
 DROP TABLE IF EXISTS `achistory`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `achistory` (
-  `ch_id` int(255) NOT NULL auto_increment,
-  `ch_acid` varchar(255) default NULL,
+  `ch_id` int(255) NOT NULL AUTO_INCREMENT,
+  `ch_acid` varchar(255) DEFAULT NULL,
   `ch_what` mediumtext,
-  `ch_when` datetime default NULL,
-  `ch_bywhom` int(128) unsigned default '0',
-  `ch_towhat` varchar(128) default NULL,
-  PRIMARY KEY  (`ch_id`)
+  `ch_when` datetime DEFAULT NULL,
+  `ch_bywhom` int(128) unsigned DEFAULT '0',
+  `ch_towhat` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`ch_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='account history';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `achistory`
+--
+
+LOCK TABLES `achistory` WRITE;
+/*!40000 ALTER TABLE `achistory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `achistory` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `address`
 --
 
 DROP TABLE IF EXISTS `address`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `address` (
-  `ad_id` int(128) NOT NULL auto_increment,
-  `ad_acid` varchar(255) default NULL,
-  `ad_adname` varchar(32) default NULL,
-  `ad_adnumber` varchar(128) default '0',
-  `ad_adroad` varchar(128) default NULL,
-  `ad_adcity` varchar(32) default NULL,
-  `ad_adcounty` varchar(64) default NULL,
-  `ad_adpostcode` varchar(16) default NULL,
-  `ad_adcountry` char(2) default 'UK',
-  `ad_phone` varchar(32) default NULL,
-  `ad_fax` varchar(32) default NULL,
-  `ad_type` int(16) default '1',
+  `ad_id` int(128) NOT NULL AUTO_INCREMENT,
+  `ad_acid` varchar(255) DEFAULT NULL,
+  `ad_adname` varchar(32) DEFAULT NULL,
+  `ad_adnumber` varchar(128) DEFAULT '0',
+  `ad_adroad` varchar(128) DEFAULT NULL,
+  `ad_adcity` varchar(32) DEFAULT NULL,
+  `ad_adcounty` varchar(64) DEFAULT NULL,
+  `ad_adpostcode` varchar(16) DEFAULT NULL,
+  `ad_adcountry` char(2) DEFAULT 'UK',
+  `ad_phone` varchar(32) DEFAULT NULL,
+  `ad_fax` varchar(32) DEFAULT NULL,
+  `ad_type` int(16) DEFAULT '1',
   `ad_notes` mediumblob,
-  PRIMARY KEY  (`ad_id`),
+  PRIMARY KEY (`ad_id`),
   KEY `cu_id` (`ad_id`,`ad_adcity`,`ad_adpostcode`)
 ) ENGINE=MyISAM AUTO_INCREMENT=449 DEFAULT CHARSET=latin1 COMMENT='Addresses';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `address`
+--
+
+LOCK TABLES `address` WRITE;
+/*!40000 ALTER TABLE `address` DISABLE KEYS */;
+/*!40000 ALTER TABLE `address` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `adhistory`
 --
 
 DROP TABLE IF EXISTS `adhistory`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `adhistory` (
-  `ah_id` int(255) unsigned NOT NULL auto_increment,
-  `ah_adid` int(128) unsigned default '0',
+  `ah_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `ah_adid` int(128) unsigned DEFAULT '0',
   `ah_what` mediumblob,
-  `ah_when` datetime default NULL,
-  `ah_bywhom` int(128) unsigned default '0',
-  PRIMARY KEY  (`ah_id`),
+  `ah_when` datetime DEFAULT NULL,
+  `ah_bywhom` int(128) unsigned DEFAULT '0',
+  PRIMARY KEY (`ah_id`),
   KEY `ah_id` (`ah_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Address History';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `adhistory`
+--
+
+LOCK TABLES `adhistory` WRITE;
+/*!40000 ALTER TABLE `adhistory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `adhistory` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `alhistory`
 --
 
 DROP TABLE IF EXISTS `alhistory`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `alhistory` (
-  `al_id` int(255) unsigned NOT NULL auto_increment,
-  `al_peid` int(128) unsigned default '0',
+  `al_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `al_peid` int(128) unsigned DEFAULT '0',
   `al_what` mediumtext,
-  `al_when` datetime default NULL,
-  PRIMARY KEY  (`al_id`)
+  `al_when` datetime DEFAULT NULL,
+  PRIMARY KEY (`al_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=372 DEFAULT CHARSET=latin1 COMMENT='Email aliase History';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `alhistory`
+--
+
+LOCK TABLES `alhistory` WRITE;
+/*!40000 ALTER TABLE `alhistory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `alhistory` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `alias_details`
 --
 
 DROP TABLE IF EXISTS `alias_details`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `alias_details` (
-  `ead_userid` varchar(128) default NULL,
-  `ead_doid` int(255) default NULL,
-  `ead_website` varchar(128) default NULL,
-  `ead_password` varchar(255) default NULL,
-  `ead_date` datetime default NULL,
+  `ead_userid` varchar(128) DEFAULT NULL,
+  `ead_doid` int(255) DEFAULT NULL,
+  `ead_website` varchar(128) DEFAULT NULL,
+  `ead_password` varchar(255) DEFAULT NULL,
+  `ead_date` datetime DEFAULT NULL,
   `ead_notes` blob,
   KEY `alias` (`ead_userid`,`ead_doid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='email alias details - passwords will be hashed somehow';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `alias_details`
+--
+
+LOCK TABLES `alias_details` WRITE;
+/*!40000 ALTER TABLE `alias_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `alias_details` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `aliases`
 --
 
 DROP TABLE IF EXISTS `aliases`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `aliases` (
-  `ea_id` int(255) NOT NULL auto_increment,
-  `ea_userid` varchar(128) NOT NULL default '',
-  `ea_touser` varchar(255) NOT NULL default '' COMMENT 'touser or pipe',
-  `ea_at` varchar(128) default '',
+  `ea_id` int(255) NOT NULL AUTO_INCREMENT,
+  `ea_userid` varchar(128) NOT NULL DEFAULT '',
+  `ea_touser` varchar(255) NOT NULL DEFAULT '' COMMENT 'touser or pipe',
+  `ea_at` varchar(128) DEFAULT '',
   `ea_doid` int(255) NOT NULL COMMENT 'link to domains.do_id',
-  `ea_suspended` tinyint(1) default NULL,
-  PRIMARY KEY  (`ea_id`),
+  `ea_suspended` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`ea_id`),
   KEY `ea_userid` (`ea_userid`,`ea_doid`,`ea_touser`,`ea_at`)
 ) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `aliases`
+--
+
+LOCK TABLES `aliases` WRITE;
+/*!40000 ALTER TABLE `aliases` DISABLE KEYS */;
+/*!40000 ALTER TABLE `aliases` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `asset_cat_data`
 --
 
 DROP TABLE IF EXISTS `asset_cat_data`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `asset_cat_data` (
-  `acd_id` int(255) NOT NULL auto_increment COMMENT 'used to group categories',
+  `acd_id` int(255) NOT NULL AUTO_INCREMENT COMMENT 'used to group categories',
   `acd_cid` int(255) NOT NULL COMMENT 'used to group categories',
-  `acd_name` varchar(255) default NULL,
-  `acd_order` int(255) default NULL COMMENT 'so we know what order to display them in',
-  `acd_type` varchar(255) default NULL COMMENT 'so we know how to deal with this',
-  `acd_regexp` varchar(255) default NULL COMMENT 'so we can control the data',
-  `acd_grid` int(255) default NULL,
-  PRIMARY KEY  (`acd_id`),
+  `acd_name` varchar(255) DEFAULT NULL,
+  `acd_order` int(255) DEFAULT NULL COMMENT 'so we know what order to display them in',
+  `acd_type` varchar(255) DEFAULT NULL COMMENT 'so we know how to deal with this',
+  `acd_regexp` varchar(255) DEFAULT NULL COMMENT 'so we can control the data',
+  `acd_grid` int(255) DEFAULT NULL,
+  PRIMARY KEY (`acd_id`),
   UNIQUE KEY `acd_id` (`acd_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=67 DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `asset_cat_data`
+--
+
+LOCK TABLES `asset_cat_data` WRITE;
+/*!40000 ALTER TABLE `asset_cat_data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `asset_cat_data` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `asset_categories`
 --
 
 DROP TABLE IF EXISTS `asset_categories`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `asset_categories` (
-  `asc_id` int(255) NOT NULL auto_increment,
+  `asc_id` int(255) NOT NULL AUTO_INCREMENT,
   `asc_name` varchar(255) NOT NULL,
-  `asc_description` varchar(255) default NULL,
-  `asc_grid` int(255) default NULL COMMENT 'group id',
-  PRIMARY KEY  (`asc_id`),
+  `asc_description` varchar(255) DEFAULT NULL,
+  `asc_grid` int(255) DEFAULT NULL COMMENT 'group id',
+  PRIMARY KEY (`asc_id`),
   UNIQUE KEY `asc_id` (`asc_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `asset_categories`
@@ -257,122 +333,169 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `asset_data`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `asset_data` (
-  `asd_id` int(255) NOT NULL auto_increment,
+  `asd_id` int(255) NOT NULL AUTO_INCREMENT,
   `asd_asid` int(255) NOT NULL,
   `asd_cid` int(255) NOT NULL,
-  `asd_value` varchar(255) default NULL,
-  `asd_date` datetime default NULL COMMENT 'for measurements that change',
-  PRIMARY KEY  (`asd_id`),
+  `asd_value` varchar(255) DEFAULT NULL,
+  `asd_date` datetime DEFAULT NULL COMMENT 'for measurements that change',
+  PRIMARY KEY (`asd_id`),
   UNIQUE KEY `asd_id` (`asd_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `asset_data`
+--
+
+LOCK TABLES `asset_data` WRITE;
+/*!40000 ALTER TABLE `asset_data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `asset_data` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `asset_location`
 --
 
 DROP TABLE IF EXISTS `asset_location`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `asset_location` (
-  `al_id` int(255) NOT NULL auto_increment,
-  `al_asid` int(255) default NULL,
-  `al_assetid` int(255) default NULL,
-  `al_ascompartment` int(32) default NULL,
-  `al_width` int(11) default NULL,
-  `al_height` int(11) default NULL,
-  `al_depth` int(11) default NULL,
-  `al_heightunit` varchar(16) default 'cm',
-  `al_widthunit` varchar(16) default 'cm',
-  `al_depthunit` varchar(16) default 'cm',
-  `al_compartmentX` tinyint(4) default '1',
-  `al_compartmentY` tinyint(4) default '1',
-  PRIMARY KEY  (`al_id`),
+  `al_id` int(255) NOT NULL AUTO_INCREMENT,
+  `al_asid` int(255) DEFAULT NULL,
+  `al_assetid` int(255) DEFAULT NULL,
+  `al_ascompartment` int(32) DEFAULT NULL,
+  `al_width` int(11) DEFAULT NULL,
+  `al_height` int(11) DEFAULT NULL,
+  `al_depth` int(11) DEFAULT NULL,
+  `al_heightunit` varchar(16) DEFAULT 'cm',
+  `al_widthunit` varchar(16) DEFAULT 'cm',
+  `al_depthunit` varchar(16) DEFAULT 'cm',
+  `al_compartmentX` tinyint(4) DEFAULT '1',
+  `al_compartmentY` tinyint(4) DEFAULT '1',
+  PRIMARY KEY (`al_id`),
   UNIQUE KEY `al_id` (`al_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `asset_location`
+--
+
+LOCK TABLES `asset_location` WRITE;
+/*!40000 ALTER TABLE `asset_location` DISABLE KEYS */;
+/*!40000 ALTER TABLE `asset_location` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `assets`
 --
 
 DROP TABLE IF EXISTS `assets`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `assets` (
-  `as_id` int(255) NOT NULL auto_increment,
+  `as_id` int(255) NOT NULL AUTO_INCREMENT,
   `as_cid` int(255) NOT NULL,
-  `as_date` datetime default NULL COMMENT 'date added',
-  `as_acid` varchar(255) default NULL,
-  `as_owner` int(255) default NULL COMMENT 'peid',
-  `as_user` int(255) default NULL COMMENT 'peid, who has borrowed it',
-  `as_adid` int(255) default NULL COMMENT 'address location',
-  `as_grid` int(255) default NULL COMMENT 'a more specific group than the as_cid',
-  `as_in_asid` int(255) default NULL COMMENT 'as in asset',
+  `as_date` datetime DEFAULT NULL COMMENT 'date added',
+  `as_acid` varchar(255) DEFAULT NULL,
+  `as_owner` int(255) DEFAULT NULL COMMENT 'peid',
+  `as_user` int(255) DEFAULT NULL COMMENT 'peid, who has borrowed it',
+  `as_adid` int(255) DEFAULT NULL COMMENT 'address location',
+  `as_grid` int(255) DEFAULT NULL COMMENT 'a more specific group than the as_cid',
+  `as_in_asid` int(255) DEFAULT NULL COMMENT 'as in asset',
   `as_notes` blob,
-  PRIMARY KEY  (`as_id`),
+  PRIMARY KEY (`as_id`),
   UNIQUE KEY `as_id` (`as_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=32 DEFAULT CHARSET=latin1 COMMENT='a more specific group than the as_cid';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `assets`
+--
+
+LOCK TABLES `assets` WRITE;
+/*!40000 ALTER TABLE `assets` DISABLE KEYS */;
+/*!40000 ALTER TABLE `assets` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `conf_data`
 --
 
 DROP TABLE IF EXISTS `conf_data`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `conf_data` (
-  `cfd_id` int(255) NOT NULL auto_increment,
-  `cfd_key` varchar(64) default NULL,
+  `cfd_id` int(255) NOT NULL AUTO_INCREMENT,
+  `cfd_key` varchar(64) DEFAULT NULL,
   `cfd_value` blob,
   `cfd_cfid` int(255) NOT NULL,
-  `cfd_peid` int(255) default NULL,
-  `cfd_acid` int(255) default NULL,
-  `cfd_grid` int(255) default NULL,
-  PRIMARY KEY  (`cfd_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=latin1 COMMENT='config data for the config table';
-SET character_set_client = @saved_cs_client;
+  `cfd_peid` int(255) DEFAULT NULL,
+  `cfd_acid` int(255) DEFAULT NULL,
+  `cfd_grid` int(255) DEFAULT NULL,
+  PRIMARY KEY (`cfd_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=latin1 COMMENT='config data for the config table';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `conf_data`
+--
+
+LOCK TABLES `conf_data` WRITE;
+/*!40000 ALTER TABLE `conf_data` DISABLE KEYS */;
+INSERT INTO `conf_data` VALUES (1,'welcome','<center>Welcome to Notice</center>',12,NULL,1,NULL),(2,'message','This is an example of CGI::Application in the form of the Notice project. Notice is a modular framework that can be used to store and manage any type of data on a small to medium size. For larger systems Notice can distribute using the delegate module and simple hierarchical IP network principles.\n\nThe people table has users and contacts, each linked to an entry in the account table. An account can be a company, a family, department or branch. Each account has a parent account. The root account\'s parent is Notice. This message, for example, is configured on a per-account basis, and each child account will default to the message set by the parent account. Because of the hierarchical nature any user in a parent account has, (some) access to the child accounts. Because humans always need flexibility, and we will have NO exceptions hacked into the code, \"just for this user\" we have the groups table. With this we can add a user to a group that will give them access to which ever corner of Notice they need.\n\nEach module determines who has access to do what within itself, (mostly based on the group membership of that user.) E.g. someone in the network_admin group would be able to delete an IP entry, but someone in the more general sysadmin group would only have read access to the IP tables.\n\nEach install of Notice has the option to generate its own uuid and register with any other install of Notice, (and assign trust levels to that connection.) This way it is possible to create a web-of-trust between installs, and combined with the certificate_authority module it is possible to have a decentralised x509 network, (no more licence-to-print-money-dangerous-centralisation for you-know-who!)\n\nIf that is too political then you can just look through the code for examples; Fix it where it is _really_ poorly written and even develop a module for your own data needs. Because of the flexibility of this framework it is possible to have it present as an asset database to one user in one account and a domain management system to another user. This is why it was originally called, \"an ISP in a box\".\n',12,NULL,1,NULL);
+/*!40000 ALTER TABLE `conf_data` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `config`
 --
 
 DROP TABLE IF EXISTS `config`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `config` (
-  `cf_id` int(255) NOT NULL auto_increment,
-  `cf_name` varchar(255) default NULL,
-  `cf_moid` varchar(64) default NULL,
-  `cf_type` varchar(64) default NULL,
-  `cf_grid` int(255) default NULL,
-  PRIMARY KEY  (`cf_id`)
+  `cf_id` int(255) NOT NULL AUTO_INCREMENT,
+  `cf_name` varchar(255) DEFAULT NULL,
+  `cf_moid` varchar(64) DEFAULT NULL,
+  `cf_type` varchar(64) DEFAULT NULL,
+  `cf_grid` int(255) DEFAULT NULL,
+  PRIMARY KEY (`cf_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=latin1 COMMENT='general config for this install of notice';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `config`
+--
+
+LOCK TABLES `config` WRITE;
+/*!40000 ALTER TABLE `config` DISABLE KEYS */;
+INSERT INTO `config` VALUES (12,'greeting',NULL,NULL,NULL),(13,'template',NULL,NULL,NULL);
+/*!40000 ALTER TABLE `config` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `country`
 --
 
 DROP TABLE IF EXISTS `country`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `country` (
   `iso` char(2) NOT NULL,
   `name` varchar(80) NOT NULL,
   `printable_name` varchar(80) NOT NULL,
-  `iso3` char(3) default NULL,
-  `numcode` smallint(6) default NULL,
-  `curid` int(255) default NULL,
+  `iso3` char(3) DEFAULT NULL,
+  `numcode` smallint(6) DEFAULT NULL,
+  `curid` int(255) DEFAULT NULL,
   `flag` blob,
-  `sigup` tinyint(1) default NULL,
-  PRIMARY KEY  (`iso`)
+  `sigup` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`iso`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `country`
@@ -383,7 +506,6 @@ LOCK TABLES `country` WRITE;
 INSERT INTO `country` VALUES ('AF','AFGHANISTAN','Afghanistan','AFG',4,NULL,NULL,NULL),('GB','Great Britain','Great Britain','GBR',320,1,NULL,NULL);
 /*!40000 ALTER TABLE `country` ENABLE KEYS */;
 UNLOCK TABLES;
-
 
 --
 -- Table structure for table `currency`
@@ -420,291 +542,416 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `domain_modification`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `domain_modification` (
-  `dm_id` int(255) NOT NULL auto_increment,
+  `dm_id` int(255) NOT NULL AUTO_INCREMENT,
   `dm_doid` int(255) NOT NULL,
-  `dm_action` enum('adding','removing','updating','incrementing') default NULL,
+  `dm_action` enum('adding','removing','updating','incrementing') DEFAULT NULL,
   `dm_when` datetime NOT NULL,
   `dm_by` int(255) NOT NULL,
   `dm_data` longtext,
-  `dm_dostatus` enum('disabled','suspended','enabled','migrating out','migrating in','registering','desired','disputed') default NULL,
-  PRIMARY KEY  (`dm_id`)
+  `dm_dostatus` enum('disabled','suspended','enabled','migrating out','migrating in','registering','desired','disputed') DEFAULT NULL,
+  PRIMARY KEY (`dm_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='these are pending changes, could be a state change ';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `domain_modification`
+--
+
+LOCK TABLES `domain_modification` WRITE;
+/*!40000 ALTER TABLE `domain_modification` DISABLE KEYS */;
+/*!40000 ALTER TABLE `domain_modification` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `domain_modification_history`
 --
 
 DROP TABLE IF EXISTS `domain_modification_history`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `domain_modification_history` (
-  `dmh_id` int(255) NOT NULL auto_increment,
+  `dmh_id` int(255) NOT NULL AUTO_INCREMENT,
   `dmh_doid` int(255) NOT NULL,
   `dmh_peid` int(255) NOT NULL,
-  `dmh_bulk` tinyint(1) default NULL,
+  `dmh_bulk` tinyint(1) DEFAULT NULL,
   `dmh_date` datetime NOT NULL,
   `dmh_action` longtext NOT NULL,
   `dmh_rollback` longtext,
-  PRIMARY KEY  (`dmh_id`)
+  PRIMARY KEY (`dmh_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='record of actions';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `domain_modification_history`
+--
+
+LOCK TABLES `domain_modification_history` WRITE;
+/*!40000 ALTER TABLE `domain_modification_history` DISABLE KEYS */;
+/*!40000 ALTER TABLE `domain_modification_history` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `domains`
 --
 
 DROP TABLE IF EXISTS `domains`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `domains` (
-  `do_id` int(255) NOT NULL auto_increment,
+  `do_id` int(255) NOT NULL AUTO_INCREMENT,
   `do_name` varchar(255) NOT NULL,
-  `do_status` enum('disabled','suspended','enabled','migrating out','migrating in','registering','desired','disputed','remote') NOT NULL default 'remote',
+  `do_status` enum('disabled','suspended','enabled','migrating out','migrating in','registering','desired','disputed','remote') NOT NULL DEFAULT 'remote',
   `do_added` datetime NOT NULL,
-  `do_acid` varchar(255) default NULL,
-  `do_group` int(255) default NULL,
-  `do_peid` int(255) default NULL,
-  `do_location` varchar(255) default NULL,
-  `do_masters` varchar(255) default NULL COMMENT 'a ; delimited list of ip addresses',
-  PRIMARY KEY  (`do_id`)
+  `do_acid` varchar(255) DEFAULT NULL,
+  `do_group` int(255) DEFAULT NULL,
+  `do_peid` int(255) DEFAULT NULL,
+  `do_location` varchar(255) DEFAULT NULL,
+  `do_masters` varchar(255) DEFAULT NULL COMMENT 'a ; delimited list of ip addresses',
+  PRIMARY KEY (`do_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=7577 DEFAULT CHARSET=latin1 COMMENT='Domains';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `domains`
+--
+
+LOCK TABLES `domains` WRITE;
+/*!40000 ALTER TABLE `domains` DISABLE KEYS */;
+/*!40000 ALTER TABLE `domains` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `domains_history`
 --
 
 DROP TABLE IF EXISTS `domains_history`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `domains_history` (
-  `dh_id` int(255) NOT NULL auto_increment,
+  `dh_id` int(255) NOT NULL AUTO_INCREMENT,
   `dh_doid` int(255) NOT NULL,
   `dh_peid` int(255) NOT NULL,
-  `dh_bulk` tinyint(1) default NULL,
+  `dh_bulk` tinyint(1) DEFAULT NULL,
   `dh_date` datetime NOT NULL,
   `dh_action` longtext NOT NULL,
   `dh_rollback` longtext,
-  PRIMARY KEY  (`dh_id`)
+  PRIMARY KEY (`dh_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2581 DEFAULT CHARSET=latin1 COMMENT='record of actions';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `domains_history`
+--
+
+LOCK TABLES `domains_history` WRITE;
+/*!40000 ALTER TABLE `domains_history` DISABLE KEYS */;
+/*!40000 ALTER TABLE `domains_history` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `email_control`
 --
 
 DROP TABLE IF EXISTS `email_control`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `email_control` (
   `ec_doid` int(255) NOT NULL,
-  `ec_max_imap` int(255) default NULL,
-  `ec_max_aliases` int(255) default NULL,
-  `ec_aliases_group` int(255) default NULL,
-  `ec_imap_group` int(255) default NULL,
-  PRIMARY KEY  (`ec_doid`)
+  `ec_max_imap` int(255) DEFAULT NULL,
+  `ec_max_aliases` int(255) DEFAULT NULL,
+  `ec_aliases_group` int(255) DEFAULT NULL,
+  `ec_imap_group` int(255) DEFAULT NULL,
+  PRIMARY KEY (`ec_doid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `email_control`
+--
+
+LOCK TABLES `email_control` WRITE;
+/*!40000 ALTER TABLE `email_control` DISABLE KEYS */;
+/*!40000 ALTER TABLE `email_control` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `group_cascade`
 --
 
 DROP TABLE IF EXISTS `group_cascade`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `group_cascade` (
-  `gc_id` int(255) NOT NULL auto_increment,
-  `gc_table` varchar(64) NOT NULL default '',
-  `gc_taid` int(255) NOT NULL default '0',
-  `gc_enabled` enum('0','1') default '1',
-  PRIMARY KEY  (`gc_table`,`gc_taid`),
+  `gc_id` int(255) NOT NULL AUTO_INCREMENT,
+  `gc_table` varchar(64) NOT NULL DEFAULT '',
+  `gc_taid` int(255) NOT NULL DEFAULT '0',
+  `gc_enabled` enum('0','1') DEFAULT '1',
+  PRIMARY KEY (`gc_table`,`gc_taid`),
   UNIQUE KEY `gc_id` (`gc_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='data that is available to all child accounts';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `group_cascade`
+--
+
+LOCK TABLES `group_cascade` WRITE;
+/*!40000 ALTER TABLE `group_cascade` DISABLE KEYS */;
+/*!40000 ALTER TABLE `group_cascade` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `group_members`
 --
 
 DROP TABLE IF EXISTS `group_members`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `group_members` (
-  `gg_id` int(255) NOT NULL auto_increment,
+  `gg_id` int(255) NOT NULL AUTO_INCREMENT,
   `gg_peid` int(255) NOT NULL,
   `gg_grid` int(255) NOT NULL,
   `gg_miag` int(255) NOT NULL,
-  `gg_state` enum('0','1','2','3','4') default '1',
-  `gg_date_added` datetime default NULL,
-  `gg_date_changed` datetime default NULL,
-  PRIMARY KEY  (`gg_peid`,`gg_grid`),
+  `gg_state` enum('0','1','2','3','4') DEFAULT '1',
+  `gg_date_added` datetime DEFAULT NULL,
+  `gg_date_changed` datetime DEFAULT NULL,
+  PRIMARY KEY (`gg_peid`,`gg_grid`),
   UNIQUE KEY `gg_id` (`gg_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1 COMMENT='who is in what group';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `group_members`
+--
+
+LOCK TABLES `group_members` WRITE;
+/*!40000 ALTER TABLE `group_members` DISABLE KEYS */;
+/*!40000 ALTER TABLE `group_members` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `groups`
 --
 
 DROP TABLE IF EXISTS `groups`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `groups` (
-  `gr_id` int(255) NOT NULL auto_increment,
-  `gr_acid` int(255) NOT NULL default '0',
+  `gr_id` int(255) NOT NULL AUTO_INCREMENT,
+  `gr_acid` int(255) NOT NULL DEFAULT '0',
   `gr_name` varchar(255) NOT NULL,
   `gr_function` mediumtext,
-  `gr_public` enum('0','1') default '0',
-  `gr_modid` varchar(16) default NULL,
-  `gr_category` varchar(8) default NULL,
-  PRIMARY KEY  (`gr_acid`,`gr_name`),
+  `gr_public` enum('0','1') DEFAULT '0',
+  `gr_modid` varchar(16) DEFAULT NULL,
+  `gr_category` varchar(8) DEFAULT NULL,
+  PRIMARY KEY (`gr_acid`,`gr_name`),
   UNIQUE KEY `gr_id` (`gr_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1 COMMENT='groups';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `groups`
+--
+
+LOCK TABLES `groups` WRITE;
+/*!40000 ALTER TABLE `groups` DISABLE KEYS */;
+/*!40000 ALTER TABLE `groups` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `imap`
 --
 
 DROP TABLE IF EXISTS `imap`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `imap` (
   `im_userid` varchar(128) NOT NULL COMMENT 'the bit before the at sign',
   `im_doid` int(255) NOT NULL COMMENT 'link to domains.do_id',
-  `im_passwd` varchar(74) default NULL COMMENT '{HASH}string e.g. {SHA1}shy75adsgf=',
+  `im_passwd` varchar(74) DEFAULT NULL COMMENT '{HASH}string e.g. {SHA1}shy75adsgf=',
   `im_home` varchar(255) NOT NULL COMMENT 'explicit path on im_server',
   `im_uid` int(11) NOT NULL COMMENT 'probably 8 (mail) though for shell users set it to their uid',
   `im_gid` int(11) NOT NULL COMMENT 'probably 12 (mail) or 8 on some systems',
-  `im_server` varchar(128) default NULL COMMENT 'mostly this will be the localhost or hostname',
-  `im_quota` int(255) default NULL COMMENT 'In Megs: 2 petabyte limit',
-  `im_peid` int(255) default NULL COMMENT 'links to people table',
-  `im_pkid` int(255) default NULL COMMENT 'link to PGPkeys',
-  `im_auth` varchar(255) default NULL COMMENT 'exim authenticates from this if it does not understand im_passwd',
-  `im_mode` char(4) default '0640' COMMENT 'smallint seems wrong',
-  `im_dir_mode` char(4) default NULL COMMENT 'exim file and dir modes',
-  PRIMARY KEY  (`im_userid`,`im_doid`)
+  `im_server` varchar(128) DEFAULT NULL COMMENT 'mostly this will be the localhost or hostname',
+  `im_quota` int(255) DEFAULT NULL COMMENT 'In Megs: 2 petabyte limit',
+  `im_peid` int(255) DEFAULT NULL COMMENT 'links to people table',
+  `im_pkid` int(255) DEFAULT NULL COMMENT 'link to PGPkeys',
+  `im_auth` varchar(255) DEFAULT NULL COMMENT 'exim authenticates from this if it does not understand im_passwd',
+  `im_mode` char(4) DEFAULT '0640' COMMENT 'smallint seems wrong',
+  `im_dir_mode` char(4) DEFAULT NULL COMMENT 'exim file and dir modes',
+  PRIMARY KEY (`im_userid`,`im_doid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='imap account';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `imap`
+--
+
+LOCK TABLES `imap` WRITE;
+/*!40000 ALTER TABLE `imap` DISABLE KEYS */;
+/*!40000 ALTER TABLE `imap` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `imaphistory`
 --
 
 DROP TABLE IF EXISTS `imaphistory`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `imaphistory` (
-  `mh_id` int(255) unsigned NOT NULL auto_increment,
-  `mh_peid` int(128) unsigned default '0',
+  `mh_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `mh_peid` int(128) unsigned DEFAULT '0',
   `mh_what` mediumtext,
-  `mh_when` datetime default NULL,
-  PRIMARY KEY  (`mh_id`)
+  `mh_when` datetime DEFAULT NULL,
+  PRIMARY KEY (`mh_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=latin1 COMMENT='imap History';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `imaphistory`
+--
+
+LOCK TABLES `imaphistory` WRITE;
+/*!40000 ALTER TABLE `imaphistory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `imaphistory` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `ip`
 --
 
 DROP TABLE IF EXISTS `ip`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ip` (
-  `ip_o1` varchar(4) NOT NULL default '',
-  `ip_o2` varchar(4) default NULL,
-  `ip_o3` varchar(4) default NULL,
-  `ip_o4` varchar(4) default NULL,
-  `ip_o5` varchar(4) default NULL,
-  `ip_o6` varchar(4) default NULL,
-  `ip_o7` varchar(4) default NULL,
-  `ip_o8` varchar(4) default NULL,
-  `ip_slash` tinyint(4) unsigned default NULL,
-  `ip_type` enum('IPv4','IPv6') default 'IPv4',
-  `ip_usedfor` varchar(128) default NULL,
-  `ip_network` varchar(255) default NULL,
-  `ip_stockref` int(128) default NULL,
+  `ip_o1` varchar(4) NOT NULL DEFAULT '',
+  `ip_o2` varchar(4) DEFAULT NULL,
+  `ip_o3` varchar(4) DEFAULT NULL,
+  `ip_o4` varchar(4) DEFAULT NULL,
+  `ip_o5` varchar(4) DEFAULT NULL,
+  `ip_o6` varchar(4) DEFAULT NULL,
+  `ip_o7` varchar(4) DEFAULT NULL,
+  `ip_o8` varchar(4) DEFAULT NULL,
+  `ip_slash` tinyint(4) unsigned DEFAULT NULL,
+  `ip_type` enum('IPv4','IPv6') DEFAULT 'IPv4',
+  `ip_usedfor` varchar(128) DEFAULT NULL,
+  `ip_network` varchar(255) DEFAULT NULL,
+  `ip_stockref` int(128) DEFAULT NULL,
   `ip_notes` blob,
   KEY `ip_o1` (`ip_o2`,`ip_o3`,`ip_o4`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ip`
+--
+
+LOCK TABLES `ip` WRITE;
+/*!40000 ALTER TABLE `ip` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ip` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `iphistory`
 --
 
 DROP TABLE IF EXISTS `iphistory`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `iphistory` (
-  `ih_id` int(255) unsigned NOT NULL auto_increment,
-  `ih_peid` int(128) unsigned default '0',
+  `ih_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `ih_peid` int(128) unsigned DEFAULT '0',
   `ih_what` mediumtext,
-  `ih_when` datetime default NULL,
-  `ih_bywhom` int(128) unsigned default '0',
-  `ih_towhat` varchar(255) default NULL,
-  PRIMARY KEY  (`ih_id`)
+  `ih_when` datetime DEFAULT NULL,
+  `ih_bywhom` int(128) unsigned DEFAULT '0',
+  `ih_towhat` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ih_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1694 DEFAULT CHARSET=latin1 COMMENT='IP History';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `iphistory`
+--
+
+LOCK TABLES `iphistory` WRITE;
+/*!40000 ALTER TABLE `iphistory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `iphistory` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `ipphistory`
 --
 
 DROP TABLE IF EXISTS `ipphistory`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ipphistory` (
-  `pp_id` int(255) unsigned NOT NULL auto_increment,
-  `pp_peid` int(128) unsigned default '0',
+  `pp_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `pp_peid` int(128) unsigned DEFAULT '0',
   `pp_what` mediumtext,
-  `pp_when` datetime default NULL,
-  `pp_bywhom` int(128) unsigned default '0',
-  `pp_towhat` varchar(255) default NULL,
-  PRIMARY KEY  (`pp_id`)
+  `pp_when` datetime DEFAULT NULL,
+  `pp_bywhom` int(128) unsigned DEFAULT '0',
+  `pp_towhat` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`pp_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=499 DEFAULT CHARSET=latin1 COMMENT='IP Pool History';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ipphistory`
+--
+
+LOCK TABLES `ipphistory` WRITE;
+/*!40000 ALTER TABLE `ipphistory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ipphistory` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `ippool`
 --
 
 DROP TABLE IF EXISTS `ippool`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ippool` (
-  `ipp_name` varchar(40) NOT NULL default '',
-  `ipp_subnet` varchar(12) default NULL,
-  `ipp_RIR` enum('IANA','ARIN','RIPE','APNIC','LACNIC','AfriNIC','RFC1918','RFC3330','RFC3849') default NULL,
-  `ipp_assigned_to` varchar(128) default NULL,
-  `ipp_network` varchar(255) default NULL,
-  `ipp_VLAN` int(8) default NULL,
+  `ipp_name` varchar(40) NOT NULL DEFAULT '',
+  `ipp_subnet` varchar(12) DEFAULT NULL,
+  `ipp_RIR` enum('IANA','ARIN','RIPE','APNIC','LACNIC','AfriNIC','RFC1918','RFC3330','RFC3849') DEFAULT NULL,
+  `ipp_assigned_to` varchar(128) DEFAULT NULL,
+  `ipp_network` varchar(255) DEFAULT NULL,
+  `ipp_VLAN` int(8) DEFAULT NULL,
   `ipp_notes` blob,
   KEY `ipp_unique` (`ipp_name`,`ipp_subnet`,`ipp_network`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ippool`
+--
+
+LOCK TABLES `ippool` WRITE;
+/*!40000 ALTER TABLE `ippool` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ippool` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `menu`
 --
 
 DROP TABLE IF EXISTS `menu`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `menu` (
-  `pe_id` int(255) unsigned NOT NULL default '0',
-  `menu` varchar(32) NOT NULL default '1' COMMENT 'this is a module ID',
-  `pref` int(64) unsigned default NULL COMMENT 'used in the "order by" so users can chose their order',
-  `hidden` tinyint(1) default '0' COMMENT 'an entry here gives them the right, but they may not want it',
-  PRIMARY KEY  (`pe_id`,`menu`)
+  `pe_id` int(255) unsigned NOT NULL DEFAULT '0',
+  `menu` varchar(32) NOT NULL DEFAULT '1' COMMENT 'this is a module ID',
+  `pref` int(64) unsigned DEFAULT NULL COMMENT 'used in the "order by" so users can chose their order',
+  `hidden` tinyint(1) DEFAULT '0' COMMENT 'an entry here gives them the right, but they may not want it',
+  PRIMARY KEY (`pe_id`,`menu`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Menu items that a user has a write to have';
-SET character_set_client = @saved_cs_client;
-
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `menu`
@@ -720,68 +967,82 @@ UNLOCK TABLES;
 -- Table structure for table `module_product_catagory`
 --
 
+DROP TABLE IF EXISTS `module_product_catagory`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `module_product_catagory` (
+  `mc_id` int(255) NOT NULL AUTO_INCREMENT,
+  `mc_name` varchar(255) DEFAULT NULL,
+  `mc_table` varchar(128) DEFAULT NULL COMMENT 'which table to change',
+  `mc_type` enum('insert','update','delete') DEFAULT NULL COMMENT 'how to change',
+  `mc_what` varchar(255) DEFAULT NULL COMMENT 'row or cell',
+  `mc_isnumeric` tinyint(1) DEFAULT '0' COMMENT 'can we add this to others?',
+  PRIMARY KEY (`mc_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='config for types of products';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 --
--- Table structure for table `module_product_catagory`
+-- Dumping data for table `module_product_catagory`
 --
 
-DROP TABLE IF EXISTS `module_product_catagory`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
-CREATE TABLE `module_product_catagory` (
-  `mc_id` int(255) NOT NULL auto_increment,
-  `mc_name` varchar(255) default NULL,
-  `mc_table` varchar(128) default NULL COMMENT 'which table to change',
-  `mc_type` enum('insert','update','delete') default NULL COMMENT 'how to change',
-  `mc_what` varchar(255) default NULL COMMENT 'row or cell',
-  `mc_isnumeric` tinyint(1) default '0' COMMENT 'can we add this to others?',
-  PRIMARY KEY  (`mc_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='config for types of products';
-SET character_set_client = @saved_cs_client;
+LOCK TABLES `module_product_catagory` WRITE;
+/*!40000 ALTER TABLE `module_product_catagory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `module_product_catagory` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `module_products`
 --
 
 DROP TABLE IF EXISTS `module_products`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `module_products` (
-  `mp_id` int(255) NOT NULL auto_increment,
+  `mp_id` int(255) NOT NULL AUTO_INCREMENT,
   `mp_moid` int(255) NOT NULL,
-  `mp_key` varchar(64) default NULL,
-  `mp_value` varchar(255) default NULL,
-  `mp_hierarchy` int(32) default NULL,
-  `mp_catagory` int(255) default NULL,
-  PRIMARY KEY  (`mp_id`)
+  `mp_key` varchar(64) DEFAULT NULL,
+  `mp_value` varchar(255) DEFAULT NULL,
+  `mp_hierarchy` int(32) DEFAULT NULL,
+  `mp_catagory` int(255) DEFAULT NULL,
+  PRIMARY KEY (`mp_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='What each module brings to the table... to sell';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `module_products`
+--
+
+LOCK TABLES `module_products` WRITE;
+/*!40000 ALTER TABLE `module_products` DISABLE KEYS */;
+/*!40000 ALTER TABLE `module_products` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `modules`
 --
 
 DROP TABLE IF EXISTS `modules`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `modules` (
-  `mo_id` int(255) NOT NULL auto_increment,
+  `mo_id` int(255) NOT NULL AUTO_INCREMENT,
   `mo_name` varchar(255) NOT NULL,
   `mo_description` varchar(255) NOT NULL,
-  `mo_uuid` char(36) default NULL COMMENT 'has to be globally unique',
-  `mo_menu` varchar(36) default NULL COMMENT 'link to menu table',
-  `mo_default_hierarchy` int(32) default NULL COMMENT 'smaller the number the higher up it goes',
-  `mo_author` varchar(128) default NULL COMMENT 'the first maintainer',
+  `mo_uuid` char(36) DEFAULT NULL COMMENT 'has to be globally unique',
+  `mo_menu` varchar(36) DEFAULT NULL COMMENT 'link to menu table',
+  `mo_default_hierarchy` int(32) DEFAULT NULL COMMENT 'smaller the number the higher up it goes',
+  `mo_author` varchar(128) DEFAULT NULL COMMENT 'the first maintainer',
   `mo_maintainers` blob,
-  `mo_dependencies` varchar(128) default NULL COMMENT 'CSV of mo_id',
-  `mo_catagorie` varchar(255) default NULL COMMENT 'short name',
-  `mo_src_url` varchar(255) default NULL,
-  `mo_update_url` varchar(255) default NULL,
-  `mo_version` varchar(128) default NULL,
-  `mo_user_use` enum('none','use','access','limited read','read','insert','update','admin_read','admin_write') default 'none',
+  `mo_dependencies` varchar(128) DEFAULT NULL COMMENT 'CSV of mo_id',
+  `mo_catagorie` varchar(255) DEFAULT NULL COMMENT 'short name',
+  `mo_src_url` varchar(255) DEFAULT NULL,
+  `mo_update_url` varchar(255) DEFAULT NULL,
+  `mo_version` varchar(128) DEFAULT NULL,
+  `mo_user_use` enum('none','use','access','limited read','read','insert','update','admin_read','admin_write') DEFAULT 'none',
   `mo_notes` blob,
-  PRIMARY KEY  (`mo_id`)
+  PRIMARY KEY (`mo_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COMMENT='The modules';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `modules`
@@ -793,56 +1054,64 @@ INSERT INTO `modules` VALUES (1,'IMAP/POP','Storage for email messages; An email
 /*!40000 ALTER TABLE `modules` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
 --
 -- Table structure for table `pehistory`
 --
 
 DROP TABLE IF EXISTS `pehistory`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pehistory` (
-  `ph_id` int(255) unsigned NOT NULL auto_increment,
-  `ph_peid` int(128) unsigned default '0',
+  `ph_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `ph_peid` int(128) unsigned DEFAULT '0',
   `ph_what` mediumtext,
-  `ph_when` datetime default NULL,
-  `ph_bywhom` int(128) unsigned default '0',
-  `ph_towhat` varchar(128) default NULL,
-  PRIMARY KEY  (`ph_id`)
+  `ph_when` datetime DEFAULT NULL,
+  `ph_bywhom` int(128) unsigned DEFAULT '0',
+  `ph_towhat` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`ph_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=130 DEFAULT CHARSET=latin1 COMMENT='People History';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pehistory`
+--
+
+LOCK TABLES `pehistory` WRITE;
+/*!40000 ALTER TABLE `pehistory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pehistory` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `people`
 --
 
 DROP TABLE IF EXISTS `people`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `people` (
-  `pe_id` int(255) NOT NULL auto_increment,
-  `pe_raid` int(255) NOT NULL default '1',
-  `pe_fname` varchar(32) default NULL,
-  `pe_lname` varchar(32) default NULL,
-  `pe_mname` varchar(32) default NULL,
-  `pe_uname` varchar(32) default NULL,
-  `pe_alias` int(255) default NULL,
-  `pe_goesby` varchar(32) default NULL,
-  `pe_dob` datetime default NULL,
-  `pe_dod` datetime default NULL,
+  `pe_id` int(255) NOT NULL AUTO_INCREMENT,
+  `pe_raid` int(255) NOT NULL DEFAULT '1',
+  `pe_fname` varchar(32) DEFAULT NULL,
+  `pe_lname` varchar(32) DEFAULT NULL,
+  `pe_mname` varchar(32) DEFAULT NULL,
+  `pe_uname` varchar(32) DEFAULT NULL,
+  `pe_alias` int(255) DEFAULT NULL,
+  `pe_goesby` varchar(32) DEFAULT NULL,
+  `pe_dob` datetime DEFAULT NULL,
+  `pe_dod` datetime DEFAULT NULL,
   `pe_mobile` tinytext,
-  `pe_email` varchar(128) default NULL,
-  `pe_password` varchar(32) default NULL,
-  `pe_acid` varchar(255) default NULL,
-  `pe_level` int(11) default NULL,
-  `pe_loggedin` varchar(90) default NULL,
-  `pe_menu` varchar(512) default '1',
-  `pe_confirmed` varchar(100) default NULL,
-  `pe_passwd` varchar(256) default NULL,
-  PRIMARY KEY  (`pe_id`),
+  `pe_email` varchar(128) DEFAULT NULL,
+  `pe_password` varchar(32) DEFAULT NULL,
+  `pe_acid` varchar(255) DEFAULT NULL,
+  `pe_level` int(11) DEFAULT NULL,
+  `pe_loggedin` varchar(90) DEFAULT NULL,
+  `pe_menu` varchar(512) DEFAULT '1',
+  `pe_confirmed` varchar(100) DEFAULT NULL,
+  `pe_passwd` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`pe_id`),
   UNIQUE KEY `pe_id` (`pe_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=562 DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `people`
@@ -850,106 +1119,138 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `people` WRITE;
 /*!40000 ALTER TABLE `people` DISABLE KEYS */;
-
-
 INSERT INTO `people` VALUES (2,23,'The','Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'a@b.com','876dfefef3ef6f4548f48bbddd856cef','2',NULL,NULL,'1',NULL,'876dfefef3ef6f4548f48bbddd856cef'),(1,24,'Alexx','Roche',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'notice-dev@alexx.net','','1',101,'20110723083628_2001:0:beef:79fb:1234:193a:a29e:5445_4878ba34353c75e82ef73d6a21c2a8c3_1',',0,1,1.1,1.2,1.2.1,1.2.2,1.2.2.1,1.2.2.2,1.2.3,1.2.4,1.3,1.3.1,1.3.2,1.3.3,2,3,3.1,3.2,4,5,5.1,6,7,7.1,7.2,8,9,10,11,12,13,14,15',NULL,'f3d9d042b89daf317475c95049c347f6');
-
 /*!40000 ALTER TABLE `people` ENABLE KEYS */;
 UNLOCK TABLES;
-
 
 --
 -- Table structure for table `people_openids`
 --
 
 DROP TABLE IF EXISTS `people_openids`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `people_openids` (
   `openid_url` varchar(255) NOT NULL,
   `pe_id` int(255) NOT NULL COMMENT 'links to people table',
-  PRIMARY KEY  (`openid_url`),
+  PRIMARY KEY (`openid_url`),
   KEY `pe_id` (`pe_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `people_openids`
+--
+
+LOCK TABLES `people_openids` WRITE;
+/*!40000 ALTER TABLE `people_openids` DISABLE KEYS */;
+/*!40000 ALTER TABLE `people_openids` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `permission`
 --
 
 DROP TABLE IF EXISTS `permission`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `permission` (
-  `mi_id` int(255) NOT NULL auto_increment,
-  `mi_peid` int(255) NOT NULL default '0',
-  `mi_asid` int(255) default NULL,
-  `mi_contactsystem` int(11) default '0',
-  `mi_startdata` datetime default NULL,
-  `mi_enddate` datetime default NULL,
+  `mi_id` int(255) NOT NULL AUTO_INCREMENT,
+  `mi_peid` int(255) NOT NULL DEFAULT '0',
+  `mi_asid` int(255) DEFAULT NULL,
+  `mi_contactsystem` int(11) DEFAULT '0',
+  `mi_startdata` datetime DEFAULT NULL,
+  `mi_enddate` datetime DEFAULT NULL,
   `mi_passphrase` blob,
-  PRIMARY KEY  (`mi_id`),
+  PRIMARY KEY (`mi_id`),
   UNIQUE KEY `mi_id` (`mi_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `permission`
+--
+
+LOCK TABLES `permission` WRITE;
+/*!40000 ALTER TABLE `permission` DISABLE KEYS */;
+/*!40000 ALTER TABLE `permission` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `price_list`
 --
 
 DROP TABLE IF EXISTS `price_list`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `price_list` (
-  `pri_id` int(255) NOT NULL auto_increment,
-  `pri_mpid` int(255) default NULL,
-  `pri_acid` varchar(255) default NULL,
+  `pri_id` int(255) NOT NULL AUTO_INCREMENT,
+  `pri_mpid` int(255) DEFAULT NULL,
+  `pri_acid` varchar(255) DEFAULT NULL,
   `pri_item` char(16) NOT NULL,
-  `pri_description` varchar(255) default NULL,
-  `pri_unitprice` decimal(10,4) default NULL,
-  `pri_period` char(16) default '1y' COMMENT 'D=decade,b=biennial,y=year,h=biannial,m=month,d=day,W=Week,H=Hour,M=Minute,S=Secont',
+  `pri_description` varchar(255) DEFAULT NULL,
+  `pri_unitprice` decimal(10,4) DEFAULT NULL,
+  `pri_period` char(16) DEFAULT '1y' COMMENT 'D=decade,b=biennial,y=year,h=biannial,m=month,d=day,W=Week,H=Hour,M=Minute,S=Secont',
   `pri_curid` int(255) NOT NULL,
-  PRIMARY KEY  (`pri_id`)
+  PRIMARY KEY (`pri_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=124 DEFAULT CHARSET=latin1 COMMENT='What each thing costs';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `price_list`
+--
+
+LOCK TABLES `price_list` WRITE;
+/*!40000 ALTER TABLE `price_list` DISABLE KEYS */;
+/*!40000 ALTER TABLE `price_list` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `promotion`
 --
 
 DROP TABLE IF EXISTS `promotion`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `promotion` (
-  `promo_id` int(255) NOT NULL auto_increment,
-  `promo_name` varchar(255) default NULL,
+  `promo_id` int(255) NOT NULL AUTO_INCREMENT,
+  `promo_name` varchar(255) DEFAULT NULL,
   `promo_startdate` datetime NOT NULL,
   `promo_enddate` datetime NOT NULL,
   `promo_priid` int(255) NOT NULL COMMENT 'what we are reducing',
-  `promo_reduction` decimal(10,4) default '0.0000' COMMENT 'how much we take off',
+  `promo_reduction` decimal(10,4) DEFAULT '0.0000' COMMENT 'how much we take off',
   `promo_ter` int(255) NOT NULL COMMENT 'pe_id who entered this promotion',
   `promo_approver` int(255) NOT NULL COMMENT 'pe_id who approved this',
-  PRIMARY KEY  (`promo_id`)
+  PRIMARY KEY (`promo_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='-20% off! limited time only';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `promotion`
+--
+
+LOCK TABLES `promotion` WRITE;
+/*!40000 ALTER TABLE `promotion` DISABLE KEYS */;
+/*!40000 ALTER TABLE `promotion` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `ranks`
 --
 
 DROP TABLE IF EXISTS `ranks`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ranks` (
-  `ra_id` int(255) unsigned NOT NULL auto_increment,
-  `ra_precedence` int(255) default NULL,
-  `ra_name` varchar(128) NOT NULL default '',
-  `ra_boatn` enum('before',' after') default 'before',
-  PRIMARY KEY  (`ra_id`),
+  `ra_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `ra_precedence` int(255) DEFAULT NULL,
+  `ra_name` varchar(128) NOT NULL DEFAULT '',
+  `ra_boatn` enum('before',' after') DEFAULT 'before',
+  PRIMARY KEY (`ra_id`),
   UNIQUE KEY `ra_id` (`ra_id`),
   UNIQUE KEY `ra_name` (`ra_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=37 DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `ranks`
@@ -961,118 +1262,171 @@ INSERT INTO `ranks` VALUES (1,0,'Goddess',' after'),(2,0,'God',' after'),(3,0,'K
 /*!40000 ALTER TABLE `ranks` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
 --
 -- Table structure for table `rental`
 --
 
 DROP TABLE IF EXISTS `rental`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `rental` (
-  `rent_id` int(255) NOT NULL auto_increment,
+  `rent_id` int(255) NOT NULL AUTO_INCREMENT,
   `rent_peid` int(255) NOT NULL,
   `rent_priid` int(255) NOT NULL,
-  `rent_period` char(16) default NULL COMMENT 'D=decade,b=biennial,y=year,h=biannial,m=month,d=day,W=Week,H=Hour,M=Minute,S=Secont',
-  `rent_promoid` int(255) default NULL,
-  `rent_tableid` varchar(255) default NULL COMMENT 'which row in tri_priid->{pri_mpid}->{mp_catagory}->{mc_table}[.{mc_what}] for fungible non assets',
-  `rent_asid` int(255) default NULL COMMENT 'OR we are selling an asset from the asset database',
-  `rent_start` datetime default NULL COMMENT 'when rent started',
-  `rent_end` datetime default NULL COMMENT 'when expires.',
-  `rent_paid` tinyint(1) default '0' COMMENT 'has this been paid for?',
-  `rent_cleared` tinyint(1) default '0' COMMENT 'have we actioned this purchase (have we given them what they have paid for?)',
-  `rent_transaction` varchar(255) default NULL COMMENT 'a unique id for this rental',
-  PRIMARY KEY  (`rent_id`),
+  `rent_period` char(16) DEFAULT NULL COMMENT 'D=decade,b=biennial,y=year,h=biannial,m=month,d=day,W=Week,H=Hour,M=Minute,S=Secont',
+  `rent_promoid` int(255) DEFAULT NULL,
+  `rent_tableid` varchar(255) DEFAULT NULL COMMENT 'which row in tri_priid->{pri_mpid}->{mp_catagory}->{mc_table}[.{mc_what}] for fungible non assets',
+  `rent_asid` int(255) DEFAULT NULL COMMENT 'OR we are selling an asset from the asset database',
+  `rent_start` datetime DEFAULT NULL COMMENT 'when rent started',
+  `rent_end` datetime DEFAULT NULL COMMENT 'when expires.',
+  `rent_paid` tinyint(1) DEFAULT '0' COMMENT 'has this been paid for?',
+  `rent_cleared` tinyint(1) DEFAULT '0' COMMENT 'have we actioned this purchase (have we given them what they have paid for?)',
+  `rent_transaction` varchar(255) DEFAULT NULL COMMENT 'a unique id for this rental',
+  PRIMARY KEY (`rent_id`),
   UNIQUE KEY `rent_id` (`rent_id`),
   KEY `rent_once` (`rent_transaction`,`rent_peid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='What you bough and when it expires';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `rental`
+--
+
+LOCK TABLES `rental` WRITE;
+/*!40000 ALTER TABLE `rental` DISABLE KEYS */;
+/*!40000 ALTER TABLE `rental` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `sessions`
 --
 
 DROP TABLE IF EXISTS `sessions`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `sessions` (
   `id` char(32) NOT NULL,
   `a_session` text NOT NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sessions`
+--
+
+LOCK TABLES `sessions` WRITE;
+/*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
+INSERT INTO `sessions` VALUES ('f7b722c78577b53f1c855a11fed5ecca','1234\0\0\0\n f7b722c78577b53f1c855a11fed5ecca\0\0\0_SESSION_ID\0*u\0\0\0_SESSION_ETIMEÂO\0\0\0AUTH_LAST_ACCESS\n2\0\0\0ef_acid\n	The Admin\0\0\0known_asÂO\0\0\0AUTH_LAST_LOGIN\n1\0\0\0menu\n::1\0\0\0_SESSION_REMOTE_ADDRÂO\0\0\0_SESSION_CTIME\n1.1\0\0\0ac_tree\rÂO\0\0\0_SESSION_ATIME\na@b.com\r\0\0\0AUTH_USERNAME€\0\0\0AUTH_LOGIN_ATTEMPTS\n2\0\0\0pe_id');
+/*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `titles`
 --
 
 DROP TABLE IF EXISTS `titles`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `titles` (
-  `ti_id` int(255) NOT NULL auto_increment,
-  `ti_raid` int(255) default NULL,
-  `ti_name` varchar(128) default NULL,
-  `ti_hereditory` enum('0','1') default '0',
-  `ti_female_line` enum('0','1') default '0',
-  `ti_issue` int(16) default NULL,
-  `ti_dateofcreation` date default NULL,
-  PRIMARY KEY  (`ti_id`),
+  `ti_id` int(255) NOT NULL AUTO_INCREMENT,
+  `ti_raid` int(255) DEFAULT NULL,
+  `ti_name` varchar(128) DEFAULT NULL,
+  `ti_hereditory` enum('0','1') DEFAULT '0',
+  `ti_female_line` enum('0','1') DEFAULT '0',
+  `ti_issue` int(16) DEFAULT NULL,
+  `ti_dateofcreation` date DEFAULT NULL,
+  PRIMARY KEY (`ti_id`),
   UNIQUE KEY `ti_id` (`ti_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `titles`
+--
+
+LOCK TABLES `titles` WRITE;
+/*!40000 ALTER TABLE `titles` DISABLE KEYS */;
+/*!40000 ALTER TABLE `titles` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `trolly`
 --
 
 DROP TABLE IF EXISTS `trolly`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `trolly` (
-  `tro_id` int(255) NOT NULL auto_increment,
+  `tro_id` int(255) NOT NULL AUTO_INCREMENT,
   `tro_peid` int(255) NOT NULL,
   `tro_startdate` datetime NOT NULL,
-  `tro_expires` datetime default NULL,
-  PRIMARY KEY  (`tro_id`)
+  `tro_expires` datetime DEFAULT NULL,
+  PRIMARY KEY (`tro_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=latin1 COMMENT='Thing to put the shopping in';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `trolly`
+--
+
+LOCK TABLES `trolly` WRITE;
+/*!40000 ALTER TABLE `trolly` DISABLE KEYS */;
+/*!40000 ALTER TABLE `trolly` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `trolly_items`
 --
 
 DROP TABLE IF EXISTS `trolly_items`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `trolly_items` (
-  `tri_id` int(255) NOT NULL auto_increment,
+  `tri_id` int(255) NOT NULL AUTO_INCREMENT,
   `tri_troid` int(255) NOT NULL,
   `tri_priid` int(255) NOT NULL,
-  `tri_promoid` int(255) default NULL,
-  `tri_tableid` varchar(255) default NULL COMMENT 'which row in tri_priid->{pri_mpid}->{mp_catagory}->{mc_table}[.{mc_what}] for fungible non assets',
-  `tri_asid` int(255) default NULL COMMENT 'it we are selling an asset from the asset database',
-  PRIMARY KEY  (`tri_id`)
+  `tri_promoid` int(255) DEFAULT NULL,
+  `tri_tableid` varchar(255) DEFAULT NULL COMMENT 'which row in tri_priid->{pri_mpid}->{mp_catagory}->{mc_table}[.{mc_what}] for fungible non assets',
+  `tri_asid` int(255) DEFAULT NULL COMMENT 'it we are selling an asset from the asset database',
+  PRIMARY KEY (`tri_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=184 DEFAULT CHARSET=latin1 COMMENT='What you want to buy (tri_tableid might point to varchar not';
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `trolly_items`
+--
+
+LOCK TABLES `trolly_items` WRITE;
+/*!40000 ALTER TABLE `trolly_items` DISABLE KEYS */;
+/*!40000 ALTER TABLE `trolly_items` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `weblogins`
 --
 
 DROP TABLE IF EXISTS `weblogins`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `weblogins` (
   `site` varchar(255) NOT NULL,
-  `username` varchar(128) default NULL,
-  `password` varchar(74) default NULL,
-  `userid` varchar(128) default NULL,
-  `domain` varchar(128) default NULL,
+  `username` varchar(128) DEFAULT NULL,
+  `password` varchar(74) DEFAULT NULL,
+  `userid` varchar(128) DEFAULT NULL,
+  `domain` varchar(128) DEFAULT NULL,
   `notes` blob
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-SET character_set_client = @saved_cs_client;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `weblogins`
+--
+
+LOCK TABLES `weblogins` WRITE;
+/*!40000 ALTER TABLE `weblogins` DISABLE KEYS */;
+/*!40000 ALTER TABLE `weblogins` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -1083,4 +1437,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2011-11-15 16:14:19
+-- Dump completed on 2012-01-05 16:56:00
