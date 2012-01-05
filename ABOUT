@@ -2,7 +2,7 @@ Notice
 
 Notice is interesting for at least two reasons, (possibly more).
 
-First it is an example of a light MVC framework. I started out by looking at the larest most popular MVC framework in CPAN; 
+First it is an example of a light MVC framework. I started out by looking at the largest most popular MVC framework in CPAN; 
 it is great, but I needed something lighter, so I started looking for the lightest. I found a collection of tutorials, but
 never quite the full combination that I needed, (actually I wanted L18n as well but I did not have time when I was creating
 this third incarnation for Notice. xkcd.com/974/)
