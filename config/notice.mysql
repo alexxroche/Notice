@@ -959,7 +959,7 @@ CREATE TABLE `menu` (
 
 LOCK TABLES `menu` WRITE;
 /*!40000 ALTER TABLE `menu` DISABLE KEYS */;
-INSERT INTO `menu` VALUES (1,'3.1',NULL,NULL),(1,'1',2,NULL),(1,'2',NULL,NULL),(1,'4',NULL,NULL),(1,'8',NULL,NULL),(1,'3',NULL,NULL),(1,'17.1',90,1);
+INSERT INTO `menu` VALUES (2,'3.1',NULL,NULL),(2,'1',2,NULL),(2,'2',NULL,NULL),(2,'4',NULL,NULL),(2,'8',NULL,NULL),(2,'3',NULL,NULL),(2,'17.1',90,1);
 /*!40000 ALTER TABLE `menu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1029,7 +1029,7 @@ CREATE TABLE `modules` (
   `mo_name` varchar(255) NOT NULL,
   `mo_description` varchar(255) NOT NULL,
   `mo_uuid` char(36) DEFAULT NULL COMMENT 'has to be globally unique',
-  `mo_menu` varchar(36) DEFAULT NULL COMMENT 'link to menu table',
+  `mo_menu_tag` varchar(36) DEFAULT NULL COMMENT 'link to menu table',
   `mo_default_hierarchy` int(32) DEFAULT NULL COMMENT 'smaller the number the higher up it goes',
   `mo_author` varchar(128) DEFAULT NULL COMMENT 'the first maintainer',
   `mo_maintainers` blob,
@@ -1317,7 +1317,7 @@ CREATE TABLE `sessions` (
 
 LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
-INSERT INTO `sessions` VALUES ('f7b722c78577b53f1c855a11fed5ecca','1234\0\0\0\n f7b722c78577b53f1c855a11fed5ecca\0\0\0_SESSION_ID\0*u\0\0\0_SESSION_ETIMEÂO\0\0\0AUTH_LAST_ACCESS\n2\0\0\0ef_acid\n	The Admin\0\0\0known_asÂO\0\0\0AUTH_LAST_LOGIN\n1\0\0\0menu\n::1\0\0\0_SESSION_REMOTE_ADDRÂO\0\0\0_SESSION_CTIME\n1.1\0\0\0ac_tree\rÂO\0\0\0_SESSION_ATIME\na@b.com\r\0\0\0AUTH_USERNAME€\0\0\0AUTH_LOGIN_ATTEMPTS\n2\0\0\0pe_id');
+INSERT INTO `sessions` VALUES ('053cc20f74c24d55f506429db27ecb65','1234\0\0\0\0*u\0\0\0_SESSION_ETIME\n 053cc20f74c24d55f506429db27ecb65\0\0\0_SESSION_IDoÐO\0\0\0AUTH_LAST_ACCESS\n2\0\0\0ef_acid\n	The Admin\0\0\0known_as\0\0\0\n3\n3.1\n8\n\0\0\0menu_orderoÐO\0\0\0AUTH_LAST_LOGIN\0\0\0\0\0\0\nassets\0\0\0rm\nAssets\0\0\0name\0\0\0hidden\n\nnavigation\0\0\0class\0\0\08\0\0\0\ndomains\0\0\0rm\nDomains\0\0\0name\0\0\0hidden\n\nnavigation\0\0\0class\0\0\03\0\0\0\nemail\0\0\0rm\nEmail\0\0\0name\0\0\0hidden\n\nnavigation\0\0\0class\0\0\03.1\0\0\0menu\n::1\0\0\0_SESSION_REMOTE_ADDR\\ÐO\0\0\0_SESSION_CTIME\n1.1\0\0\0ac_tree¹ÐO\0\0\0_SESSION_ATIME\na@b.com\r\0\0\0AUTH_USERNAME€\0\0\0AUTH_LOGIN_ATTEMPTS\n2\0\0\0pe_id');
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1437,4 +1437,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-01-05 16:56:00
+-- Dump completed on 2012-01-05 17:34:07
