@@ -51,6 +51,10 @@ BUGS and LIMITATIONS
 
 Notice should check for a valid DB and offer to install via https if $CFG{installing}=1;
 
+DONATIONS
+
+I would like to thank, for their donations to the development of Notice: SDR,SMD,CLA
+
 SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
