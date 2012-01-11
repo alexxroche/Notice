@@ -27,8 +27,8 @@ Create the database:
     ./script/create_notice_db.pl
 
 Then 
-    cp config t/cgi-bin/* /var/www/sites/www.example.com/cgi-bin/  #or where ever your cgi-bin is
-    cp t/www/* /var/www/sites/www.example.com/www/          #or where ever your www is
+    cp -pari config t/cgi-bin/* /var/www/sites/www.example.com/cgi-bin/  #or where ever your cgi-bin is
+    cp -pari t/www/* /var/www/sites/www.example.com/www/          #or where ever your www is
 
 (This is why the TT templates are in t/cgi-bin/templates.)
 
