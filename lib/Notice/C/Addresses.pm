@@ -4,6 +4,8 @@ use warnings;
 use strict;
 use base 'Notice';
 
+our $VERSION = 0.01;
+
 =head1 NAME
 
 Template controller subclass for Notice
@@ -28,7 +30,43 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 
 sub setup {
     my ($self) = @_;
+    $self->authen->protected_runmodes(':all');
+    my $runmode;
+    $runmode = ($self->query->self_url);
+    $runmode =~s/\/$//;
+    if($self->param('rm')){
+        $runmode = $self->param('rm');
+    }
+    if($self->param('id')){
+        my $id = $self->param('id');
+        if($self->param('extra1')){
+            my $extra = $self->param('extra1');
+            $runmode =~s/\/$extra[^\/]*//;
+        }
+        if($self->param('sid')){
+            my $sid = $self->param('sid');
+            $runmode =~s/\/$sid[^\/]*//;
+        }
+        $runmode =~s/\/$id[^\/]*$//;
+    }
+    $runmode=~s/.*\///;
 
+    my $page_loaded = 0;
+    eval {
+        use Time::HiRes qw ( time );
+        $page_loaded = time;
+    };
+    if($@){
+        $page_loaded = time;
+    }
+
+    # we /could/ put this in Notice.pm but then it would be less accurate
+    if($self->param('cgi_start_time')){
+        $self->tt_params({page_load_time => sprintf("Page built in: %.2f seconds", ($page_loaded - $self->param('cgi_start_time')))});
+    }elsif($self->param('page_load_time')){
+        $self->tt_params({page_load_time => sprintf("Page loaded %.2f seconds", ($page_loaded - $self->param('page_load_time')))});
+    }  
+    $self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $self->param('known_as') at ". $ENV{REMOTE_ADDR}});
 }
 
 =head2 RUN MODES

@@ -351,11 +351,11 @@ Alexx Roche, C<alexx@cpan.org>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (C) 2011 Alexx Roche
+Copyright (C) 2011-2012 Alexx Roche
 
 This program is free software; you can redistribute it and/or modify it
 under the following license: Eclipse Public License, Version 1.0
-or the Artistic License.
+or the Artistic License, Version 2.0
 
 See http://www.opensource.org/licenses/ for more information.
 

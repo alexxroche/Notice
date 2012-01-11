@@ -149,6 +149,7 @@ t/cgi-bin/templates/Notice/C/Myerror/index.tmpl
 t/cgi-bin/templates/Notice/C/Okay/index.tmpl
 t/cgi-bin/templates/Notice/C/Signup/main.tmpl
 t/cgi-bin/templates/Notice/C/Signup/wrapper.tmpl
+t/cgi-bin/templates/Notice/C/Addresses/index.tmpl
 t/cgi-bin/templates/site_wrapper.tmpl
 t/perl-critic.t
 t/perlcriticrc

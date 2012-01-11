@@ -61,6 +61,7 @@ Use: Reset Styles for all browsers
     padding:12px 17px 17px;
 }
 
+.footer { position: absolute; bottom: 0px; }
 
 a img, iframe { border: none; }
 	
@@ -223,9 +224,10 @@ tr a.even {
 	color: rgb(000, 000, 000);
 	text-decoration: none;
 }
-/*
-tr a { color: rgb(255, 255, 255); text-decoration: none; }
-*/
+tr a {
+	color: rgb(255, 255, 255);
+	text-decoration: none;
+}
 tr a:hover {
 	text-decoration: underline;
 }
@@ -319,3 +321,8 @@ font-weight:bold;
 }
 
 .strike { text-decoration: line-through; }
+.pageLoadTime { 
+    position: absolute; /* This protects the inner element from being blurred */
+    margin: auto 0 ;
+        padding-left: 70%;
+text-align: right; color: #60c; font-family: monospace; font-size: 75%; text-shadow:0 2px 6px #000000; }

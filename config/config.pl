@@ -17,6 +17,7 @@ $CFG{tinyDNS_path} = '/var/www/sites/BytemarkDNS/data';
 $CFG{update_dns} = 'sudo /var/www/sites/BytemarkDNS/upload 1>/dev/null';
 $CFG{rebuild_dns} = 'sudo nsdc rebuild 1>/dev/null';
 $CFG{reload_dns} = 'sudo nsdc reload';
+$CFG{default_lang} = 'en_GB';
 
 
 return \%CFG;

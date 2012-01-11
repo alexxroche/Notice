@@ -3,6 +3,17 @@ use strict;
 use base 'CGI::Application';
 
 use Notice::DB;
+our $page_load_time = time;
+BEGIN {
+    eval { 
+        use Time::HiRes qw( time );
+        $page_load_time = time;
+    };
+    if($@){
+        $page_load_time = time;
+    }
+}
+
 #use CGI::Application::Plugin::ConfigAuto (qw/cfg/);
 use CGI::Application::Plugin::AutoRunmode;
 use CGI::Application::Plugin::DBH(qw/dbh_config dbh/);
@@ -17,7 +28,7 @@ use CGI::Application::Plugin::Forward;
 use CGI::Application::Plugin::TT;
 use Data::Dumper;
 
-our $VERSION = 3.02;
+our $VERSION = 3.03;
 
 =head1 NAME
 
@@ -142,7 +153,6 @@ sub cgiapp_init {
             $self->param(username => $username);
             if($self->session->param('ef_acid')){ 
                 my $ef_acid = $self->session->param('ef_acid');
-                warn "$username has an effected account ID of $ef_acid" if $self->query->param('debug')>=2;
                 $self->param(ef_acid => $ef_acid);
             }
             if($self->session->param('ac_tree')){ 
@@ -170,7 +180,6 @@ sub cgiapp_init {
             # we /should/ have populated our params from the session... but lets check
 
             if($username && !$self->session->param('menu')){
-                #warn "$username ($known_as) has no session menu.. so we look" if $self->query->param('debug')>=20;
                 my $user_data = $self->resultset('People')->search({
                     'pe_email' => { '=', "$username"},
                    },{
@@ -223,7 +232,6 @@ sub cgiapp_init {
                     20 => {name => 'Bee Keeping', rm=> 'beekeeping' },
                     );
                     # NOTE we can add global default menu items here
-                    #warn "menu search:" if $self->query->param('debug')>=20;
                     while( my $m = $menu_rs->next){
                         my $menu_name = $modules{$m->menu()}{'name'};
                         my $rm = $modules{$m->menu()}{'rm'};
@@ -251,9 +259,14 @@ sub cgiapp_init {
         };
         my $runmode = $self_url;
         if($self->param('rm')){ $runmode = $self->param('rm'); }
+        if($CFG{'default_lang'} && !$self->param('i18n')){ $self->param('i18n' => $CFG{'default_lang'}); }
         $self->tt_params({title => 'Notice CRaAM  ' . $runmode ." - $known_as AT ". $ENV{REMOTE_ADDR}});
     }else{
         $self->tt_params({title => 'Notice CRaAM -' . $known_as . ' ON '. $ENV{REMOTE_ADDR}});
+    }
+    # Maybe this was not called using cgi-bin/index.cgi 
+    unless($self->param('page_load_time')){
+        $self->param('page_load_time' => $page_load_time);
     }
 }
 
@@ -415,7 +428,7 @@ __END__
 Probably, and certainly better ways to do the same thing
 
 Please report any bugs or feature requests to
-C<bug-notice at rt.cpan.org>, or through the web interface at
+C<alexx@cpan.org>, or through the web interface at
 L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=notice>.
 I will be notified, and then you'll automatically be notified of progress on
 your bug as I make changes.
@@ -459,11 +472,11 @@ Alexx Roche, C<alexx@cpan.org>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (C) 2011 Alexx Roche
+Copyright (C) 2001-2012 Alexx Roche
 
 This program is free software; you can redistribute it and/or modify it
 under the following license: Eclipse Public License, Version 1.0
-or the Artistic License.
+or the Artistic License, Version 2.0
 
 See http://www.opensource.org/licenses/ for more information.
 
