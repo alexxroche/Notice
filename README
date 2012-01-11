@@ -54,6 +54,7 @@ Notice should check for a valid DB and offer to install via https if $CFG{instal
 DONATIONS
 
 I would like to thank, for their donations to the development of Notice: SDR,SMD,CLA
+; Donations are gratefully received.
 
 SUPPORT AND DOCUMENTATION
 
@@ -67,6 +68,8 @@ You could also look for information at:
     Notice@GitHub
         http://github.com/alexxroche/Notice
 
+    (Contact the author)
+
     RT, CPAN's request tracker
         http://rt.cpan.org/NoAuth/Bugs.html?Dist=Notice
 
@@ -79,6 +82,11 @@ You could also look for information at:
     Search CPAN
         http://search.cpan.org/dist/Notice/
 
+AUTHOR
+
+Alexx Roche, C<alexx@cpan.org>
+
+
 LICENSE AND COPYRIGHT
 
 Copyright (C) 2011-2012 Alexx Roche
@@ -86,5 +94,7 @@ Copyright (C) 2011-2012 Alexx Roche
 This program is free software; you can redistribute it and/or modify it
 under the following license: Eclipse Public License, Version 1.0
 or the Artistic License, Version 2.0.
+
+(Contact the author if you require another license)
 
 See http://www.opensource.org/licenses/ for more information.

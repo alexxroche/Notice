@@ -19,12 +19,12 @@ SHA1 d6149c7501ae89385513e7e0b4e0c4a75ca0243c Changes
 SHA1 22a490402aa65229d34ac44f0418802c267e78cf MANIFEST
 SHA1 f45a89654b926fe753218eef91639df99b93d53d META.yml
 SHA1 17d0190a6bd7732a743700bec7b56d583eaf10f0 Makefile.PL
-SHA1 9be52df64fd6149d8d03553fe54d537807ba7a69 README
+SHA1 895dbf730924745ed8bbabc1c9cf3ecf9145a5ff README
 SHA1 378a9927a24e2ab7c6e116b09bff53828da8fb6f README.whois
-SHA1 a6628736717859319e7a3a18bfda4d6168447eb5 config/config.pl
+SHA1 d1cd3255d3f636c31b1d87ba004632c7dc45bfd5 config/config.pl
 SHA1 f4526d94572b0ba66af1d128b3328e9dcad1d5cd config/notice.mysql
 SHA1 50c5b506d52aa63cda67d936e31dca6ffd8b290f debug.sh
-SHA1 8e5d83d2a568f7ff939d2cd15924fe4a461f1743 lib/Notice.pm
+SHA1 9961cd8d681ea906f242257549d7806a50416217 lib/Notice.pm
 SHA1 f3cbf6214e9a1ec8a57a115fa618bd021945c40c lib/Notice/Base.pm
 SHA1 7c27e132588b09a9bc7ebe7a9ae2d24839754c1d lib/Notice/C/Account.pm
 SHA1 b1dd731a184ef5a830e924ea0f94150e89c7f8c6 lib/Notice/C/Addresses.pm
@@ -35,10 +35,10 @@ SHA1 d743e1666b1966f37e02f7ffa0e8bba6da241c84 lib/Notice/C/Email.pm
 SHA1 c7917ff8253b133d9410adce8dfb3aacc38287bd lib/Notice/C/Login.pm
 SHA1 145ed060930704ecbabb08cca59ef1a81c4b9595 lib/Notice/C/Logout.pm
 SHA1 7a4d8357d8552cc308514448f86a02a1c01af94c lib/Notice/C/Main.pm
-SHA1 62773e6361c46a4de7dc601658bd169e31edd8fc lib/Notice/C/Modules.pm
+SHA1 69ac5833f5e4aec1a7d435caaf724543552b6ebf lib/Notice/C/Modules.pm
 SHA1 e05e7f2a070936821b219b9c80177615938b6065 lib/Notice/C/Mustlogin.pm
 SHA1 b7614c10b3e3803845dc3186930719fc8493e148 lib/Notice/C/Myerror.pm
-SHA1 963c1a50a8f251e6b6e63f0c9c61db77a52e946f lib/Notice/C/Okay.pm
+SHA1 8d9638df17b27755d59d7c2b48f042068090618c lib/Notice/C/Okay.pm
 SHA1 ffbf5ff6611f328c991b097218e63b695adb2166 lib/Notice/C/Signup.pm
 SHA1 f3a6f7b75d01035e1fc012c7254fb9886fb9b604 lib/Notice/DB.pm
 SHA1 63c16ec0c52b449f81e13bd48522cc3e8dcbe13e lib/Notice/DB/Result/Account.pm
@@ -167,7 +167,7 @@ SHA1 0851b5c7c47169b888488f46afb0f4397caa4934 t/cgi-bin/templates/login.tmpl
 SHA1 1f8b7657ec0c5c81e3c606ff7d9daff098810c7c t/cgi-bin/templates/login_form.html
 SHA1 d0e9663e24f43e384b0a440df8025e07c42d6fed t/cgi-bin/templates/main.html
 SHA1 3a348b2bcba5ad74a7b025e12fa40bbf84817371 t/cgi-bin/templates/main.tmpl
-SHA1 97f48019ea08f335ff716e72f0d4a90d09db6db4 t/cgi-bin/templates/site_wrapper.tmpl
+SHA1 b60119bc63fe784040de35c8f88ec2223012d641 t/cgi-bin/templates/site_wrapper.tmpl
 SHA1 cb3de934b65728bed1268e2da825e071c344a189 t/perl-critic.t
 SHA1 d171416aca8c8f684661689f43ecca299064b2bc t/perlcriticrc
 SHA1 c18ca726d0789b8929fb76c40427532cdb0bdccf t/pod-coverage.t
@@ -194,11 +194,11 @@ SHA1 010455109cd47ac8274b776bd3c7b0ff7f754868 t/www/js/jsapi
 SHA1 1c5a878f552b786be042369bc1f46a0a29dd198f t/www/js/orphus.js
 SHA1 e94e959d169e67af503e76d2443582ca984e4742 t/www/js/script.js
 SHA1 69e11a51f25c0afa0b29433aec303ac1d2e4a662 t/www/js/signup.js
-SHA1 da39a3ee5e6b4b0d3255bfef95601890afd80709 t/www/robots.txt
+SHA1 63657cbb7d7086c56b0cd4e5c6999bb683664868 t/www/robots.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (GNU/Linux)
 
-iEYEARECAAYFAk8Ni1sACgkQAR68wSDJd66rXACfYbpiB8g4ijH/JSnLAXJ9nXoU
-clIAniYq6hwsaG+U/Z4C8HCzNaznbAsK
-=5pnv
+iEYEARECAAYFAk8NrugACgkQAR68wSDJd65JTQCgy9O6GhzmwKYOYSOJv6vgz/hv
+6NEAoKl7EYK72YCHNvEvwUBMC7FMhxwV
+=hok6
 -----END PGP SIGNATURE-----
