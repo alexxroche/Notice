@@ -18,6 +18,7 @@ $CFG{update_dns} = 'sudo /var/www/sites/BytemarkDNS/upload 1>/dev/null';
 $CFG{rebuild_dns} = 'sudo nsdc rebuild 1>/dev/null';
 $CFG{reload_dns} = 'sudo nsdc reload';
 $CFG{default_lang} = 'en_GB';
+$CFG{session_timeout} = '+5s';
 
 
 return \%CFG;

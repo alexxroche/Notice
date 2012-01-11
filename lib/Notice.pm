@@ -1,5 +1,6 @@
 package Notice;
 use strict;
+use warnings;
 use base 'CGI::Application';
 
 use Notice::DB;
@@ -106,6 +107,7 @@ sub cgiapp_init {
     $CFG{'db_user'},   # "webadmin",
     $CFG{'db_pw'},   # ""
   );
+   unless($CFG{'session_expiry'}){ $CFG{'session_expiry'} = '+1h'; }
 
   $self->session_config(
     CGI_SESSION_OPTIONS => [
@@ -113,7 +115,7 @@ sub cgiapp_init {
       $self->query, {Handle => $self->dbh},
     ],
 
-   DEFAULT_EXPIRY => '+1h', # a good choice
+   DEFAULT_EXPIRY => $CFG{'session_expiry'},
 #    COOKIE_PARAMS => {
 #      -name => 'MYCGIAPPSID',
 #      -expires => '+24h',

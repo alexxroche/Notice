@@ -1,6 +1,6 @@
 package Notice::C::Modules;
 
-use warnings;
+#use warnings;
 use strict;
 use base 'Notice';
 
@@ -255,18 +255,16 @@ sub index: StartRunmode {
     my ($c) = @_;
 
     my $message = "<pre><table>";
-#sub mlist_sort{ ( $a <=> $b ) }
-#sub mlist_sort{ ( $a <=> $b, $a cmp $b ) }
-sub mlist_sort{ 
-    if( ($a=~m/^$b/ || $b=~m/^$a/) && $a=~m/^\d\.\d\.\d/ && $b=~m/^\d\.\d\.\d/){
-        ( substr($a,4) <=> substr($b,4) || $a cmp $b )
-    }elsif($a=~m/^$b/ || $b=~m/^$a/){
-        ( $a <=> $b || $a cmp $b );
-    }else{
-        $a <=> $b; 
+    sub mlist_sort{ 
+        if( ($a=~m/^$b/ || $b=~m/^$a/) && $a=~m/^\d\.\d\.\d/ && $b=~m/^\d\.\d\.\d/){
+            ( substr($a,4) <=> substr($b,4) || $a cmp $b )
+        }elsif($a=~m/^$b/ || $b=~m/^$a/){
+            ( $a <=> $b || $a cmp $b );
+        }else{
+            $a <=> $b; 
+        }
     }
-}
-foreach my $keynum (sort mlist_sort keys %mlist){
+    foreach my $keynum (sort mlist_sort keys %mlist){
         my($checked,$disabled);
         my $indent;
         $indent = '&nbsp; ' if $keynum=~m/\d+\.\d+/;
@@ -279,11 +277,11 @@ foreach my $keynum (sort mlist_sort keys %mlist){
         $class = 'threetab' if $keynum=~m/\d+\.\d+\.\d+\.\d+/;
         $class = 'fourtab' if $keynum=~m/\d+\.\d+\.\d+\.\d+\.\d+/;
 
-        $message .= qq (
-        <tr class="thinborder"><td><span class="$class">$indent$mlist{$keynum}{name}</span></td><td>$keynum</td></tr>
-        );
-}
-$message .= "</table>";
+        if($mlist{$keynum}{name}){
+            $message .= qq (<tr class="thinborder"><td><span class="$class">$indent$mlist{$keynum}{name}</span></td><td>$keynum</td></tr>);
+        }
+    }
+    $message .= "</table>";
 
 $message .= qq |<br/> <br/> </pre> |;
 foreach my $om (sort { $a <=> $b } keys %old_modules){
