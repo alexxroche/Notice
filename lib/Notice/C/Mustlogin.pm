@@ -4,6 +4,8 @@ use warnings;
 use strict;
 use base 'Notice';
 
+our $VERSION = 0.01;
+
 =head1 NAME
 
 Template controller subclass for Notice
@@ -37,7 +39,7 @@ sub setup {
 
 =head3 index
 
-  * Purpose - unknown
+  * Purpose - to ensure that valid users have logged in
 
 =cut
 
