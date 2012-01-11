@@ -95,6 +95,12 @@ __PACKAGE__->table("modules");
   is_nullable: 1
   size: 128
 
+=head2 mo_runmode
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 128
+
 =head2 mo_user_use
 
   data_type: 'enum'
@@ -136,6 +142,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 255 },
   "mo_version",
   { data_type => "varchar", is_nullable => 1, size => 128 },
+  "mo_runmode",
+  { data_type => "varchar", is_nullable => 1, size => 128 },
   "mo_user_use",
   {
     data_type => "enum",
@@ -161,8 +169,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("mo_id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-24 17:01:30
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YnzXk03rSDsTNdJbUjyXqw
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2012-01-11 18:08:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0+yPsh8OmKldALHa/20Evg
 
 __PACKAGE__->has_many('menu' => 'Notice::DB::Result::Menu', {'foreign.menu' => 'self.mo_menu_tag'});
 

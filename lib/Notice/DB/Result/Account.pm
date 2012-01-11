@@ -19,22 +19,17 @@ __PACKAGE__->table("account");
 
 =head1 ACCESSORS
 
-=head2 ac_tree
+=head2 ac_id
 
-  data_type: 'varchar'
+  data_type: 'integer'
+  is_auto_increment: 1
   is_nullable: 0
-  size: 255
 
 =head2 ac_name
 
   data_type: 'varchar'
   is_nullable: 1
   size: 128
-
-=head2 ac_notes
-
-  data_type: 'blob'
-  is_nullable: 1
 
 =head2 ac_parent
 
@@ -48,11 +43,16 @@ __PACKAGE__->table("account");
   default_value: 0
   is_nullable: 1
 
-=head2 ac_id
+=head2 ac_tree
 
-  data_type: 'integer'
-  is_auto_increment: 1
+  data_type: 'varchar'
   is_nullable: 0
+  size: 255
+
+=head2 ac_notes
+
+  data_type: 'blob'
+  is_nullable: 1
 
 =head2 ac_min
 
@@ -67,18 +67,18 @@ __PACKAGE__->table("account");
 =cut
 
 __PACKAGE__->add_columns(
-  "ac_tree",
-  { data_type => "varchar", is_nullable => 0, size => 255 },
+  "ac_id",
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "ac_name",
   { data_type => "varchar", is_nullable => 1, size => 128 },
-  "ac_notes",
-  { data_type => "blob", is_nullable => 1 },
   "ac_parent",
   { data_type => "varchar", is_nullable => 1, size => 255 },
   "ac_useradd",
   { data_type => "tinyint", default_value => 0, is_nullable => 1 },
-  "ac_id",
-  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
+  "ac_tree",
+  { data_type => "varchar", is_nullable => 0, size => 255 },
+  "ac_notes",
+  { data_type => "blob", is_nullable => 1 },
   "ac_min",
   { data_type => "integer", is_nullable => 1 },
   "ac_max",
@@ -88,8 +88,8 @@ __PACKAGE__->set_primary_key("ac_id");
 __PACKAGE__->add_unique_constraint("id", ["ac_id", "ac_tree"]);
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-24 17:01:30
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iJgGfEeMJMKXm1mUZOKPlQ
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2012-01-11 18:08:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QuDUxy/XcjuaWTqKoE7uVA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

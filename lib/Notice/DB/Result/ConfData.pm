@@ -33,9 +33,8 @@ __PACKAGE__->table("conf_data");
 
 =head2 cfd_value
 
-  data_type: 'varchar'
+  data_type: 'blob'
   is_nullable: 1
-  size: 255
 
 =head2 cfd_cfid
 
@@ -65,7 +64,7 @@ __PACKAGE__->add_columns(
   "cfd_key",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "cfd_value",
-  { data_type => "varchar", is_nullable => 1, size => 255 },
+  { data_type => "blob", is_nullable => 1 },
   "cfd_cfid",
   { data_type => "integer", is_nullable => 0 },
   "cfd_peid",
@@ -78,8 +77,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("cfd_id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-06-27 12:27:37
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dxlzCEh13PHjRY0MMmYTHg
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2012-01-11 18:08:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Y2P+uqD4SNm3HY6ODinkaw
 
 __PACKAGE__->add_unique_constraint(
     control_update_or_create => [ qw/cfd_key cfd_value cfd_acid / ],

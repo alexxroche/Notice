@@ -2,6 +2,7 @@ package Notice;
 use strict;
 use warnings;
 use base 'CGI::Application';
+our %opt; # nice to have them
 
 use Notice::DB;
 our $page_load_time = time;
@@ -24,6 +25,8 @@ use CGI::Application::Plugin::Redirect;
 use CGI::Application::Plugin::DBIC::Schema qw/dbic_config schema resultset/;
 #use CGI::Application::Plugin::DebugScreen;
 use Digest::MD5 qw(md5_hex);
+#use DBIx::Class::Exception;
+#$ENV{DBIC_TRACE} = 10;
 
 use CGI::Application::Plugin::Forward;
 use CGI::Application::Plugin::TT;
@@ -216,16 +219,7 @@ sub cgiapp_init {
                     }
                     $self->session->param(pe_id => $pe_id);
 
-                    my $menu_class = 'navigation'; #change the css not the class!
-                    my $menu_rs = $self->resultset('Menu')->search({
-                        'pe_id' => { '=', $self->param('pe_id')},
-                        },{
-                        columns => ['menu','hidden',{ name => 'modules.mo_name AS name'} ],
-                        join => 'modules',
-                        order_by => {-asc =>['pref','mo_default_hierarchy','menu+0']}
-                        });
-                    my %menu; # this will be a list of this users menu items
-                    my @menu_order; #and this will be the order that they want them displayed in
+=pod
                     # NTS pull this from the database
                     my %modules = (
                     '3.1' => {name => 'Email', rm=> 'email' },
@@ -233,17 +227,92 @@ sub cgiapp_init {
                     8 => {name => 'Assets', rm=> 'assets' },
                     20 => {name => 'Bee Keeping', rm=> 'beekeeping' },
                     );
+
+                    # NTS ... which is what we are trying to do here
+                    my $modules_rs = $self->resultset('Module')->search({
+                        #'mo_id' => { 'like', '%'},
+                       },{
+                        columns => ['mo_menu_tag', { name => 'mo_name AS name'},{ rm => 'mo_runmode AS rm'} ],
+                    });
+
+                    my %new_modules;
+                    while( my $mo = $modules_rs->next){
+                        my $mtid = $mo->mo_menu_tag;
+                        $new_modules{$mtid}{name} = $mo->name;
+                        $new_modules{$mtid}{rm} = $mo->rm;
+                        warn keys %{ $mo };
+                    }
+                    $opt{Dumper}  = Dumper(\%new_modules);
+
+                    warn $opt{Dumper};
+
+                    warn Dumper(\%modules);
+=cut 
+
+
+                    my $menu_class = 'navigation'; #change the css not the class!
+                    #my $menu_rs = $self->resultset('Menu')->search({
+                    my @menu_rs = $self->resultset('Menu')->search({
+                        'pe_id' => { '=', $self->param('pe_id')},
+                        'modules.mo_catagorie' => { '=', 'base'}, #catagorie ?? IT IS Category !
+                        'hidden' => { '<=', '0'}, #catagorie ?? IT IS Category !
+                        },{
+                        columns => ['menu','hidden',{ name => 'modules.mo_name AS name'},{ rm => 'modules.mo_runmode AS rm'} ],
+                        join => 'modules',
+                        order_by => {-asc =>['pref','mo_default_hierarchy','menu+0']}
+                        });
+                    my %menu; # this will be a list of this users menu items
+                    my @menu_order; #and this will be the order that they want them displayed in
+
+                    #warn Dumper($menu_rs);
+                    # GOT HERE! NTS
+
+
+                    #my $menu_cols = $menu_rs->all;
+                    my $menu_cols = keys %{ $menu_rs[0]->{_column_data} };
+                    my $menu_rows = @menu_rs;
+                    warn "Cols: $menu_cols, Rows: $menu_rows";
+
                     # NOTE we can add global default menu items here
+                    push @menu_order, '1.2';
+                    $menu{'1.2'} = {hidden => '', rm => 'details', name => 'Your Details', class => "$menu_class"};
+
+                    # NOTE I _know_ that there is a better way to do this.. but my dbic-fu fails here
+                    for(my $i=0;$i<=$menu_rows;$i++){
+                        my $menu     = $menu_rs[$i]->{_column_data}{menu};
+                        my $hidden   = $menu_rs[$i]->{_column_data}{hidden} || '';
+                        my $rm       = $menu_rs[$i]->{_column_data}{rm};
+                        my $menu_name= $menu_rs[$i]->{_column_data}{name};
+                        if($menu_name && $rm){
+                          push @menu_order, $menu;
+                          $menu{$menu} = {hidden => "$hidden", rm => "$rm", name => "$menu_name", class => "$menu_class"};
+                        }
+                    }
+
+                    push @menu_order, '1.0';
+                    $menu{'1.0'} = {hidden=>'',rm=>'config',name=>'Configuration', class => "$menu_class"};
+
+=pod
+
+                    # This all worked when I still had %modules hard-coded. 
+                    # First I tried to populate that hash from the database, before I realised
+                    # that I should join the modules table, (maybe I should not, but I have not found that yet.)
+
                     while( my $m = $menu_rs->next){
-                        my $menu_name = $modules{$m->menu()}{'name'};
-                        my $rm = $modules{$m->menu()}{'rm'};
+                        #my $menu_name = $modules{$m->menu()}{'name'};
+                        my $menu_name = $m->name;
+                        my $rm = $m->rm;
+                        #my $rm = $modules{$m->menu()}{'rm'};
                          my $message = keys %{ $m };
                         $message .= $self->param('message');
                         $self->param(message => $message);
                         push @menu_order, $m->menu;
                         my $hidden = $m->hidden;
-                        $menu{$m->menu} = {hidden => $hidden, rm => $rm, name => $menu_name, class => "$menu_class"};
+                        $menu{$m->menu} = {hidden => "$hidden", rm => "$rm", name => "$menu_name", class => "$menu_class"};
+                        warn qq |hidden => $hidden, rm => $rm, name => $menu_name, class => "$menu_class"|;
                     }
+=cut
+
                     my $menu_dump = Dumper(\%menu);
                     $self->param(menu => \%menu);
                     $self->param(menu_order => \@menu_order);
@@ -352,7 +421,9 @@ sub my_login_form {
   my $self = shift;
   my $template = $self->load_tmpl('login_form.html');
 
-  (undef, my $info) = split(/\//, $ENV{'PATH_INFO'});
+  my $PATH_INFO = '';
+  if($ENV{'PATH_INFO'}){ $PATH_INFO = $ENV{'PATH_INFO'} || undef; }
+  (undef, my $info) = split(/\//, $PATH_INFO);
   my $url = $self->query->url;
 
   my $destination = $self->query->param('destination');

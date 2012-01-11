@@ -22,6 +22,7 @@ __PACKAGE__->table("aliases");
 =head2 ea_id
 
   data_type: 'integer'
+  is_auto_increment: 1
   is_nullable: 0
 
 =head2 ea_userid
@@ -59,7 +60,7 @@ __PACKAGE__->table("aliases");
 
 __PACKAGE__->add_columns(
   "ea_id",
-  { data_type => "integer", is_nullable => 0 },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "ea_userid",
   { data_type => "varchar", default_value => "", is_nullable => 0, size => 128 },
   "ea_touser",
@@ -74,8 +75,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("ea_id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-07-30 00:50:18
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tmZNfV6gTUzwWxMZNWVc9g
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2012-01-11 18:08:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BHFVX++iBjIoANt6CG+oSg
 
 __PACKAGE__->belongs_to('domains' => 'Notice::DB::Result::Domain', {'foreign.do_id' => 'self.ea_doid'});
 __PACKAGE__->might_have('aliasdetails' => 'Notice::DB::Result::AliasDetail',

@@ -55,7 +55,7 @@ __PACKAGE__->table("pehistory");
 
   data_type: 'varchar'
   is_nullable: 1
-  size: 512
+  size: 128
 
 =cut
 
@@ -90,13 +90,13 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
   },
   "ph_towhat",
-  { data_type => "varchar", is_nullable => 1, size => 512 },
+  { data_type => "varchar", is_nullable => 1, size => 128 },
 );
 __PACKAGE__->set_primary_key("ph_id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-24 17:01:30
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ASlZzUyUFfBxA2I1wudE1Q
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2012-01-11 18:08:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:408FlOh9y/ItPngA3njrSQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
