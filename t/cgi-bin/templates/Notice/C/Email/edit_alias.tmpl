@@ -11,15 +11,16 @@
 <form class="editAlias" name="form" method="post" onsubmit="return false;">
                 <div class="center">
                 <table style="width:10%" class="editAlias">
+[% destination = ref.0.ea_touser _ '@' _ ref.0.ea_at %]
 <tr><th>Alias</th><th>Destination</th></tr>
 <tr><td>
-<input type="hidden" name="from" value="[% ref.ea_userid %]" />
-<input type="hidden" name="to" value="[% ref.destination %]" />
-<input type="hidden" name="domain" value="[% ref.ea_doid %]" />
-        [% ref.forwarding %]
+<input type="hidden" name="from" value="[% ref.0.ea_userid %]" />
+<input type="hidden" name="to" value="[% destination %]" />
+<input type="hidden" name="domain" value="[% ref.0.ea_doid %]" />
+        [% ref.0.ea_userid %]@[% ref.0.domains.do_name %]
 </td>
 <td>
-        <input type="text" size="100" maxlength="200" name="destination" value="[% ref.destination  %]" />
+        <input type="text" size="100" maxlength="200" name="destination" value="[% ref.0.destination || destination  %]" />
 </td>
 
 
@@ -30,9 +31,9 @@ Optional Additional data:
 <tr><th>Website</th><th><a onClick="document.getElementById('57ivCMhw9').value=randomPassword(16)" title="Click for random password">Password</a></th><th>Encryption key</th><th colspan="3">Action&nbsp;</th></tr>
 <tr>
 <td>
-<input type="text" name="website" value="[% ref.ead_website %]" /></td><td>
+<input type="text" name="website" value="[% ref.0.aliasdetails.ead_website %]" /></td><td>
 <input id="57ivCMhw9" type="text" size="28" maxlenth="220" name="passwd" 
-value="[% ref.ead_password || '' %]" autocomplete="off" onmouseout="suggest_passwd('57ivCMhw9','[% silent_password %]','[% password_size %]')"></td><td>
+value="[% ref.0.aliasdetails.ead_password || '' %]" autocomplete="off" onmouseout="suggest_passwd('57ivCMhw9','[% silent_password %]','[% password_size %]')"></td><td>
 <input class="key" size="10" maxlength="250" type="password" name="key" value="" /></td><td>
 <input type="hidden" name="save" value="save" />
 <input class="save button blue" type="submit" name="Save" value="Save" onClick="encryptFormText(Save); this.form.key.type='text'; this.form.onsubmit=false;" /></td><td>
@@ -42,13 +43,13 @@ onmouseover="this.form.onsubmit='return false;'" onClick="javascript:decryptText
 <input class="small button green" type="button" name="encrypt" value=" Encrypt " title=" If you want to encrypt your password then you have to enter a secret key.               The key will not be sent to the server" onClick="encryptFormText();" />
 </td></tr>
 <tr><th colspan="5">Notes</th><th>Status</th></tr>
-<tr><td class="radio" colspan="5"><textarea class="ead_notes" name="notes" rows="5" cols="90">[% ref.ead_notes %]</textarea><input type="hidden" name="editAlias" value="[% ref.ea %]" /></td>
-
+<tr><td class="radio" colspan="5"><textarea class="ead_notes" name="notes" rows="5" cols="90">[% ref.0.aliasdetails.ead_notes %]</textarea><input type="hidden" name="editAlias" value="[% ref.0.ea_id %]" /></td> 
         <!-- form method="POST" action="/cgi-bin/index.cgi/email/edit_alias/[% f.ea_userid %]/[% f.ea_doid %]/" -->
 <td class="radio">
 
-  <table class="borderless"><tr><td>Enabled:</td><td class="borderless"><input class="radio" type="radio" name="status" value="enabled" [% ref.enabled %] /></td></tr>
-  <tr><td>Suspended:</td><td><input class="radio" type="radio" name="status" value="disabled" [% ref.disabled %] /></td></tr>
+  <table class="borderless"><tr><td>Enabled:</td><td class="borderless"><input class="radio" type="radio" name="status" value="enabled" [%-
+UNLESS ref.0.ea_suspended; 'checked="checked"'; END -%] /></td></tr>
+  <tr><td>Suspended:</td><td><input class="radio" type="radio" name="status" value="disabled" [% IF ref.0.ea_suspended; 'checked="checked"'; END -%] /></td></tr>
   </table>
 
 </td></tr>
@@ -63,6 +64,6 @@ onmouseover="this.form.onsubmit='return false;'" onClick="javascript:decryptText
  Pressing the Encrypt button is optional, (just so you can see it in action) as the save button will also encrypt if you have entered a key
 </center>
 
-[% #Dumper.dump(alias) %]
+[% Dumper.dump(ref.2.do_name) %]
 [% END #IF %]
 [% END #WRAPPER %]

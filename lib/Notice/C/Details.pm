@@ -105,9 +105,9 @@ sub main: StartRunmode {
         $opt{default_domain} = '/' . $domains[1]->{_column_data}{do_name};
     }
 
-    $message = 'Welcome to the Configuration section';
-    $message .=qq |In this section you can: <br/>
-                 add,view,edit the details of this copy of Notice, (and its associated network.)<br/>
+    $message = 'Welcome to the Your Details section<br />';
+    $body .=qq |In this section you can: <br />
+                 add,view,edit your details in this copy of Notice, (and its associated network.)<br />
 |;
     
     $self->tt_params({
@@ -119,6 +119,45 @@ sub main: StartRunmode {
 		  });
     return $self->tt_process();
 }
+
+sub css: Runmode {
+    my ($self) = @_;
+    my ($message,$body,%opt);
+    my $q = $self->query;
+
+    $message = 'Here you can update the CSS that you user for this site.<br />';
+    $body .=qq |You can create a new css just for you. If you give it a name then others will be able to find and use it. They will even be able to take a copy and change it for their needs. You can even have a css for each page!<br />
+        Account admin can set a default css for their account, and Notice_admin can set the default css for the whole site.<br />
+|; 
+
+
+    $self->tt_params({
+    submenu => \%submenu,
+    message => $message,
+    body    => $body
+          });
+    return $self->tt_process();
+}
+
+sub menu: Runmode {
+    my ($self) = @_;
+    my ($message,$body,%opt);
+    my $q = $self->query;
+
+    $message = 'Here you can set which modules and function show up in your navigation menu, (on the left).<br />';
+    $body .=qq |
+|; 
+
+
+    $self->tt_params({
+    submenu => \%submenu,
+    message => $message,
+    body    => $body
+          });
+    return $self->tt_process();
+}
+
+
 
 
 1;

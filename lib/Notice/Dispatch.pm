@@ -38,7 +38,8 @@ sub dispatch_args {
 			'fr/:app'            => {i18n => 'fr'},
 			':app'               => {},
 			':app/:rm/:id?'      => {},
-			':app/:rm/:id/:cid?' => {},
+			':app/:rm/:id/:sid?' => {},
+			':app/:rm/:id/:sid?/:did?' => {},
 
 		],
 		default => 'main'

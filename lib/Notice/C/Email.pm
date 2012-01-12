@@ -309,7 +309,7 @@ sub edit_alias: Runmode{
             $self->tt_params({ password_size => $self->param('password_size')});
     }
     my %find_alias;
-    if($opt{ea_id}=~m/^\d+$/){
+    if($opt{ed_id} && $opt{ea_id}=~m/^\d+$/){
         $find_alias{ea_id} = $opt{ea_id};
     }elsif($opt{ea_from}=~m/^\d+$/){
         $find_alias{ea_id} = $opt{ea_from};
@@ -318,7 +318,7 @@ sub edit_alias: Runmode{
     }else{
         ($find_alias{ea_userid},$find_alias{do_id}) = split(/\@/, $opt{ea_from});
         unless($find_alias{do_id} && $find_alias{do_id}=~m/^\d+$/){
-            $find_alias{do_id} = $self->param('cid') ? $self->param('cid') : $q->param('cid');
+            $find_alias{do_id} = $self->param('sid') ? $self->param('sid') : $q->param('sid');
         }
     }
 

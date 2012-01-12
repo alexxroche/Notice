@@ -1,4 +1,4 @@
-package Notice::C::Config;
+package Notice::C::Prefs;
 
 use warnings;
 use strict;
@@ -7,25 +7,25 @@ use Data::Dumper;
 
 # NTS pull this from the menu and modules table
 my %submenu = ( 
-   '1.0' => [
-        '1' => { peer => 1, name=> 'Modules', rm => 'modules', class=> 'navigation'},
+   '1.2' => [
+        '1' => { peer => 1, name=> 'Preferences', rm => 'prefs', class=> 'navigation'},
+        '2' => { name=> 'CSS', rm => 'css', class=> 'navigation'},
+        '3' => { name=> 'Menu', rm => 'menu', class=> 'navigation'},
     ],
 );
 
 
 =head1 NAME
 
-Notice::C::Config - Template controller subclass for Notice
+Notice::C::Prefs - Template controller subclass for Notice
 
 =head1 ABSTRACT
 
-This is where Notice is configured from. Only those in the Notice_Admin group
-should have access here. The user equivelent is "Your Details"
+This is where a user can view/change their preferences. Vanilla or more interesting?
 
 =head1 DESCRIPTION
 
-This lets you update configurations, (e.g. the welcome message)
-and modules for this installation of Notice
+This lets you update your prefs, (this is probably going to be things like search-bias and defaults for data entry.)
 
 =head1 METHODS
 
@@ -105,9 +105,9 @@ sub main: StartRunmode {
         $opt{default_domain} = '/' . $domains[1]->{_column_data}{do_name};
     }
 
-    $message = 'Welcome to the Configuration section<br />';
-    $message .=qq |In this section you can: <br/>
-                 add,view,edit the details of this copy of Notice, (and its associated network.)<br/>
+    $message = 'Welcome to the Your Details section<br />';
+    $body .=qq |In this section you can: <br />
+                 add,view,edit your details in this copy of Notice, (and its associated network.)<br />
 |;
     
     $self->tt_params({
@@ -128,6 +128,7 @@ __END__
 =head1 BUGS AND LIMITATIONS
 
 There are no known problems with this module.
+(Other than it has not been writen yet.)
 Please fix any bugs or add any features you need. 
 You can report them through GitHub or CPAN.
 

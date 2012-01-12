@@ -223,7 +223,8 @@ sub details: Runmode{
     }
     }elsif($q){
           if($q->param('id')){ $as_cid = $q->param('id'); }
-      elsif($q->param('cid')){ $as_cid = $q->param('cid'); }
+      #elsif($q->param('cid')){ $as_cid = $q->param('cid'); }
+      elsif($q->param('sid')){ $as_cid = $q->param('sid'); }
           $message .= "QO = " . Dumper($q);
           $message .= "<br />\n";
           #foreach my $ref (@{ $q->param("id") }){
