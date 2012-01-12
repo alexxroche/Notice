@@ -235,12 +235,14 @@ CREATE TABLE `alias_details` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='email alias details - passwords can be hashed via javascriptAES';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
 --
 -- Dumping data for table `alias_details`
 --
 
 LOCK TABLES `alias_details` WRITE;
 /*!40000 ALTER TABLE `alias_details` DISABLE KEYS */;
+INSERT INTO `alias_details` VALUES ('abuse',1,'https://www.example.com/','U2FsdGVkX1/apFKy3zhozDMjK2lcG9eqfzLqwzdleX0=','2012-01-12 14:43:08','The Key is \"there is no key\" The password can, optionally be encrypted');
 /*!40000 ALTER TABLE `alias_details` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -269,6 +271,7 @@ CREATE TABLE `aliases` (
 
 LOCK TABLES `aliases` WRITE;
 /*!40000 ALTER TABLE `aliases` DISABLE KEYS */;
+INSERT INTO `aliases` VALUES (1,'abuse','roges','mailbox.net.uk',1,0);
 /*!40000 ALTER TABLE `aliases` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -603,6 +606,7 @@ CREATE TABLE `domains` (
 
 LOCK TABLES `domains` WRITE;
 /*!40000 ALTER TABLE `domains` DISABLE KEYS */;
+INSERT INTO `domains` VALUES (1,'example.net','registering','2012-01-12 14:31:07','2',NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `domains` ENABLE KEYS */;
 UNLOCK TABLES;
 
