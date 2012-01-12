@@ -466,7 +466,7 @@ sub logout : Runmode {
   my $self = shift;
   if ($self->authen->username) {
     $self->authen->logout;
-    $self->session->delete;
+    $self->session_delete;
   }
   $self->param(message => 'You are no longer logged in');
   return $self->redirect($self->query->url);
