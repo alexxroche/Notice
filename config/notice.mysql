@@ -232,7 +232,7 @@ CREATE TABLE `alias_details` (
   `ead_date` datetime DEFAULT NULL,
   `ead_notes` blob,
   KEY `alias` (`ead_userid`,`ead_doid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='email alias details - passwords will be hashed somehow';
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='email alias details - passwords can be hashed via javascriptAES';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -289,7 +289,7 @@ CREATE TABLE `asset_cat_data` (
   `acd_grid` int(255) DEFAULT NULL,
   PRIMARY KEY (`acd_id`),
   UNIQUE KEY `acd_id` (`acd_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=67 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=79 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -298,6 +298,7 @@ CREATE TABLE `asset_cat_data` (
 
 LOCK TABLES `asset_cat_data` WRITE;
 /*!40000 ALTER TABLE `asset_cat_data` DISABLE KEYS */;
+INSERT INTO `asset_cat_data` VALUES (18,21,'Description',1,'text','\\w+',NULL),(19,21,'Manufacturer',2,'text','\\w+',NULL),(20,21,'Model',3,'text','\\w+',NULL),(21,21,'Version',4,'text','\\w+',NULL),(22,21,'Purchase Cost',5,'text','\\w+',NULL),(23,21,'Supplier Tag',7,'text','\\w+',NULL),(24,21,'Licence',8,'text','\\w+',NULL),(25,21,'Height',9,'text','\\w+',NULL),(26,21,'Width',10,'text','\\w+',NULL),(27,21,'Depth',10,'text','\\w+',NULL),(28,19,'Planting date',2,'text','\\d{4}.?\\d{2}.?\\d{2}',NULL),(29,19,'Height',3,'text','\\w+',NULL),(30,19,'Common Name',1,'select','\\w+',10),(31,19,'Planting Ref',4,'text','\\w+',NULL),(32,19,'Cause of Death',12,'text','\\w+',NULL),(33,19,'Date of Death',11,'text','\\w+',NULL),(37,19,'GPS Location',8,'text','\\w+',NULL),(35,19,'Trunk Circumpherence at Ground',6,'text','\\w+',NULL),(36,19,'Trunk Circumpherence at 1 Meter',7,'text','\\w+',NULL),(38,20,'Name',1,'text','\\w+',NULL),(39,20,'GPS Location (exact centre)',12,'text','\\w+',NULL),(40,20,'GPS Location (within)',11,'text','\\w+',NULL),(41,20,'Footpath',10,'checkbox','[yes|no]',NULL),(42,20,'Features',50,'textarea','.*',NULL),(43,20,'Notes',60,'textarea','.*',NULL),(44,20,'Right-to-roam?',15,'checkbox','[yes|no]',NULL),(45,20,'Barns',16,'text','d*',NULL),(46,20,'Land Region',7,'text','\\w{0,20}',NULL),(47,20,'Type',6,'text','\\w*',NULL),(48,20,'Use',2,'text','\\w*',NULL),(49,20,'OS Map Sheet',3,'text','\\w{2}\\d{1,4}',NULL),(50,20,'NG Field',4,'text','\\d{1,4}',NULL),(51,20,'Size (ha)',5,'text','\\d*\\.\\d{0,4}',NULL),(52,20,'Dry-stone wall',13,'text','\\w*',NULL),(53,20,'Hedge',14,'text','\\w*',NULL),(54,19,'Leaf Colour',5,'text','\\w*',NULL),(55,19,'Notes',99,'textarea','.*',NULL),(1,1,'Subject',1,'text','w+',NULL),(2,1,'Artist',2,'text','w+',NULL),(3,1,'Materials',3,'text','w+',NULL),(4,1,'Height (mm)',10,'text','d+',NULL),(5,1,'Width (mm)',11,'text','d+',NULL),(6,1,'Frame',11,'text','w*',NULL),(7,1,'Style',15,'text','w*',NULL),(8,1,'Notes',50,'textarea','w*',NULL),(9,1,'Date',4,'text','d{2}.{,8}',NULL),(10,2,'Title',1,'text','w+',NULL),(11,2,'Author',2,'text','w+',NULL),(12,2,'ISBN',2,'text','(d{10}|d{13})',NULL),(13,2,'Type',4,'text','.*',NULL),(14,2,'Publisher',5,'text','.*',NULL),(15,2,'Year',6,'text','.*',NULL),(16,2,'Edition',7,'text','.*',NULL),(17,2,'Notes',70,'textarea','.*',NULL),(56,18,'Make',5,'text','.*',NULL),(57,18,'Model',6,'text','.*',NULL),(58,18,'Name',7,'text','.*',NULL),(59,18,'Screen size',8,'text','.*',NULL),(60,18,'Keyboard Layout',9,'text','.*',NULL),(61,18,'Built-in Mouse-type',10,'text','.*',NULL),(62,18,'No. USB ports',11,'text','d*',NULL),(63,18,'Internal CD/DVD drive?',15,'checkbox','.*',NULL),(67,24,'Apiary',10,'text','w+',0),(68,24,'Type',15,'text','w+',0),(69,24,'Markings',20,'text','w+',0),(70,24,'Keeper',25,'text','d+',0),(71,24,'Owner',30,'text','d+',0),(72,24,'Date Added',30,'text','w+',0),(73,24,'Roof',50,'text','w+',0),(74,24,'Honey Supers',51,'text','w+',0),(75,24,'Queen Excluder',55,'checkbox','[yes|no]',0),(76,24,'Brood Supers',60,'text','d+',0),(77,24,'Brood Boxes',65,'text','d+',0),(78,24,'Floor',70,'text','w+',0);
 /*!40000 ALTER TABLE `asset_cat_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -315,7 +316,7 @@ CREATE TABLE `asset_categories` (
   `asc_grid` int(255) DEFAULT NULL COMMENT 'group id',
   PRIMARY KEY (`asc_id`),
   UNIQUE KEY `asc_id` (`asc_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -324,7 +325,7 @@ CREATE TABLE `asset_categories` (
 
 LOCK TABLES `asset_categories` WRITE;
 /*!40000 ALTER TABLE `asset_categories` DISABLE KEYS */;
-INSERT INTO `asset_categories` VALUES (18,'Laptop','A Laptop computer',NULL),(19,'A Tree','Tall thing with leaves',NULL),(20,'A Field','Thing with plants or animals in',NULL),(21,'Server','A type of computer',NULL),(1,'A Painting','Picture, Portrait or Landscape',NULL),(2,'A Book','Printed reading material',NULL),(3,'A CD','Music or data',NULL),(4,'A DVD','Music or data',NULL),(5,'A House','Building with rooms for people',NULL),(6,'A Room','Part of a House',NULL),(7,'A Bookcase','Like shelves but for for books',NULL),(8,'A Table','Flat surface supported by legs',NULL),(9,'A Chair','Moveable sitting device',NULL);
+INSERT INTO `asset_categories` VALUES (18,'Laptop','A Laptop computer',NULL),(19,'A Tree','Tall thing with leaves',NULL),(20,'A Field','Thing with plants or animals in',NULL),(21,'Server','A type of computer',NULL),(1,'A Painting','Picture, Portrait or Landscape',NULL),(2,'A Book','Printed reading material',NULL),(3,'A CD','Music or data',NULL),(4,'A DVD','Music or data',NULL),(5,'A House','Building with rooms for people',NULL),(6,'A Room','Part of a House',NULL),(7,'A Bookcase','Like shelves but for for books',NULL),(8,'A Table','Flat surface supported by legs',NULL),(9,'A Chair','Moveable sitting device',NULL),(24,'Beehive','A Beehive',NULL);
 /*!40000 ALTER TABLE `asset_categories` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -343,17 +344,8 @@ CREATE TABLE `asset_data` (
   `asd_date` datetime DEFAULT NULL COMMENT 'for measurements that change',
   PRIMARY KEY (`asd_id`),
   UNIQUE KEY `asd_id` (`asd_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=252 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `asset_data`
---
-
-LOCK TABLES `asset_data` WRITE;
-/*!40000 ALTER TABLE `asset_data` DISABLE KEYS */;
-/*!40000 ALTER TABLE `asset_data` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `asset_location`
@@ -409,17 +401,8 @@ CREATE TABLE `assets` (
   `as_notes` blob,
   PRIMARY KEY (`as_id`),
   UNIQUE KEY `as_id` (`as_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=32 DEFAULT CHARSET=latin1 COMMENT='a more specific group than the as_cid';
+) ENGINE=MyISAM AUTO_INCREMENT=74 DEFAULT CHARSET=latin1 COMMENT='a more specific group than the as_cid';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `assets`
---
-
-LOCK TABLES `assets` WRITE;
-/*!40000 ALTER TABLE `assets` DISABLE KEYS */;
-/*!40000 ALTER TABLE `assets` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `conf_data`
@@ -897,7 +880,7 @@ CREATE TABLE `ipphistory` (
   `pp_bywhom` int(128) unsigned DEFAULT '0',
   `pp_towhat` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`pp_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=499 DEFAULT CHARSET=latin1 COMMENT='IP Pool History';
+) ENGINE=MyISAM AUTO_INCREMENT=499 DEFAULT CHARSET=latin1 COMMENT='IP Pool History; Contains the seeds of its own undoing.';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -906,6 +889,7 @@ CREATE TABLE `ipphistory` (
 
 LOCK TABLES `ipphistory` WRITE;
 /*!40000 ALTER TABLE `ipphistory` DISABLE KEYS */;
+INSERT INTO `ipphistory` VALUES (498,1,'Made example assignable for networks','2011-01-12 18:05:16',0,'DELETE from ippool where ippname=\"IPPAT_1.2.2.2\"');
 /*!40000 ALTER TABLE `ipphistory` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -925,7 +909,7 @@ CREATE TABLE `ippool` (
   `ipp_VLAN` int(8) DEFAULT NULL,
   `ipp_notes` blob,
   KEY `ipp_unique` (`ipp_name`,`ipp_subnet`,`ipp_network`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT 'contains the RIR, VLANS and network groups (overloaded? oh yeah!)';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -934,6 +918,22 @@ CREATE TABLE `ippool` (
 
 LOCK TABLES `ippool` WRITE;
 /*!40000 ALTER TABLE `ippool` DISABLE KEYS */;
+INSERT INTO `ippool` VALUES ('IANA',NULL,'IANA',NULL,NULL,0,NULL),
+('RIPE',NULL,'RIPE',NULL,NULL,0,NULL),
+('APNIC',NULL,'APNIC',NULL,NULL,0,NULL),
+('LACNIC',NULL,'LACNIC',NULL,NULL,0,NULL),
+('AfriNIC',NULL,'AfriNIC',NULL,NULL,0,NULL),
+('RFC1918',NULL,'RFC1918',NULL,NULL,0,NULL),
+('RFC3330',NULL,'RFC3330',NULL,NULL,0,NULL),
+('RFC3849',NULL,'RFC3849',NULL,NULL,0,NULL),
+('1',NULL,NULL,'1','1',1,NULL),
+('192.168.1.0','24','RFC1918','1.5','1.5.1',1,'Main Office'),
+('192.168.2.0','24','RFC1918','1.5','1.5.1',1,'Sysadmin Home VPN'),
+('192.168.3.0','24','RFC1918','1.5','1.5.1',1,'DMZ'),
+('10.10.10.10','28','RFC1918','1.2','1.2.1',1,'Internal Network'),
+('100',NULL,NULL,'1.2','1.2.1',100,'VLAN example'),
+('IPPAT_1',NULL,NULL,'1',NULL,NULL,'Cahiravahilla Publications'),
+('IPPAT_1.2.2.2',NULL,NULL,'1.2.2.2',NULL,NULL,'example.com');
 /*!40000 ALTER TABLE `ippool` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -948,7 +948,7 @@ CREATE TABLE `menu` (
   `pe_id` int(255) unsigned NOT NULL DEFAULT '0',
   `menu` varchar(32) NOT NULL DEFAULT '1' COMMENT 'this is a module ID',
   `pref` int(64) unsigned DEFAULT NULL COMMENT 'used in the "order by" so users can chose their order',
-  `hidden` tinyint(1) DEFAULT '0' COMMENT 'an entry here gives them the right, but they may not want it',
+  `hidden` tinyint(1) NOT NULL,
   PRIMARY KEY (`pe_id`,`menu`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Menu items that a user has a write to have';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -959,7 +959,7 @@ CREATE TABLE `menu` (
 
 LOCK TABLES `menu` WRITE;
 /*!40000 ALTER TABLE `menu` DISABLE KEYS */;
-INSERT INTO `menu` VALUES (2,'3.1',NULL,NULL),(2,'1',2,NULL),(2,'2',NULL,NULL),(2,'4',NULL,NULL),(2,'8',NULL,NULL),(2,'3',NULL,NULL),(2,'17.1',90,1);
+INSERT INTO `menu` VALUES (2,'3.1',NULL,0),(2,'1',2,0),(2,'2',NULL,0),(2,'4',NULL,0),(2,'8',NULL,0),(2,'3',NULL,0),(2,'17.1',90,1),(2,'1.2.3',2,1),(2,'3.1.1',0,0);
 /*!40000 ALTER TABLE `menu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1038,10 +1038,11 @@ CREATE TABLE `modules` (
   `mo_src_url` varchar(255) DEFAULT NULL,
   `mo_update_url` varchar(255) DEFAULT NULL,
   `mo_version` varchar(128) DEFAULT NULL,
+  `mo_runmode` varchar(128) DEFAULT NULL,
   `mo_user_use` enum('none','use','access','limited read','read','insert','update','admin_read','admin_write') DEFAULT 'none',
   `mo_notes` blob,
   PRIMARY KEY (`mo_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COMMENT='The modules';
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1 COMMENT='The modules';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1050,7 +1051,7 @@ CREATE TABLE `modules` (
 
 LOCK TABLES `modules` WRITE;
 /*!40000 ALTER TABLE `modules` DISABLE KEYS */;
-INSERT INTO `modules` VALUES (1,'IMAP/POP','Storage for email messages; An email account','e13a9120-de9a-4ec1-877d-34c4f719b538','3.1',2,'alexx at alexx dot net','','0,1,3','','https://notice.alexx.net/modules/3/3.1/src/','https://notice.alexx.net/modules/3/3.1/update/','0.0.2','insert',''),(2,'Assets','Asset inventory and manangement','756b67a0-9cb6-11e0-aedf-00188bba79ac','8',3,'alexx at alexx dot net','','1','asset','https://notice.alexx.net/modules/8/src/','https://notice.alexx.net/modules/8/update/','0.02','insert',''),(3,'Domains','Domain names','8cf15874-9cb8-11e0-beed-00188bba79ac','3',1,'alexx at alexx dot net','','1','domains','https://notice.alexx.net/modules/3/src/','https://notice.alexx.net/modules/3/update/','0.02','insert','');
+INSERT INTO `modules` VALUES (1,'IMAP/POP','Storage for email messages; An email account','e13a9120-de9a-4ec1-877d-34c4f719b538','3.1.1',2,'alexx at alexx dot net','','0,1,3','','https://notice.alexx.net/modules/3/3.1/src/','https://notice.alexx.net/modules/3/3.1/update/','0.0.2','imap','insert',''),(2,'Assets','Asset inventory and manangement','756b67a0-9cb6-11e0-aedf-00188bba79ac','8',3,'alexx at alexx dot net','','1','base','https://notice.alexx.net/modules/8/src/','https://notice.alexx.net/modules/8/update/','0.02','assets','insert',''),(3,'Domains','Domain names','8cf15874-9cb8-11e0-beed-00188bba79ac','3',1,'alexx at alexx dot net','','1','base','https://notice.alexx.net/modules/3/src/','https://notice.alexx.net/modules/3/update/','0.02','domains','insert',''),(4,'Modules','The Modules of Notice','a99976ee-3c6f-11e1-a234-00188bba79ac','1.2.3',1,'alexx at alexx dot net','','','base','https://notice.alexx.net/modules/1/1.2/1.2.3/src/','https://notice.alexx.net/modules/1/1.2/1.2.3/update/','0.01','modules','',''),(5,'Email','Email','16268bac-3c71-11e1-9f6f-00188bba79ac','3.1',2,'alexx at alexx dot net','','','base','https://notice.alexx.net/modules/3/3.1/src/','https://notice.alexx.net/modules/3/3.1/update/','0.01','email','','');
 /*!40000 ALTER TABLE `modules` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1119,7 +1120,7 @@ CREATE TABLE `people` (
 
 LOCK TABLES `people` WRITE;
 /*!40000 ALTER TABLE `people` DISABLE KEYS */;
-INSERT INTO `people` VALUES (2,23,'The','Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'a@b.com','876dfefef3ef6f4548f48bbddd856cef','2',NULL,NULL,'1',NULL,'876dfefef3ef6f4548f48bbddd856cef'),(1,24,'Alexx','Roche',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'notice-dev@alexx.net','','1',101,'20110723083628_2001:0:beef:79fb:1234:193a:a29e:5445_4878ba34353c75e82ef73d6a21c2a8c3_1',',0,1,1.1,1.2,1.2.1,1.2.2,1.2.2.1,1.2.2.2,1.2.3,1.2.4,1.3,1.3.1,1.3.2,1.3.3,2,3,3.1,3.2,4,5,5.1,6,7,7.1,7.2,8,9,10,11,12,13,14,15',NULL,'f3d9d042b89daf317475c95049c347f6');
+INSERT INTO `people` VALUES (2,23,'The','Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'a@b.com','876dfefef3ef6f4548f48bbddd856cef','2',NULL,'20120111203706_::1_f927298785ec9d04f661345e84c75359_2','1',NULL,'876dfefef3ef6f4548f48bbddd856cef'),(1,24,'Alexx','Roche',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'notice-dev@alexx.net','','1',101,'20110723083628_2001:0:beef:79fb:1234:193a:a29e:5445_4878ba34353c75e82ef73d6a21c2a8c3_1',',0,1,1.1,1.2,1.2.1,1.2.2,1.2.2.1,1.2.2.2,1.2.3,1.2.4,1.3,1.3.1,1.3.2,1.3.3,2,3,3.1,3.2,4,5,5.1,6,7,7.1,7.2,8,9,10,11,12,13,14,15',NULL,'f3d9d042b89daf317475c95049c347f6');
 /*!40000 ALTER TABLE `people` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1312,16 +1313,6 @@ CREATE TABLE `sessions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `sessions`
---
-
-LOCK TABLES `sessions` WRITE;
-/*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
-INSERT INTO `sessions` VALUES ('053cc20f74c24d55f506429db27ecb65','1234\0\0\0\0*u\0\0\0_SESSION_ETIME\n 053cc20f74c24d55f506429db27ecb65\0\0\0_SESSION_IDoÐO\0\0\0AUTH_LAST_ACCESS\n2\0\0\0ef_acid\n	The Admin\0\0\0known_as\0\0\0\n3\n3.1\n8\n\0\0\0menu_orderoÐO\0\0\0AUTH_LAST_LOGIN\0\0\0\0\0\0\nassets\0\0\0rm\nAssets\0\0\0name\0\0\0hidden\n\nnavigation\0\0\0class\0\0\08\0\0\0\ndomains\0\0\0rm\nDomains\0\0\0name\0\0\0hidden\n\nnavigation\0\0\0class\0\0\03\0\0\0\nemail\0\0\0rm\nEmail\0\0\0name\0\0\0hidden\n\nnavigation\0\0\0class\0\0\03.1\0\0\0menu\n::1\0\0\0_SESSION_REMOTE_ADDR\\ÐO\0\0\0_SESSION_CTIME\n1.1\0\0\0ac_tree¹ÐO\0\0\0_SESSION_ATIME\na@b.com\r\0\0\0AUTH_USERNAME€\0\0\0AUTH_LOGIN_ATTEMPTS\n2\0\0\0pe_id');
-/*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `titles`
 --
 
@@ -1334,11 +1325,11 @@ CREATE TABLE `titles` (
   `ti_name` varchar(128) DEFAULT NULL,
   `ti_hereditory` enum('0','1') DEFAULT '0',
   `ti_female_line` enum('0','1') DEFAULT '0',
-  `ti_issue` int(16) DEFAULT NULL,
-  `ti_dateofcreation` date DEFAULT NULL,
+  `ti_issue` int(16) DEFAULT NULL COMMENT 'date of change of holder',
+  `ti_dateofcreation` date DEFAULT NULL COMMENT 'original date of issue for this line',
   PRIMARY KEY (`ti_id`),
   UNIQUE KEY `ti_id` (`ti_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Not to be confused with ranks';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1347,6 +1338,7 @@ CREATE TABLE `titles` (
 
 LOCK TABLES `titles` WRITE;
 /*!40000 ALTER TABLE `titles` DISABLE KEYS */;
+INSERT INTO titles VALUES('1',12,'Clanfield',2,0,'1976','1929-00-00');
 /*!40000 ALTER TABLE `titles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1437,4 +1429,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-01-05 17:34:07
+-- Dump completed on 2012-01-12 11:50:06
