@@ -4,6 +4,14 @@ package Notice::C::Modules;
 use strict;
 use base 'Notice';
 
+# NTS pull this from the menu and modules table
+my %submenu = (
+   '1.0' => [
+        '1' => { peer => 1, name=> 'Modules', rm => 'modules', class=> 'navigation'},
+    ],
+);
+
+
 =head1 NAME
 
 Template controller subclass for Notice
@@ -229,6 +237,8 @@ sub setup {
     }elsif($self->param('page_load_time')){
         $self->tt_params({page_load_time => sprintf("Page loaded %.2f seconds", ($page_loaded - $self->param('page_load_time')))});
     }
+
+    $self->tt_params({submenu => \%submenu});
 
     # debug message
     if($self->param('i18n')){ $self->tt_params({warning => '<span class="small lang i18n">Lang:' . $self->param('i18n') . '</span>'}); }

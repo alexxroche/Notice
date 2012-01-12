@@ -185,7 +185,7 @@
 	        <!--li>[%# loop.count -%]/[%-loop.size-%][% '<a class="'; smi.class; '" href="/cgi-bin/index.cgi/'; 
 			c.param('menu').$item.value('rm') OR c.param('menu').$item.rm; '/'; smi.rm; '">'; smi.name -%]</a></li -->
 		   <li>[%# loop.count;'/';loop.size;%]<a class="[%- smi.class -%]" href="/cgi-bin/index.cgi/
-		   [%- c.param('menu').$item.value('rm') OR c.param('menu').$item.rm; '/'; smi.rm; '">'; smi.name -%]</a></li>
+           [%- UNLESS smi.peer; c.param('menu').$item.value('rm') OR c.param('menu').$item.rm; '/'; END; smi.rm; '">'; smi.name -%]</a></li>
 		[% END; END %]
 		[%- "</ul>\n"# IF loop.last %]
 	    [% END #submenu IF %]
