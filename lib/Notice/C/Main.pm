@@ -46,7 +46,9 @@ sub setup {
     }
 
     # debug message
-    if($self->param('i18n')){ $self->tt_params({warning => '<span class="small lang i18n">Lang:' . $self->param('i18n') . '</span>'}); }
+    if($self->param('i18n') && $self->param('debug')){ 
+        $self->tt_params({warning => '<span class="small lang i18n">Lang:' . $self->param('i18n') . '</span>'}); 
+    }
 }
 
 =head2 RUN MODES

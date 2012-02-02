@@ -54,13 +54,14 @@ and then make a note of each hive/colony that you have in each apiary. Then the 
 you can store hive records for each hive and we will graph the data for you so that you can
 watch for patterns.<br />
 <br />
-So to start off with you should <a href="beekeeping/add">enter some locations</a>.<br />
+So to start off with you should <a class="black" href="beekeeping/add">enter some locations</a>.<br />
 <br />
 <br />If this is your first time you will have to create an account and log in
-<br />then you can <a href="beekeeping/list">list</a> your apiraies
-<br />or add a <a href="beekeeping/add">new record entry</a> for an existing <a href="beekeeping/hive">hive</a>
+<br />then you can <a class="black" href="beekeeping/list">list</a> your apiraies
+<br />or add a <a class="black" href="beekeeping/add">new record entry</a> for an existing <a class="black" href="beekeeping/hive">hive</a>
         
     ';
+    unless($self->authen->username){ $self->tt_params({show_login=>1}); }
     $self->tt_params({
     no_home => 1,
 	heading => $heading,

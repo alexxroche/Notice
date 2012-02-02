@@ -175,7 +175,8 @@
     <ul>
         <li><a class="nowrap navigation" href="[% c.query.url || '/cgi-bin/index.cgi'%]/main">Home</a></li>
 [%- FOREACH m = c.param('menu_order'); item = m; IF c.param('menu').$item AND c.param('menu').$item.value('hidden') != 1 %]
-        <li><a class="nowrap [%- c.param('menu').$item.value('class') || c.param('menu').$item.class || 'navigation' 
+        <li><a class="nowrap [%- c.param('menu').$item.value('class') || c.param('menu').$item.class || 'navigation';
+	IF c.param('mod') == c.param('menu').$item.rm; ' selected'; END #IF selected 
 	-%]" href="/cgi-bin/index.cgi/[% c.param('menu').$item.value('rm') OR c.param('menu').$item.rm 
 	-%]"> [% c.param('menu').$item.value('name') || c.param('menu').$item.name  %]</a> [%-
 	    IF submenu.$item -%]
@@ -184,7 +185,8 @@
 		<!-- Just for comparison, for those that wonder; Is it faster to escape TT or HTML -->
 	        <!--li>[%# loop.count -%]/[%-loop.size-%][% '<a class="'; smi.class; '" href="/cgi-bin/index.cgi/'; 
 			c.param('menu').$item.value('rm') OR c.param('menu').$item.rm; '/'; smi.rm; '">'; smi.name -%]</a></li -->
-		   <li>[%# loop.count;'/';loop.size;%]<a class="[%- smi.class -%]" href="/cgi-bin/index.cgi/
+		   <li>[%# loop.count;'/';loop.size;%]<a class="[%- smi.class;
+	IF c.param('id') == smi.rm; ' selected'; END #IF selected -%]" href="/cgi-bin/index.cgi/
            [%- UNLESS smi.peer; c.param('menu').$item.value('rm') OR c.param('menu').$item.rm; '/'; END; smi.rm; '">'; smi.name -%]</a></li>
 		[% END; END %]
 		[%- "</ul>\n"# IF loop.last %]

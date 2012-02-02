@@ -105,7 +105,7 @@ sub main: StartRunmode {
         $opt{default_domain} = '/' . $domains[1]->{_column_data}{do_name};
     }
 
-    $message = 'Welcome to the Your Details section<br />';
+    $message = 'Welcome to the Your Preferences section<br />';
     $body .=qq |In this section you can: <br />
                  add,view,edit your details in this copy of Notice, (and its associated network.)<br />
 |;

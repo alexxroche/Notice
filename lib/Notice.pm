@@ -329,7 +329,10 @@ sub cgiapp_init {
           }
         };
         my $runmode = $self_url;
-        if($self->param('rm')){ $runmode = $self->param('rm'); }
+        if($self->param('rm')){ $runmode = $self->param('rm'); }else{ $self->param('rm' => $runmode); }
+        my($module,$id) = ($self->query->self_url=~m/index.cgi\/([^\/]*)\/?([^\/]*)/);
+        unless($self->param('id')){ $self->param('id' => $id ); }
+        unless($self->param('mod')){ $self->param('mod' => $module ); }
         if($CFG{'default_lang'} && !$self->param('i18n')){ $self->param('i18n' => $CFG{'default_lang'}); }
         $self->tt_params({title => 'Notice CRaAM  ' . $runmode ." - $known_as AT ". $ENV{REMOTE_ADDR}});
     }else{
@@ -403,7 +406,7 @@ sub login : Runmode {
     # This should be an option pulled from the DB config table
     unless ($url =~ /^https/) {
       $url =~ s/^http/https/;
-      return $self->redirect($url);
+      return $self->my_login_form
     }
     return $self->my_login_form;
   }

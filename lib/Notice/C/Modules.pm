@@ -25,15 +25,18 @@ Template for consistent controller creation.
 Provide an overview of the known modules of Notice
 and control them.
 
-=head1 METHODS
+=head3 global hash
 
-=head2 SUBCLASSED METHODS
+Each of these should be in the modules table, but for now they are here.
+It works... for now.
 
-=head3 setup
+=head3 %mlist
 
-Override or add to configuration supplied by Notice::cgiapp_init.
+%mlist - a list of the modules in a handy hash
 
-TODO: change all these values to ones more appropriate for your application.
+=head3 %old_modules
+
+%old_modules - an old list of modules back in version 0.01 of Notice
 
 =cut
 
@@ -218,6 +221,15 @@ my %old_modules = (
 ####################################################################
 );
 
+=head1 METHODS
+
+=head2 SUBCLASSED METHODS
+
+=head3 setup
+
+Override or add to configuration supplied by Notice::cgiapp_init.
+
+=cut
 
 sub setup {
     my ($self) = @_;
@@ -244,20 +256,31 @@ sub setup {
     if($self->param('i18n')){ $self->tt_params({warning => '<span class="small lang i18n">Lang:' . $self->param('i18n') . '</span>'}); }
 }
 
-=pod
+=head2 mlist_sort
 
-TODO: Other methods inherited from CGI::Application go here.
+sort the module list hash
+
+=cut
+
+sub mlist_sort{ 
+    if( ($a=~m/^$b/ || $b=~m/^$a/) && $a=~m/^\d\.\d\.\d/ && $b=~m/^\d\.\d\.\d/){
+        ( substr($a,4) <=> substr($b,4) || $a cmp $b )
+    }elsif($a=~m/^$b/ || $b=~m/^$a/){
+        ( $a <=> $b || $a cmp $b );
+    }else{
+        $a <=> $b; 
+    }
+}
+
 
 =head2 RUN MODES
 
+
+
 =head3 index
 
-  * Purpose
-  * Expected parameters
-  * Function on success
-  * Function on failure
-
-TODO: Describe index1 here. 
+What? Why is this here? I thought that we had chosen main over index
+as explained in README
 
 =cut
 
@@ -265,15 +288,6 @@ sub index: StartRunmode {
     my ($c) = @_;
 
     my $message = "<pre><table>";
-    sub mlist_sort{ 
-        if( ($a=~m/^$b/ || $b=~m/^$a/) && $a=~m/^\d\.\d\.\d/ && $b=~m/^\d\.\d\.\d/){
-            ( substr($a,4) <=> substr($b,4) || $a cmp $b )
-        }elsif($a=~m/^$b/ || $b=~m/^$a/){
-            ( $a <=> $b || $a cmp $b );
-        }else{
-            $a <=> $b; 
-        }
-    }
     foreach my $keynum (sort mlist_sort keys %mlist){
         my($checked,$disabled);
         my $indent;
@@ -307,20 +321,6 @@ foreach my $om (sort { $a <=> $b } keys %old_modules){
     
 }
 
-=head3 example
-
-An example stub for adding a controller runmode. Runmodes are declared with the ': Runmode' modifier.
-NOTE: Only one method can be marked as 'StartRunmode'.
-
-=cut
-
-#sub example: Runmode{
-#	my $c = shift;
-#	# do something
-#	# set $c->tt_params
-#	# return $c->tt_process();
-#}
-
 1;    # End of 
 
 __END__
@@ -345,7 +345,7 @@ Alexx Roche, C<alexx@cpan.org>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright Alexx Roche, all rights reserved.
+Copyright 2012 Alexx Roche, all rights reserved.
 
 =cut
 
