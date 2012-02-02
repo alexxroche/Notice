@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.1.37, for debian-linux-gnu (i486)
+-- MySQL dump 10.13  Distrib 5.1.41, for debian-linux-gnu (i486)
 --
 -- Host: localhost    Database: notice
 -- ------------------------------------------------------
--- Server version	5.1.37-1ubuntu5.5-log
+-- Server version	5.1.41-3ubuntu12.10-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -90,7 +90,7 @@ CREATE TABLE `account` (
   `ac_max` int(255) DEFAULT NULL COMMENT 'within other accounts',
   PRIMARY KEY (`ac_id`),
   UNIQUE KEY `id` (`ac_id`,`ac_tree`)
-) ENGINE=MyISAM AUTO_INCREMENT=569 DEFAULT CHARSET=latin1 COMMENT='These are the companies, or family that people belong to';
+) ENGINE=MyISAM AUTO_INCREMENT=570 DEFAULT CHARSET=latin1 COMMENT='These are the companies, or family that people belong to';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -99,7 +99,7 @@ CREATE TABLE `account` (
 
 LOCK TABLES `account` WRITE;
 /*!40000 ALTER TABLE `account` DISABLE KEYS */;
-INSERT INTO `account` VALUES (2,'L','1',0,'1.1','LastFirst',4,5),(1,'Chairvalla Publications',NULL,0,'1','',1,1126);
+INSERT INTO `account` VALUES (2,'L','1',0,'1.1','LastFirst',2,3),(1,'Chairvalla Publications',NULL,0,'1','',1,10);
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -157,15 +157,6 @@ CREATE TABLE `address` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `address`
---
-
-LOCK TABLES `address` WRITE;
-/*!40000 ALTER TABLE `address` DISABLE KEYS */;
-/*!40000 ALTER TABLE `address` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `adhistory`
 --
 
@@ -184,15 +175,6 @@ CREATE TABLE `adhistory` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `adhistory`
---
-
-LOCK TABLES `adhistory` WRITE;
-/*!40000 ALTER TABLE `adhistory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `adhistory` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `alhistory`
 --
 
@@ -207,15 +189,6 @@ CREATE TABLE `alhistory` (
   PRIMARY KEY (`al_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=372 DEFAULT CHARSET=latin1 COMMENT='Email aliase History';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `alhistory`
---
-
-LOCK TABLES `alhistory` WRITE;
-/*!40000 ALTER TABLE `alhistory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `alhistory` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `alias_details`
@@ -234,7 +207,6 @@ CREATE TABLE `alias_details` (
   KEY `alias` (`ead_userid`,`ead_doid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='email alias details - passwords can be hashed via javascriptAES';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 
 --
 -- Dumping data for table `alias_details`
@@ -408,6 +380,10 @@ CREATE TABLE `assets` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `assets`
+--
+
+--
 -- Table structure for table `conf_data`
 --
 
@@ -432,7 +408,7 @@ CREATE TABLE `conf_data` (
 
 LOCK TABLES `conf_data` WRITE;
 /*!40000 ALTER TABLE `conf_data` DISABLE KEYS */;
-INSERT INTO `conf_data` VALUES (1,'welcome','<center>Welcome to Notice</center>',12,NULL,1,NULL),(2,'message','This is an example of CGI::Application in the form of the Notice project. Notice is a modular framework that can be used to store and manage any type of data on a small to medium size. For larger systems Notice can distribute using the delegate module and simple hierarchical IP network principles.\n\nThe people table has users and contacts, each linked to an entry in the account table. An account can be a company, a family, department or branch. Each account has a parent account. The root account\'s parent is Notice. This message, for example, is configured on a per-account basis, and each child account will default to the message set by the parent account. Because of the hierarchical nature any user in a parent account has, (some) access to the child accounts. Because humans always need flexibility, and we will have NO exceptions hacked into the code, \"just for this user\" we have the groups table. With this we can add a user to a group that will give them access to which ever corner of Notice they need.\n\nEach module determines who has access to do what within itself, (mostly based on the group membership of that user.) E.g. someone in the network_admin group would be able to delete an IP entry, but someone in the more general sysadmin group would only have read access to the IP tables.\n\nEach install of Notice has the option to generate its own uuid and register with any other install of Notice, (and assign trust levels to that connection.) This way it is possible to create a web-of-trust between installs, and combined with the certificate_authority module it is possible to have a decentralised x509 network, (no more licence-to-print-money-dangerous-centralisation for you-know-who!)\n\nIf that is too political then you can just look through the code for examples; Fix it where it is _really_ poorly written and even develop a module for your own data needs. Because of the flexibility of this framework it is possible to have it present as an asset database to one user in one account and a domain management system to another user. This is why it was originally called, \"an ISP in a box\".\n',12,NULL,1,NULL);
+INSERT INTO `conf_data` VALUES (1,'welcome','<center>Welcome</center>',12,NULL,1,NULL),(2,'message','This is an example of CGI::Application in the form of the Notice project. Notice is a modular framework that can be used to store and manage any type of data on a small to medium size. For larger systems Notice can distribute using the delegate module and simple hierarchical IP network principles.\n\nThe people table has users and contacts, each linked to an entry in the account table. An account can be a company, a family, department or branch. Each account has a parent account. The root account\'s parent is Notice. This message, for example, is configured on a per-account basis, and each child account will default to the message set by the parent account. Because of the hierarchical nature any user in a parent account has, (some) access to the child accounts. Because humans always need flexibility, and we will have NO exceptions hacked into the code, \"just for this user\" we have the groups table. With this we can add a user to a group that will give them access to which ever corner of Notice they need.\n\nEach module determines who has access to do what within itself, (mostly based on the group membership of that user.) E.g. someone in the network_admin group would be able to delete an IP entry, but someone in the more general sysadmin group would only have read access to the IP tables.\n\nEach install of Notice has the option to generate its own uuid and register with any other install of Notice, (and assign trust levels to that connection.) This way it is possible to create a web-of-trust between installs, and combined with the certificate_authority module it is possible to have a decentralised x509 network, (no more licence-to-print-money-dangerous-centralisation for you-know-who!)\n\nIf that is too political then you can just look through the code for examples; Fix it where it is _really_ poorly written and even develop a module for your own data needs. Because of the flexibility of this framework it is possible to have it present as an asset database to one user in one account and a domain management system to another user. This is why it was originally called, \"an ISP in a box\".\n',12,NULL,1,NULL);
 /*!40000 ALTER TABLE `conf_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -597,7 +573,7 @@ CREATE TABLE `domains` (
   `do_location` varchar(255) DEFAULT NULL,
   `do_masters` varchar(255) DEFAULT NULL COMMENT 'a ; delimited list of ip addresses',
   PRIMARY KEY (`do_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7577 DEFAULT CHARSET=latin1 COMMENT='Domains';
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1 COMMENT='Domains';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -606,7 +582,7 @@ CREATE TABLE `domains` (
 
 LOCK TABLES `domains` WRITE;
 /*!40000 ALTER TABLE `domains` DISABLE KEYS */;
-INSERT INTO `domains` VALUES (1,'example.net','registering','2012-01-12 14:31:07','2',NULL,NULL,NULL,NULL);
+INSERT INTO `domains` VALUES (1,'example.net','enabled','2012-01-12 14:31:07','2',NULL,NULL,NULL,NULL),(7,'test.exampled.com','enabled','2012-01-17 14:29:57','2',NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `domains` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -687,6 +663,7 @@ CREATE TABLE `group_cascade` (
 
 LOCK TABLES `group_cascade` WRITE;
 /*!40000 ALTER TABLE `group_cascade` DISABLE KEYS */;
+INSERT INTO `group_cascade` VALUES (1,'domains',7,'0');
 /*!40000 ALTER TABLE `group_cascade` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -774,15 +751,6 @@ CREATE TABLE `imap` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `imap`
---
-
-LOCK TABLES `imap` WRITE;
-/*!40000 ALTER TABLE `imap` DISABLE KEYS */;
-/*!40000 ALTER TABLE `imap` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `imaphistory`
 --
 
@@ -795,17 +763,8 @@ CREATE TABLE `imaphistory` (
   `mh_what` mediumtext,
   `mh_when` datetime DEFAULT NULL,
   PRIMARY KEY (`mh_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=latin1 COMMENT='imap History';
+) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=latin1 COMMENT='imap History';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `imaphistory`
---
-
-LOCK TABLES `imaphistory` WRITE;
-/*!40000 ALTER TABLE `imaphistory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `imaphistory` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `ip`
@@ -938,6 +897,7 @@ INSERT INTO `ippool` VALUES ('IANA',NULL,'IANA',NULL,NULL,0,NULL),
 ('100',NULL,NULL,'1.2','1.2.1',100,'VLAN example'),
 ('IPPAT_1',NULL,NULL,'1',NULL,NULL,'Cahiravahilla Publications'),
 ('IPPAT_1.2.2.2',NULL,NULL,'1.2.2.2',NULL,NULL,'example.com');
+
 /*!40000 ALTER TABLE `ippool` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -963,7 +923,7 @@ CREATE TABLE `menu` (
 
 LOCK TABLES `menu` WRITE;
 /*!40000 ALTER TABLE `menu` DISABLE KEYS */;
-INSERT INTO `menu` VALUES (2,'3.1',NULL,0),(2,'1',2,0),(2,'2',NULL,0),(2,'4',NULL,0),(2,'8',NULL,0),(2,'3',NULL,0),(2,'17.1',90,1),(2,'1.2.3',2,1),(2,'3.1.1',0,0);
+INSERT INTO `menu` VALUES (2,'3.1',NULL,0),(2,'1',2,0),(2,'2',NULL,0),(2,'4',NULL,0),(2,'8',NULL,0),(2,'3',NULL,0),(2,'17.1',90,1),(2,'1.2.3',2,1),(2,'3.1.1',0,0),(1,'1.0',0,0);
 /*!40000 ALTER TABLE `menu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1046,7 +1006,7 @@ CREATE TABLE `modules` (
   `mo_user_use` enum('none','use','access','limited read','read','insert','update','admin_read','admin_write') DEFAULT 'none',
   `mo_notes` blob,
   PRIMARY KEY (`mo_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1 COMMENT='The modules';
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1 COMMENT='The modules';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1055,7 +1015,7 @@ CREATE TABLE `modules` (
 
 LOCK TABLES `modules` WRITE;
 /*!40000 ALTER TABLE `modules` DISABLE KEYS */;
-INSERT INTO `modules` VALUES (1,'IMAP/POP','Storage for email messages; An email account','e13a9120-de9a-4ec1-877d-34c4f719b538','3.1.1',2,'alexx at alexx dot net','','0,1,3','','https://notice.alexx.net/modules/3/3.1/src/','https://notice.alexx.net/modules/3/3.1/update/','0.0.2','imap','insert',''),(2,'Assets','Asset inventory and manangement','756b67a0-9cb6-11e0-aedf-00188bba79ac','8',3,'alexx at alexx dot net','','1','base','https://notice.alexx.net/modules/8/src/','https://notice.alexx.net/modules/8/update/','0.02','assets','insert',''),(3,'Domains','Domain names','8cf15874-9cb8-11e0-beed-00188bba79ac','3',1,'alexx at alexx dot net','','1','base','https://notice.alexx.net/modules/3/src/','https://notice.alexx.net/modules/3/update/','0.02','domains','insert',''),(4,'Modules','The Modules of Notice','a99976ee-3c6f-11e1-a234-00188bba79ac','1.2.3',1,'alexx at alexx dot net','','','base','https://notice.alexx.net/modules/1/1.2/1.2.3/src/','https://notice.alexx.net/modules/1/1.2/1.2.3/update/','0.01','modules','',''),(5,'Email','Email','16268bac-3c71-11e1-9f6f-00188bba79ac','3.1',2,'alexx at alexx dot net','','','base','https://notice.alexx.net/modules/3/3.1/src/','https://notice.alexx.net/modules/3/3.1/update/','0.01','email','','');
+INSERT INTO `modules` VALUES (1,'IMAP/POP','Storage for email messages; An email account','e13a9120-de9a-4ec1-877d-34c4f719b538','3.1.1',2,'alexx at alexx dot net','','0,1,3','','https://notice.alexx.net/modules/3/3.1/src/','https://notice.alexx.net/modules/3/3.1/update/','0.0.2','imap','insert',''),(2,'Assets','Asset inventory and manangement','756b67a0-9cb6-11e0-aedf-00188bba79ac','8',3,'alexx at alexx dot net','','1','base','https://notice.alexx.net/modules/8/src/','https://notice.alexx.net/modules/8/update/','0.02','assets','insert',''),(3,'Domains','Domain names','8cf15874-9cb8-11e0-beed-00188bba79ac','3',1,'alexx at alexx dot net','','1','base','https://notice.alexx.net/modules/3/src/','https://notice.alexx.net/modules/3/update/','0.02','domains','insert',''),(4,'Modules','The Modules of Notice','a99976ee-3c6f-11e1-a234-00188bba79ac','1.2.3',1,'alexx at alexx dot net','','','base','https://notice.alexx.net/modules/1/1.2/1.2.3/src/','https://notice.alexx.net/modules/1/1.2/1.2.3/update/','0.01','modules','',''),(5,'Email','Email','16268bac-3c71-11e1-9f6f-00188bba79ac','3.1',2,'alexx at alexx dot net','','','base','https://notice.alexx.net/modules/3/3.1/src/','https://notice.alexx.net/modules/3/3.1/update/','0.01','email','',''),(6,'Configuration','Define how it all works','12fdc608-4211-11e1-9b60-00188bba79ac','1.0',99,'alexx at alexx dot net','','0','','https://notice.alexx.net/modules/1/1.0/src/','https://notice.alexx.net/modules/1/1.0/update/','0.01','config','','');
 /*!40000 ALTER TABLE `modules` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1115,7 +1075,7 @@ CREATE TABLE `people` (
   `pe_passwd` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`pe_id`),
   UNIQUE KEY `pe_id` (`pe_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=562 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1124,7 +1084,7 @@ CREATE TABLE `people` (
 
 LOCK TABLES `people` WRITE;
 /*!40000 ALTER TABLE `people` DISABLE KEYS */;
-INSERT INTO `people` VALUES (2,23,'The','Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'a@b.com','876dfefef3ef6f4548f48bbddd856cef','2',NULL,'20120111203706_::1_f927298785ec9d04f661345e84c75359_2','1',NULL,'876dfefef3ef6f4548f48bbddd856cef'),(1,24,'Alexx','Roche',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'notice-dev@alexx.net','','1',101,'20110723083628_2001:0:beef:79fb:1234:193a:a29e:5445_4878ba34353c75e82ef73d6a21c2a8c3_1',',0,1,1.1,1.2,1.2.1,1.2.2,1.2.2.1,1.2.2.2,1.2.3,1.2.4,1.3,1.3.1,1.3.2,1.3.3,2,3,3.1,3.2,4,5,5.1,6,7,7.1,7.2,8,9,10,11,12,13,14,15',NULL,'f3d9d042b89daf317475c95049c347f6');
+INSERT INTO `people` VALUES (2,23,'The','Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'a@b.com','876dfefef3ef6f4548f48bbddd856cef','2',NULL,'20120111203706_::1_f927298785ec9d04f661345e84c75359_6','1',NULL,'876dfefef3ef6f4548f48bbddd856cef'),(1,24,'Alexx','Roche',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'notice-dev@alexx.net','f3d9d042b89daf317475c95049c347f6','1',101,'1',',0,1,1.0,1.1,1.2,1.2.1,1.2.2,1.2.2.1,1.2.2.2,1.2.3,1.2.4,1.3,1.3.1,1.3.2,1.3.3,2,3,3.1,3.2,4,5,5.1,6,7,7.1,7.2,8,9,10,11,12,13,14,15,',NULL,'876dfefef3ef6f4548f48bbddd856cef');
 /*!40000 ALTER TABLE `people` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1316,10 +1276,6 @@ CREATE TABLE `sessions` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `titles`
---
-
 DROP TABLE IF EXISTS `titles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1333,7 +1289,7 @@ CREATE TABLE `titles` (
   `ti_dateofcreation` date DEFAULT NULL COMMENT 'original date of issue for this line',
   PRIMARY KEY (`ti_id`),
   UNIQUE KEY `ti_id` (`ti_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Not to be confused with ranks';
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='Not to be confused with ranks; ';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1342,7 +1298,7 @@ CREATE TABLE `titles` (
 
 LOCK TABLES `titles` WRITE;
 /*!40000 ALTER TABLE `titles` DISABLE KEYS */;
-INSERT INTO titles VALUES('1',12,'Clanfield',2,0,'1976','1929-00-00');
+INSERT INTO `titles` VALUES (1,12,'Clanfield','1','',1976,'1929-00-00');
 /*!40000 ALTER TABLE `titles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1433,4 +1389,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-01-12 11:50:06
+-- Dump completed on 2012-02-02 17:21:12
