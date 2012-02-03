@@ -10,7 +10,7 @@ my $port = '8060';
 my $doc_root = './t/www';
 
 BEGIN {
-   unshift @INC, '../../', '.'; #prefer the version of the module that we are in to the one installed on the system
+   unshift @INC, '../../lib', './lib'; #prefer the version of the module that we are in to the one installed on the system
    my $cgi_root = 't/cgi-bin';
    #use Cwd; $cwd = cwd;
    #my $pwd = `readlink -mn $ENV{_}`;

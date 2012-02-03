@@ -104,7 +104,7 @@ sub main: StartRunmode {
         $opt{default_domain} = '/' . $domains[1]->{_column_data}{do_name};
     }
 
-    $message = 'Welcome to the email section ';
+    $message = 'Welcome to the Email section ';
     if($self->param('i18n') && $self->param('i18n') eq 'fr'){
         $message = 'Bienvenue à le email section'; #pull this from fr.po
     }
