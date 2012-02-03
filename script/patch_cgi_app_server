@@ -1,0 +1,5 @@
+#!/bin/bash
+
+#patch /usr/local/share/perl/5.10.0/CGI/Application/Server.pm t/0.062-cgi-application-server.patch
+#patch /usr/share/perl5/CGI/Application/Server.pm t/0.062-cgi-application-server.patch
+patch $(perldoc -l CGI::Application::Server.pm) t/0.062-cgi-application-server.patch

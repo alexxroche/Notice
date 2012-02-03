@@ -1,72 +1,95 @@
-*** /usr/local/share/perl/5.10.0/CGI/Application/Server.pm	2010-01-21 01:39:31.000000000 +0100
---- /usr/local/share/perl/5.10.0/CGI/Application/Server.pm	2012-01-17 12:16:33.173780450 +0100
-*************** use Scalar::Util qw( blessed reftype );
-*** 10,16 ****
-  use HTTP::Response;
-  use HTTP::Status;
-  
-! our $VERSION = '0.062';
-  
-  use base qw( HTTP::Server::Simple::CGI );
-  use HTTP::Server::Simple::Static;
---- 10,16 ----
-  use HTTP::Response;
-  use HTTP::Status;
-  
-! our $VERSION = '0.062n';
-  
-  use base qw( HTTP::Server::Simple::CGI );
-  use HTTP::Server::Simple::Static;
-*************** sub new {
-*** 22,27 ****
---- 22,28 ----
-      my $self  = $class->SUPER::new(@_); 
-      $self->{entry_points} = {};    
-      $self->{document_root}  = '.';
-+     $self->{default_index}  = '/index.html';
-      return $self;
-  }
-  
-*************** sub document_root {
-*** 37,42 ****
---- 38,55 ----
-      $self->{document_root};
-  }
-  
-+ sub default_index {
-+     my ($self, $default_index) = @_;
-+     if (defined $default_index) {
-+         my $default_url = $self->{document_root};
-+ 	$default_url .= $default_index;
-+         (-f $default_url)
-+             || confess "The server default_index ($default_url) [$default_index] is not found";
-+         $self->{default_index} = $default_index;
-+     }
-+     $self->{default_index};
-+ }
-+ 
-  sub entry_points {
-      my ($self, $entry_points) = @_;
-      if (defined $entry_points) {
-*************** sub handle_request {
-*** 100,105 ****
---- 113,131 ----
-            confess "Target must be a CGI::Application or CGI::Application::Dispatch subclass or the name of a directory that exists and is readable.\n";
-          }
-      } else {
-+ 	my $path = $cgi->path_info();
-+         if($path=~m/^\/?$/){
-+ 	   my $file = shift || './t/www/index.html';
-+ 		# We want to pull the fiel from $self->{document_root} .'/'. ($self->{default_index}=~s/^\//g)
-+ 	   if (-f "$file"){
-+ 		open (FILE, "<$file");
-+ 		while(<FILE>){ print $_; }
-+ 		close(FILE);
-+ 	   }else{
-+ 		print qq |<a href="/cgi-bin/index.cgi">Welcome to Notice - We will be with you shortly.</a>|;
-+ 	   }
-+ 	   return 1;
-+         }
-          return $self->serve_static($cgi, $self->document_root);
-      } 
-  }
+--- /usr/local/share/perl/5.10.0/CGI/Application/Server.pm	2012-02-03 16:09:03.847871198 +0100
++++ /usr/share/perl5/CGI/Application/Server.pm	2012-02-03 16:12:08.036403746 +0100
+@@ -1,4 +1,3 @@
+-
+ package CGI::Application::Server;
+ 
+ use strict;
+@@ -10,7 +9,7 @@
+ use HTTP::Response;
+ use HTTP::Status;
+ 
+-our $VERSION = '0.062';
++our $VERSION = '0.062n1';
+ 
+ use base qw( HTTP::Server::Simple::CGI );
+ use HTTP::Server::Simple::Static;
+@@ -22,6 +21,7 @@
+     my $self  = $class->SUPER::new(@_); 
+     $self->{entry_points} = {};    
+     $self->{document_root}  = '.';
++    $self->{default_index}  = '/index.html';
+     return $self;
+ }
+ 
+@@ -37,6 +37,18 @@
+     $self->{document_root};
+ }
+ 
++sub default_index {
++    my ($self, $default_index) = @_;
++    if (defined $default_index) {
++        my $default_url = $self->{document_root};
++	$default_url .= $default_index;
++        (-f $default_url)
++            || confess "The server default_index ($default_url) [$default_index] is not found";
++        $self->{default_index} = $default_index;
++    }
++    $self->{default_index};
++}
++
+ sub entry_points {
+     my ($self, $entry_points) = @_;
+     if (defined $entry_points) {
+@@ -84,22 +96,38 @@
+         (local $ENV{PATH_INFO} = $ENV{PATH_INFO}) =~ s/\A\Q$path//;
+ 
+         if (-d $target && -x $target) {
+-	  return $self->serve_static($cgi, $target);
+-	}
+-	elsif ($target->isa('CGI::Application::Dispatch')) {
+-	  return $self->_serve_response($target->dispatch);
+-        } elsif ($target->isa('CGI::Application')) {
+-          if (!defined blessed $target) {
+-	    return $self->_serve_response($target->new->run);
+-          } else {
+-        $target->query($cgi);
+-	    return $self->_serve_response($target->run);
+-          }
+-	}
+-	else {
++	        return $self->serve_static($cgi, $target);
++        }
++        elsif ($target->isa('CGI::Application::Dispatch')) {
++          return $self->_serve_response($target->dispatch);
++            } elsif ($target->isa('CGI::Application')) {
++              if (!defined blessed $target) {
++            return $self->_serve_response($target->new->run);
++              } else {
++            $target->query($cgi);
++            return $self->_serve_response($target->run);
++              }
++        }
++	    else {
+           confess "Target must be a CGI::Application or CGI::Application::Dispatch subclass or the name of a directory that exists and is readable.\n";
+         }
+     } else {
++	    my $path = $cgi->path_info();
++        if($path=~m/^\/?$/){
++           my $file = shift || './t/www/index.html';
++           my $index_file = $self->{document_root} . '/'. $self->{default_index};
++           if(-f $index_file){ $file = $index_file; }
++           if (-f "$file"){
++             open (FILE, "<$file");
++             while(<FILE>){ print $_; }
++             close(FILE);
++           }else{
++             print "HTTP/1.1 200 OK\n";
++             print "Content-type: text/html; charset=iso-8859-1\n\n";
++             print qq |<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><href><body><a href="/cgi-bin/index.cgi">Welcome to the Notice - We will be with you shortly.</a></body></html>|;
++           }
++	       return 1;
++        }
+         return $self->serve_static($cgi, $self->document_root);
+     } 
+ }

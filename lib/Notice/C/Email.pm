@@ -104,8 +104,11 @@ sub main: StartRunmode {
         $opt{default_domain} = '/' . $domains[1]->{_column_data}{do_name};
     }
 
-    $message = 'Welcome to the email section';
-    $message .=qq |In this section you can: <br/>
+    $message = 'Welcome to the email section ';
+    if($self->param('i18n') && $self->param('i18n') eq 'fr'){
+        $message = 'Bienvenue à le email section'; #pull this from fr.po
+    }
+    $message .=qq |<br />In this section you can: <br/>
                  add,view,edit the details of the electronic messaging containers.<br/>
         If you were a sytem administrator you could control other aspects of the electronic communications system.<br/>
         (If you have the webmail module installed you will be able to grant or revoke access here)|;
