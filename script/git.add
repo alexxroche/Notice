@@ -1,0 +1,3 @@
+#!/bin/sh
+
+for i in `git st|grep :|grep '\.'|awk '{print \$NF}'`;do git add $i; done

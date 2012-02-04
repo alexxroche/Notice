@@ -21,17 +21,17 @@
      </tr>
       [% FOREACH ac = asc %]
          <tr class="as_data as_data_[% loop.parity %]">
-           <td class="bg">[% ac.ac_name  or '' %]</td>
-           <td class="bg">[% IF ac.ac_type=='text';
-            '<input type="text" name="'; ac.ac_id; '" value="'; ac.ac_value; '" />';
-        ELSIF ac.ac_type=='textarea';
-            '<textarea name="'; ac.ac_id; '">'; ac.ac_value; '</textarea>';
-        ELSIF ac.ac_type=='checkbox';
-            '<input type="checkbox" name="'; ac.ac_id; '" />';
+           <td class="bg">[% ac.acd_name  or '' %]</td>
+           <td class="bg">[% IF ac.acd_type=='text';
+            '<input type="text" name="'; ac.acd_id; '" value="'; ac.acd_value; '" />';
+        ELSIF ac.acd_type=='textarea';
+            '<textarea name="'; ac.acd_id; '">'; ac.acd_value; '</textarea>';
+        ELSIF ac.acd_type=='checkbox';
+            '<input type="checkbox" name="'; ac.acd_id; '" />';
         END %]
         </td>
         <td class="bg_white">
-        [% IF ac.ac_regexp; %] ( [% ac.ac_regexp %] ) [% END %]
+        [% IF ac.acd_regexp; %] ( [% ac.acd_regexp %] ) [% END %]
        </td>
          </tr>
       [% END %]

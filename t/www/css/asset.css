@@ -1,5 +1,20 @@
 .nowrap { white-space: nowrap; }
 
+.select {
+    padding: 5px 10px;
+    display: inline;
+   /*  background: #777; */
+    /* background: #777 url(/images/button.png) repeat-x bottom; */
+    border: none;
+    /*color: #fff; */
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    text-shadow: 1px 1px #666;
+}
+
 .button {
     padding: 5px 10px;
     display: inline;

@@ -1,4 +1,31 @@
 [% WRAPPER site_wrapper.tmpl %]
-        <h1>[% heading %]</h1>
+ <h1>[% heading %]</h1>
+ [% IF c_missing_data %]
+<div class="warn">
+<h4><span class="warning"> N.B.</span> Warning:</h4> There are undefined asset catagories, that you can define
+Here you can add an asset <form action="/cgi-bin/index.cgi/assets/define">
+    <select name="cid">
+ [%- FOREACH acl = c_missing_data; -%]
+        <option class="very" value="[%- acl.asc_id -%]">[%- acl.asc_name -%] - [%- acl.asc_description -%]</option>
+ [%- END #FOREACH -%]
+  </select>
+  <input class="small orange button" type="submit" name="" value="Define" />
+  </form>
+  </p>
+</div>
+ [% END # IF c_missing_data %]
+
+ [% IF ac %]
+<h4> Add </h4> Here you can add an asset <form action="/cgi-bin/index.cgi/assets/details">
+    <select class="small green select" name="id">
+ [%- FOREACH acl = ac; cat = acl; -%]
+        <option class="very" value="[%- acl.asc_id -%]">[%- acl.asc_name -%] - [%- acl.asc_description -%]</option>
+ [%- END #FOREACH -%]
+  </select>
+  <input class="small green button" type="submit" name="" value="Add" />
+  </form>
+  </p>
+
+ [% END # IF ac %]
         <span class="page">[% page %]</span>
 [% END %]

@@ -92,6 +92,28 @@ sub main: StartRunmode {
         $user_msg .= $username;
     }
 
+    # NOTE !
+    # we should warn if there is an asset_category entry that has no asset_cat_data
+    # select asc_id, asc_name, asc_description from asset_categories LEFT JOIN asset_cat_data ON acd_cid = asc_id WHERE acd_id is NULL;
+    # so that they can go and define them
+    my @c_missing_data = $self->resultset('AssetCategory')->search({
+           'acd_id' => undef
+        },{
+            join => 'catdata',
+            group_by => [qw/asc_id/],
+        })->all;
+      $self->tt_params({ c_missing_data => \@c_missing_data});
+
+
+    # we only want fully defined Categories
+    my @ac = $self->resultset('AssetCategory')->search({
+           'acd_id' => { '>=', 1}
+        },{
+            #select => [ { distinct => [ $source->columns ] } ], as => [ $source->columns ], 
+            group_by => [qw/asc_id/],
+            join    => 'catdata',
+        })->all;
+
     my $page;
     
     $page =qq ( 
@@ -102,22 +124,8 @@ sub main: StartRunmode {
 
     $page .=qq (
     $user_msg;
-<p>
+    <p>
     <h4><strike>Search</strike></h4>
-</p>
-<p>
-<h4> Add </h4> Here you can add an asset <form action="/cgi-bin/index.cgi/assets/details">
-    <select name="id">
-     <option value="19">A Tree</option>
-     <option value="20">A Field - thing with animals or crops in it</option>
-     <option value="21">A Server</option>
-     <option value="1">A Painting</option>
-     <option value="2">A Book</option>
-     <option value="3">A CD</option>
-     <option value="4">A DVD</option>
-    </select>
-    <input type="submit" name="" value="Add" />
-    </form>
     </p>
     <p>
     <h4> List </h4>
@@ -169,6 +177,7 @@ sub main: StartRunmode {
     $self->tt_params({
     heading => 'Welcome to the new Assets page!',
     message => $message,
+    ac      => \@ac,
     page => $page,
           });
     return $self->tt_process();
@@ -234,13 +243,13 @@ sub details: Runmode{
     #$warning .= Dumper($q->{'param'});
     if($self->param('id')){
         $as_cid = $self->param('id');
-    if($self->param('sid')){ 
-        $as_id = $self->param('sid');
-    }
+        $as_cid=~s/.*\?id=//;
+        if($self->param('sid')){ 
+            $as_id = $self->param('sid');
+        }
     }elsif($q){
-          if($q->param('id')){ $as_cid = $q->param('id'); }
-      #elsif($q->param('cid')){ $as_cid = $q->param('cid'); }
-      elsif($q->param('sid')){ $as_cid = $q->param('sid'); }
+        if($q->param('id')){ $as_cid = $q->param('id'); }
+        elsif($q->param('sid')){ $as_cid = $q->param('sid'); }
           $message .= "QO = " . Dumper($q);
           $message .= "<br />\n";
           #foreach my $ref (@{ $q->param("id") }){
@@ -303,28 +312,28 @@ sub details: Runmode{
         { 'as_id' => { '=', "$as_id"}},
         {});
       while(my $l=$as_rs->next){
-    my $as_acid = $l->as_acid;  
-    my $as_owner = $l->as_owner;    
-    my $as_user = $l->as_user;  
-    my $as_adid = $l->as_adid;  
-    my $as_grid = $l->as_grid;  
-    my $as_notes = $l->as_notes;    
-        push ( @asc, 
-     {ac_name => 'Account', ac_id => 'acid', ac_type => 'text', ac_regexp => '\d+(\.\d+)*', ac_value=> "$as_acid" },
-         {ac_name => 'Owner',   ac_id => 'owner', ac_type => 'text', ac_regexp => '\d+', ac_value=> "$as_owner" },
-         {ac_name => 'User',    ac_id => 'user', ac_type => 'text', ac_regexp => '\d+' },
-         {ac_name => 'Address', ac_id => 'adid', ac_type => 'text', ac_regexp => '\d+' },
-         {ac_name => 'Group',   ac_id => 'grid', ac_type => 'text', ac_regexp => '\d+' },
-         {ac_name => 'Container',ac_id =>'in_asid', ac_type => 'text', ac_regexp => '\d+' },
-     {ac_name => 'Notes', ac_id => 'notes', ac_type => 'textarea', ac_regexp => '', ac_value => "$as_notes" }
-    );
+        my $as_acid = $l->as_acid;  
+        my $as_owner = $l->as_owner;    
+        my $as_user = $l->as_user;  
+        my $as_adid = $l->as_adid;  
+        my $as_grid = $l->as_grid;  
+        my $as_notes = $l->as_notes;    
+            push ( @asc, 
+         {ac_name => 'Account', ac_id => 'acid', ac_type => 'text', ac_regexp => '\d+(\.\d+)*', ac_value=> "$as_acid" },
+             {ac_name => 'Owner',   ac_id => 'owner', ac_type => 'text', ac_regexp => '\d+', ac_value=> "$as_owner" },
+             {ac_name => 'User',    ac_id => 'user', ac_type => 'text', ac_regexp => '\d+' },
+             {ac_name => 'Address', ac_id => 'adid', ac_type => 'text', ac_regexp => '\d+' },
+             {ac_name => 'Group',   ac_id => 'grid', ac_type => 'text', ac_regexp => '\d+' },
+             {ac_name => 'Container',ac_id =>'in_asid', ac_type => 'text', ac_regexp => '\d+' },
+         {ac_name => 'Notes', ac_id => 'notes', ac_type => 'textarea', ac_regexp => '', ac_value => "$as_notes" }
+        );
       }
       $self->tt_params( title => 'Asset Details',
              submit => 'Update',
              update => 'update'
     );
-    }else{
-    @asc = (
+    }else{ 
+        @asc = (
                  {ac_name => 'Account', ac_id => 'acid', ac_type => 'text', ac_regexp => '\d+(\.\d+)*', ac_value=>'1.5' },
                  {ac_name => 'Owner',   ac_id => 'owner', ac_type => 'text', ac_regexp => '\d+', ac_value=>'1' },
                  {ac_name => 'User',    ac_id => 'user', ac_type => 'text', ac_regexp => '\d+' },
@@ -333,6 +342,9 @@ sub details: Runmode{
                  {ac_name => 'Container',ac_id =>'in_asid', ac_type => 'text', ac_regexp => '\d+' },
          {ac_name => 'Notes', ac_id => 'notes', ac_type => 'textarea', ac_regexp => '', ac_comment => "Keep this short, as we mostly want to add notes into the Asset Data rather than here"},
                 );
+        @asc = $self->resultset('AssetCatData')->search(
+                { 'acd_cid' => { '=', "$as_cid"}},
+                {});
       $self->tt_params( title => 'Add Asset Details',
              submit => 'Add',
              create => 'new'
@@ -352,13 +364,14 @@ sub details: Runmode{
                 );
 
     unless(@asc){
-                my $error = "That isn't a valid asset ID<br />\n";
-                $message =qq |<div><span class="error">$as_id</span> is not a valid asset</div>|;
-                $self->tt_params(
-                        title => 'Error - unknown asset',
-                        error => $error,
-                        message => $message);
-                return $self->tt_process();
+        my $error = "That isn't a valid asset ID<br />\n";
+        unless(defined $as_id){ $as_id = 'That'; }
+        $message =qq |<div><span class="error">$as_id</span> is not a valid asset</div>|;
+        $self->tt_params(
+                title => 'Error - unknown asset',
+                error => $error,
+                message => $message);
+        return $self->tt_process();
     }
 
 
@@ -390,28 +403,60 @@ sub data: Runmode{
     my $as_id;
     my $q = \%{ $self->query() };
     if($self->param('sid')){
-    $as_id = $self->param('sid');
+        $as_id = $self->param('sid');
     }elsif($q && $q->param('sid')){
-    $as_id = $q->param('sid');
+        $as_id = $q->param('sid');
     }
     
-    if($self->param('id')){
+    if($self->param('id') && defined $as_id){
         $acd_id = $self->param('id');
     #}elsif( ref($self->param('id')) eq 'ARRAY'){
     #   $acd_id = $self->param('id')->[0];
-    }else{
-    no strict "refs";
-    if($q && $q->param('id')){
-      $message .= "QO = " . Dumper($q);
-      $message .= "<br />\n";
-      #foreach my $ref (keys %{ $self->param('id') }){
-      foreach my $ref (@{ $q->param("id") }){
-        $message .= "RREF = $ref<br />\n";
-      }
-      $acd_id = $q->param('id');
-      $message .= "REF = $acd_id " . ref($acd_id);
-      #$message .= "DUMP = " . ref($self->param('id'));
+    }elsif(! defined $self->param('sid')){
+        $as_id = $self->param('id');
+        my $find_asc =  $self->resultset('Asset')->search(
+                { 'as_id' => { '=', "$as_id"},
+        },{})->first;
+        if($self->resultset('Asset')->search({ 'as_id' => { '=', "$as_id"}, },{})->count == 1){
+            $acd_id = $find_asc->as_cid;
+        }else{
+            $self->tt_params( 
+                title => 'Error - unknown asset',
+                message => 'That asset has not yet been added to the database',
+                no_data => '1',
+                error => '<script type="text/javascript">
+function goBack()
+  {
+  window.history.back()
+  }
+function goHome(url)
+    {
+        window.document.location.href=url
     }
+</script>
+</head>
+<body>
+
+<input type="button" value="Maybe try going back" onclick="goBack()" />
+<input type="button" value="or searching" onclick="goHome(\'/cgi-bin/index.cgi/assets\')" />'
+                );
+            return $self->tt_process();
+        }
+        # we should only have one entry!
+        #while(my $fasc=$find_asc->next){ $acd_id = $fasc->ac_cid; }
+    }else{
+        no strict "refs";
+        if($q && $q->param('id')){
+          $message .= "QO = " . Dumper($q);
+          $message .= "<br />\n";
+          #foreach my $ref (keys %{ $self->param('id') }){
+          foreach my $ref (@{ $q->param("id") }){
+            $message .= "RREF = $ref<br />\n";
+          }
+          $acd_id = $q->param('id');
+          $message .= "REF = $acd_id " . ref($acd_id);
+          #$message .= "DUMP = " . ref($self->param('id'));
+        }
     }
 
     #my $acd_id = '';
@@ -654,6 +699,7 @@ sub list: Runmode{
 =head3 define
 
 This lets you define an asset
+# NTS you are here - if we have a cid then pull what we DO know from the DB
 
 =cut
 

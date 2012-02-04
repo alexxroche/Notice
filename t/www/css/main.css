@@ -28,6 +28,8 @@ Use: Reset Styles for all browsers
 
 .login-caption { font-size: 175%; text-shadow:0 2px 6px #000000; }
 
+div.warn {display: block; margin: 1em auto; border: 1px solid; border-color: #ddd #999 #999 #ddd; color: #000000; background-color: #eeffff; font: bolder 14px/1.4em "Courier New", Courier, monospace;}
+
 .login-form { 
     margin: 40px auto;
     -moz-box-shadow: -5px 0px 5px rgba(68,68,68,0.6);

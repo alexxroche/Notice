@@ -11,7 +11,7 @@
     tr.as_data_odd td.bg { background-color: #cc9; }
     .error { color: orange; size:20px; }
     </style>
-[% IF error; error; ELSE; %]
+ [% UNLESS no_data %]
  <span class="h1">Asset Data for [% ning; ' '; type or asc.assetcategory.asc_name or asc.type or asc.asc_name; IF asd.cid or asid; ' <a href="/cgi-bin/index.cgi/assets/list/'; asd.cid or asid; '">(Asset '; asd.cid or asid; ')</a>'; END %]</span>
     <span class="headmsg">[% headmsg %]</span>
     <form method="POST" action="[% action %]">
@@ -51,8 +51,6 @@
     Which asset is this data for?
     [% END %]
     </form>
+ [% END %]
 [% END %]
-    [% message %]
-[% END %]
-
 
