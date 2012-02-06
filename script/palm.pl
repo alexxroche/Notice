@@ -197,7 +197,8 @@ sub process_request {
                     unless(defined $REMOTE_ADDR){ $REMOTE_ADDR = $ENV{REMOTE_ADDR}; }
                     chomp($REMOTE_ADDR);
                     $REMOTE_ADDR=~s/\s*\r?\n?$//g;
-                    print STDERR "$REMOTE_ADDR ran $script " . length($return) . " bytes in $slow seconds\n";
+                    use Time::localtime; my $now = ctime();
+                    print STDERR "$now $REMOTE_ADDR ran $script " . length($return) . " bytes in $slow seconds\n";
                     last;
                 }else{
                     warn ("doc_root = $doc_root (not found)");
