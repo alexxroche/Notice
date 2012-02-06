@@ -20,7 +20,6 @@ my $page_load_time = 0;
   }
 }
 
-
 =head2 dispatch_args
 
 This dispatches the args

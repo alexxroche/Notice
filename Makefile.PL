@@ -41,5 +41,3 @@ See http://www.opensource.org/licenses/ for more information.
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Notice-*' },
 );
-
-
