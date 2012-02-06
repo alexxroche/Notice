@@ -19,6 +19,7 @@
 </body>
 </html>
 [% ELSE %]
+[%- USE date -%]
 <?xml version="2.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"; xml:lang="en" lang="en">
@@ -146,15 +147,15 @@
         <tr><td>Other:</td><td><input name="help_type" id="other" value="other" type="radio"></td></tr>
         <tr><td colspan="2">
         <input type="submit" value="Send for help" onclick="javascript: alert(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Help is on the way... &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; once we read your message.. \n\n\n &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (probably tomorrow.. I would get on with something else for now)'); submitform(); clearForms(); return false;">
-        <!--input type="submit" value="Send for help" onclick="javascript: alert(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Help is on the way... &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; once we read your message.. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;'); alert('(probably tomorrow..)'); alert('I would get on with something else for now'); submitform(); document.help.reset(); this.reset(); reset(); return false;"-->
-        <input type="hidden" name="URI" value="[% c.param.self_url %]" />
+        <!--input type="submit" value="Send for help" onclick="javascript: alert(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Help is on the way... &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; once we read your message.. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;'); alert('(probably tomorrow..)'); alert('I would get on with something else for now'); submitform(); document.help.reset(); this.reset(); reset(); return false;"--> 
 
-        <input type="hidden" name="ud" value="[% c.param.username %]" />
-	<input type="hidden" name="subject" value="[notice] help [% c.param.known_as %]" />
-	<input type="hidden" name="realname" value="[% c.param.known_as %]" />
+        <input type="hidden" name="URI" value="[% c.query.self_url OR c.query.url OR self_url %]" />
+        <input type="hidden" name="ud" value="[% c.param('username') OR username %]" />
+	<input type="hidden" name="subject" value="[notice] help [% c.param('known_as') OR known_as %]" />
+	<input type="hidden" name="realname" value="[% c.param('known_as') OR known_as %]" />
 	<input type="hidden" name="recipient" value="bugs" />
-	<input type="hidden" name="email" value="[% c.param.username OR 'customer@notice.alexx.net' %]" />
-        <input type="hidden" name="date" value="Tue Mar 29 13:30:39 2011" />
+	<input type="hidden" name="email" value="[% username OR 'anonymous@'; REMOTE_ADDR -%]" />
+        <input type="hidden" name="date" value="[% date.format %]" />
         </td>
 	<td><input type="button" value="Clear help form" onclick="javascript:clearForms()" title="reset form" /></td></tr>
         </table>
@@ -233,7 +234,8 @@
 </table>
 </div><!-- end bodyblock -->
 
-<div id="footer">Copyright (c) 2007-2012 Alexx Roche  [% IF page_load_time %]<span class="pageLoadTime">([% page_load_time %])</span>[% END #IF %]</div>
+<div id="footer">Copyright (c) 2007-2012 Alexx Roche [% IF page_load_time %]<span class="pageLoadTime">([% page_load_time %])</span>[% END #IF %]</div>
+<!-- Template last modified [%- date.format(template.modtime) -%] -->
 </div><!-- end outer -->
 
 </body>

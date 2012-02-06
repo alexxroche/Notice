@@ -50,8 +50,8 @@ sub setup {
     $runmode=~s/.*\///;
 
     my $known_as;
-    $known_as = $self->param('known_as');
-    $self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $known_as at ". $ENV{REMOTE_ADDR}});
+    #$known_as = $self->param('known_as');
+    #$self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $known_as at ". $ENV{REMOTE_ADDR}});
 
     my $page_loaded = 0;
     eval {
@@ -89,7 +89,7 @@ sub main: StartRunmode {
     my $username = '';
     $username = $self->authen->username;
     if($username && $username ne ''){
-        $user_msg .= $username;
+        $self->tt_params({ username => $username});
     }
 
     # NOTE !
@@ -122,11 +122,9 @@ sub main: StartRunmode {
 <strike>Define a type of Asset</strike></a></h4>
 </p>);
 
-    $page .=qq (
-    $user_msg;
-    <p>
-    <h4><strike>Search</strike></h4>
-    </p>
+    if(defined $user_msg){ $page .=qq ( $user_msg; <br /> ); }
+
+    $page .=qq (<h4><strike>Search</strike></h4>
     <p>
     <h4> List </h4>
     <a class="navigation" href="/cgi-bin/index.cgi/assets/list/cid/19">list all trees</a> in the asset database or

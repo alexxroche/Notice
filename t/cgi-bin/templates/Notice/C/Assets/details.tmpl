@@ -1,4 +1,5 @@
-[% WRAPPER 'site_wrapper.tmpl' %] 
+[% WRAPPER 'Notice/C/Assets/wrapper.tmpl' %]
+[% #WRAPPER 'site_wrapper.tmpl' %] 
     <style type="text/css">
    /* table {border-collapse:collapse;} */
     tr th.under { border-bottom-style:dotted; }
@@ -10,7 +11,7 @@
     tr.as_data_odd td.bg { background-color: #cc9; }
     .error { color: orange; size:20px; }
     </style>
-[% UNLESS error; %]
+ [% UNLESS error; %]
  <h1>[% submit or 'submit' %] [% ning; ' '; type or asc.assetcategory.asc_name or asc.type or asc.asc_name %] to the Asset Database</h1>
     [% headmsg %][%# IF warning; '&lt;WARNING&gt;'; warning; '&lt;/WARNING&gt;'; END %]<form method="POST" action="[% action %]">
     <table>
@@ -47,6 +48,6 @@
     [% END %]
     <input type="submit" name="Add" value="[% submit or 'Add' %] [% type %]" />
     </form>
-[% END #of UNLESS %]
+ [% END #of UNLESS %]
 [% END #of WRAPPER %]
 
