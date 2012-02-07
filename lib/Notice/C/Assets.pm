@@ -87,7 +87,7 @@ sub plt {
     if($@){
         $page_loaded = time;
     }
-    $self->tt_params({page_load_time => sprintf("Page created %.3f seconds", ($page_loaded - $self->param('page_load_time')))});
+    $self->tt_params({page_load_time => sprintf("Took %.3f ms", (($page_loaded - $self->param('page_load_time'))*1000))});
     #return $page_loaded;
 }
 
@@ -737,6 +737,7 @@ sub define: Runmode {
     my $user_msg;
 
     $page .=qq (Here we will have a form so that the details for a new asset can be added);
+        # why isn't this in the template?
     $page .=qq (
     <div id="form">
         <form method="post" action="" id="add_asset_cat">
@@ -779,8 +780,7 @@ sub define: Runmode {
         <input type="submit" value="Add this new Asset type" class="button green" /></td>
         </form>
 
-        (we probably need one row for each asset categorie data entry)
-        ( and as each row is entered we could get jquery to add a new row )
+     <span class="warning">(New data rows will be added as needed; Empty rows will be ignored/deleted)</span>
     </div>
 );
 

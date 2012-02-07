@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.66.
+signed via the Module::Signature module, version 0.61.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -16,33 +16,47 @@ Hash: SHA1
 
 SHA1 9fc744d1a76b93645a786aa70aab24c3e7971c0e ABOUT
 SHA1 d6149c7501ae89385513e7e0b4e0c4a75ca0243c Changes
-SHA1 3a9809aafe710468f2db86e45aaeec41b321c72f MANIFEST
+SHA1 9f27ed875be6d42975ac6c07a1e3228c44c253ea MANIFEST
 SHA1 f45a89654b926fe753218eef91639df99b93d53d META.yml
-SHA1 17d0190a6bd7732a743700bec7b56d583eaf10f0 Makefile.PL
+SHA1 f1ab271c088fb5865a8294c9c39fbed6ae9413a7 Makefile.PL
 SHA1 895dbf730924745ed8bbabc1c9cf3ecf9145a5ff README
 SHA1 378a9927a24e2ab7c6e116b09bff53828da8fb6f README.whois
 SHA1 d1cd3255d3f636c31b1d87ba004632c7dc45bfd5 config/config.pl
-SHA1 db3c47158aa9aa0f7fb44f1603907a11e54e6d86 config/notice.mysql
-SHA1 50c5b506d52aa63cda67d936e31dca6ffd8b290f debug.sh
-SHA1 7700389c2bec36990388231c10f88e6ec030a80b lib/Notice.pm
+SHA1 ba37f0cde8a4efca63e161e00b902754b09944e5 config/notice.mysql
+SHA1 086941a4b8d9523c225aba691faab0b397315da2 debug.sh
+SHA1 d583149666bf6db74f93915e165da0d16be5a1dd lib/Notice.pm
 SHA1 f3cbf6214e9a1ec8a57a115fa618bd021945c40c lib/Notice/Base.pm
 SHA1 7c27e132588b09a9bc7ebe7a9ae2d24839754c1d lib/Notice/C/Account.pm
 SHA1 b1dd731a184ef5a830e924ea0f94150e89c7f8c6 lib/Notice/C/Addresses.pm
-SHA1 4f6d3fc8739c793095cc8ccffc6507eaec113af3 lib/Notice/C/Assets.pm
-SHA1 535ad489ed8a9857c9ecfca3cc23a16fbdf07e9f lib/Notice/C/Beekeeping.pm
+SHA1 6f2ace304f617f454d8a22cf7f4a85348843bbec lib/Notice/C/Assets.pm
+SHA1 96bc29d79a936c8342c80a96d22cb4428793c319 lib/Notice/C/Beekeeping.pm
 SHA1 69ee97331f435e91f3fb6766be3f71d31aca8ae7 lib/Notice/C/Config.pm
-SHA1 0b5a8d5a795fb9d7f67c8929eafc1ea90bd978b8 lib/Notice/C/Details.pm
+SHA1 3c984793e3a3bfa1d8d4da2beb986034c971275e lib/Notice/C/Details.pm
 SHA1 1eb6bfd8aa32ebe7f99e3a64636022ce6d08dc88 lib/Notice/C/Domains.pm
-SHA1 d3dd9e7902ee320ff6f76362d881b303d7a292cb lib/Notice/C/Email.pm
+SHA1 a433805bfed7f60cee492504321c4815097ceab0 lib/Notice/C/Email.pm
 SHA1 c7917ff8253b133d9410adce8dfb3aacc38287bd lib/Notice/C/Login.pm
 SHA1 145ed060930704ecbabb08cca59ef1a81c4b9595 lib/Notice/C/Logout.pm
-SHA1 7a4d8357d8552cc308514448f86a02a1c01af94c lib/Notice/C/Main.pm
-SHA1 097cff08114be7acd828b0140bb52dc032cd0db7 lib/Notice/C/Modules.pm
+SHA1 2bc5952305dc53520877debfcba130bba745083c lib/Notice/C/Main.pm
+SHA1 3c58b4ea91b5f57c513f5e741d79838d6272474c lib/Notice/C/Modules.pm
 SHA1 e05e7f2a070936821b219b9c80177615938b6065 lib/Notice/C/Mustlogin.pm
 SHA1 b7614c10b3e3803845dc3186930719fc8493e148 lib/Notice/C/Myerror.pm
 SHA1 8d9638df17b27755d59d7c2b48f042068090618c lib/Notice/C/Okay.pm
-SHA1 9adee3294a1f2b6b15bf046d8c334db2a20b4e15 lib/Notice/C/Prefs.pm
+SHA1 f4bba275a79726055df1738142e3d30aa263392d lib/Notice/C/Prefs.pm
 SHA1 ffbf5ff6611f328c991b097218e63b695adb2166 lib/Notice/C/Signup.pm
+SHA1 56e5bec969a03ae42a671449043f7bb6f37912fd lib/Notice/C/groups.cgi
+SHA1 6fb1c423f39a20910eabcf87b79bdd09a6bd190f lib/Notice/C/ip.cgi
+SHA1 d60a50e918af268b9dbd67f80ecad7ef76c104fb lib/Notice/C/ip_CIDR.cgi
+SHA1 074d09940e74616204b2e539a07af820c93dcd79 lib/Notice/C/ip_allocator.cgi
+SHA1 534b6b2f93b1229f9b285851d768052babdd95bb lib/Notice/C/ip_assigned_to.cgi
+SHA1 c94936cd0e29a43867f4076e529cf8aacd979765 lib/Notice/C/ip_block.cgi
+SHA1 2cffdf4776dc3816d65017d2d4effa0de7a872c5 lib/Notice/C/ip_edit.cgi
+SHA1 90f4f01c4b4e720f35793a6551474b0bdae42f39 lib/Notice/C/ip_history.cgi
+SHA1 fe97aaa21646ddf482386e07ed3ff88f446f2b9a lib/Notice/C/ip_networks.cgi
+SHA1 1d888f27e99ea9a38715e64ca65afb0d3e507942 lib/Notice/C/ip_rir.cgi
+SHA1 956c278ae606a16a91d81fd34fff7bd61dc86f47 lib/Notice/C/ip_search.cgi
+SHA1 d6bd582f23a1eefd81c6a28a1fe686eae0beb935 lib/Notice/C/ip_vlan.cgi
+SHA1 949cb8cac5078d7aaf75d6a7de7e7ce2ba17a055 lib/Notice/C/ssl.cgi
+SHA1 b4e5aa8b8687af1f5e6e3b1956e6e3077d69e969 lib/Notice/C/ssl_history.cgi
 SHA1 f3a6f7b75d01035e1fc012c7254fb9886fb9b604 lib/Notice/DB.pm
 SHA1 4694a85fd214bd7f07d7adfa0b529bc5d8e80c2a lib/Notice/DB/Result/Account.pm
 SHA1 b1d399cc5642f911b925d1e7817cc02a964b7b61 lib/Notice/DB/Result/Achistory.pm
@@ -55,7 +69,7 @@ SHA1 413daf67bc241d6372a76b4282ecd8b01aeeb205 lib/Notice/DB/Result/Asset.pm
 SHA1 d0dabbf5b3b8582d15c1fd4f9fde1f5fe223e84b lib/Notice/DB/Result/AssetCatData.pm
 SHA1 f71326ca300cd87e8c4bb7724bb927220fa4fddd lib/Notice/DB/Result/AssetCatDataGroupEntry.pm
 SHA1 9917831bac3c67f0f75e51fbc9de8dfda13b84e2 lib/Notice/DB/Result/AssetCatDataGroupMembers.pm
-SHA1 63eeca6bea1cb6fcab421884aef81f608127abfc lib/Notice/DB/Result/AssetCategory.pm
+SHA1 43baebd94efaa685b42c4da5dc0eda00bb5a72af lib/Notice/DB/Result/AssetCategory.pm
 SHA1 2f2c1cf71dc5811f8dbd235e7b3d32358554ab86 lib/Notice/DB/Result/AssetData.pm
 SHA1 3b84d59b84c70e1419e93d1ca9d7ba892a9cfa04 lib/Notice/DB/Result/AssetLocation.pm
 SHA1 be5f66985a8fb0d0a4064767d5d1aed25f981eb7 lib/Notice/DB/Result/ConfData.pm
@@ -105,7 +119,8 @@ SHA1 f53d87ce37c711717cce47ac1da2f018663ec484 lib/Notice/DB/Result/Trolly.pm
 SHA1 0dfc0100d521aa8af8d7e6198e42c2a4d442b26f lib/Notice/DB/Result/TrollyItem.pm
 SHA1 25c15ffc728bfc7d74474a1e13db5c8e8bc09f18 lib/Notice/DB/Result/Weblogin.pm
 SHA1 94d5c2a2cd18324a638d04d6dad54b1363873fb6 lib/Notice/DB/Result/Whowhere.pm
-SHA1 ad805becd895fef627ec2b35697e02e8c1eb9178 lib/Notice/Dispatch.pm
+SHA1 fc2daeac86a685113a8e9547fe8f18723a7dda5d lib/Notice/DB/ip.pm
+SHA1 99309e9e51fd1e1ff3dcbd9e7a7164ad4c903d25 lib/Notice/Dispatch.pm
 SHA1 58d895e2733aed6d3af703d5ceb26c80cf4b17c1 script/broken_builddns.pl
 SHA1 560ba8b08c1cfa19a3407e43123c7ef0acece4e6 script/build_dns.pl
 SHA1 75ee859b1c514aa0b3812eb03612ade28adf7deb script/cdbdump.pl
@@ -113,15 +128,22 @@ SHA1 3dbef02d2b5c5a8641851c33fd4afa5e11f69589 script/create_controller.pl
 SHA1 53eeb6d9e8d5b9d299d631ca6d94a893ccef0c4c script/create_dbic_schema.pl
 SHA1 1598d1b6f57f90eef2b61fa0e339124ec62ef095 script/create_notice_db.pl
 SHA1 2c08e5da4cf7259baab0feccde97e9e1bc51c483 script/create_whois_cdb.pl
+SHA1 b90bec8ad7fb9af63be9148bcebe4ee25af531fd script/git.add
+SHA1 f8814d73d45c104a05d269c8efa714460489e609 script/palm.pl
+SHA1 e88217e433c247cff13a0236814f0eb856442072 script/patch_cgi_app_server
+SHA1 18b23e9c88a582e48a7231e10652a185456d0254 script/patch_module_signature
 SHA1 b115b971a72f81303cd711ef96983308833e6d24 script/pin
 SHA1 05bc34cd6ba7e20c63f1a7cae3f961e3dea9977e script/prep_db.pl
 SHA1 6d52fe6735a97b420b11f1ae2b61b092305e90c1 script/publish_zone.pl
 SHA1 19352be490a2650f8487b071ffc7e6127c3dfccd script/sign_zone.pl
 SHA1 90af8ae0adad53c0c374e1b017bab9f229a9dc38 script/test_db.pl
 SHA1 5334adaa5c1a0a828a1d731b6f00e3bdc10bdf2d script/whois.pl
-SHA1 dba723e1958a7cb83b96c44128daa241a080619c server.pl
+SHA1 9b29e137709c8813d68c4d5d48b871e0d50eab3d server.pl
+SHA1 36a421099aabe1395d72a7d1de73a3117cc485f4 t/0.062-cgi-application-server.patch
 SHA1 a1f254731cd05e47db1e498aac120824b76e03c7 t/00-signature.t
 SHA1 fe7e02f78f2e08362385ab85bc32c4d65738941c t/01-load.t
+SHA1 17906c9913e7c797010aecc07554e9dc7d38bb6f t/README.nts
+SHA1 e62dd483ef085ad1769239d3f5699291710051b1 t/bio_ref.info
 SHA1 d558f92c70b6708316df1ae5eb195d99e660a4db t/boilerplate.t
 SHA1 0e6cca28323f896c2170da56b53c842378604917 t/cgi-bin/i18n/I18N/de.mo
 SHA1 595ad888590ead88bc7bd26cd03ad267e7d63936 t/cgi-bin/i18n/I18N/de.po
@@ -134,12 +156,13 @@ SHA1 807172ba1010e72a25a10eb03ae48acc66dda52a t/cgi-bin/i18n/test.html
 SHA1 f2533df4938b32d14861d450383aba2f2cf1cde8 t/cgi-bin/index.cgi
 SHA1 9a386c9849620b98d2a7d23985b6445c238dc021 t/cgi-bin/templates/Notice/C/Account/index.tmpl
 SHA1 aa49143a3e6f26091dfa6fe6fd2fe51d35b28f1d t/cgi-bin/templates/Notice/C/Addresses/index.tmpl
-SHA1 d52c1f45130ae64e5f492051255bc66ee2ac803a t/cgi-bin/templates/Notice/C/Assets/data.tmpl
+SHA1 4e3fdfcbb19a9b48583f79203a4121f852fe7c99 t/cgi-bin/templates/Notice/C/Assets/data.tmpl
 SHA1 9afcb1b863cba1ef60f669d5a4c8f1bbe5cf086f t/cgi-bin/templates/Notice/C/Assets/define.tmpl
 SHA1 217eda5f8fac8ef7593d2042933b04f3d75ffa8d t/cgi-bin/templates/Notice/C/Assets/delete.tmpl
-SHA1 ed5355e30568422bf5c73c445890fe08b33c62d9 t/cgi-bin/templates/Notice/C/Assets/details.tmpl
+SHA1 5b94408b640e35f9ad2163f7d300734ee59d2ae3 t/cgi-bin/templates/Notice/C/Assets/details.tmpl
 SHA1 2741b0f95e68939958172a759f4ce8e0b6ba23fc t/cgi-bin/templates/Notice/C/Assets/list.tmpl
-SHA1 9afcb1b863cba1ef60f669d5a4c8f1bbe5cf086f t/cgi-bin/templates/Notice/C/Assets/main.tmpl
+SHA1 c1a1ad84ac690cc940b01b663eb2e7b142591b23 t/cgi-bin/templates/Notice/C/Assets/main.tmpl
+SHA1 325a84d372b8d2f9c287f7e1be7401b7d4617004 t/cgi-bin/templates/Notice/C/Assets/wrapper.tmpl
 SHA1 9a386c9849620b98d2a7d23985b6445c238dc021 t/cgi-bin/templates/Notice/C/Beekeeping/main.tmpl
 SHA1 7618e99ea6b6d2d5e5c0af718255c53bbf2fb382 t/cgi-bin/templates/Notice/C/Beekeeping/wrapper.tmpl
 SHA1 70f41c39f6bcdfc7d3f970e13b016b0affe79ba7 t/cgi-bin/templates/Notice/C/Config/main.tmpl
@@ -175,7 +198,9 @@ SHA1 0851b5c7c47169b888488f46afb0f4397caa4934 t/cgi-bin/templates/login.tmpl
 SHA1 8eb1be207670e2f6f6ea2e9202686afec6108a7d t/cgi-bin/templates/login_form.html
 SHA1 d0e9663e24f43e384b0a440df8025e07c42d6fed t/cgi-bin/templates/main.html
 SHA1 3a348b2bcba5ad74a7b025e12fa40bbf84817371 t/cgi-bin/templates/main.tmpl
-SHA1 1f40428bd4b624e1f25caafbbe9e60cff70ed4bf t/cgi-bin/templates/site_wrapper.tmpl
+SHA1 f03d91767f683ba287caf5ad7d64f53132495ab5 t/cgi-bin/templates/site_wrapper.tmpl
+SHA1 b5cfec3d9801dbc806bcee21a4a81d71be0f05ba t/gameplan.info
+SHA1 f5b4834dce5fbb5eda91580491caec0a6a05bf7d t/module_outline.nts
 SHA1 cb3de934b65728bed1268e2da825e071c344a189 t/perl-critic.t
 SHA1 d171416aca8c8f684661689f43ecca299064b2bc t/perlcriticrc
 SHA1 c18ca726d0789b8929fb76c40427532cdb0bdccf t/pod-coverage.t
@@ -183,9 +208,9 @@ SHA1 18130b756804579d4c3db238c7d7127d2ae6f315 t/pod.t
 SHA1 8ae0d2f9c8203d18ad5b2278976e791f1a84eabb t/test-app.t
 SHA1 69927b175abe4c16ee98df106a545ff5df6e1f16 t/www/css/1_1.css
 SHA1 8d8dc70aef7aa1016b58ff3f7e500fc6d48502a1 t/www/css/all.css
-SHA1 b0c8683545e1551a59f56838ba5e78f75117b26a t/www/css/asset.css
+SHA1 141d08924a5fd5ff0c783abe952806f79be3cc05 t/www/css/asset.css
 SHA1 dd37776704c7961914a8b024f041352d76931073 t/www/css/domain_edit.css
-SHA1 ee366edc96aea9eefa5cd3424be7b29ba0898dc5 t/www/css/main.css
+SHA1 71967febb72490e92c624e5c18e728d3a2c4482f t/www/css/main.css
 SHA1 4a433eb60b7e203082159cf5de995d29cf587831 t/www/css/mobile.css
 SHA1 cecb66868ec420559a1e403c161ee994fc1c47fe t/www/css/notice.css
 SHA1 b876165081b3a3028fb004f7666c5f9a2949059d t/www/css/print.css
@@ -193,8 +218,9 @@ SHA1 d6e390dc26c62692f375119985d025797054300c t/www/css/signup.css
 SHA1 780a9f39e042bd4bd55c32483aa5c3428fd46fb1 t/www/css/splash.css
 SHA1 40f681a481932ba593b4910c28cf6860263d73fb t/www/favicon.ico
 SHA1 548b27444c7d2576fb824c2e66267acd766b4ae5 t/www/images/orphus.gif
-SHA1 1d229271928d3f9e2bb0375bd6ce5db6c6d348d9 t/www/index.html
-SHA1 c5ec06decfc50705ae097807e8dc27e264a509f9 t/www/js/asset.js
+SHA1 4b772b939292e57eb8b6997206d8f888b57323fb t/www/images/top_logo.png
+SHA1 e98d0d086f790e026f5c8c73f4422282e93d99c8 t/www/index.html
+SHA1 95dc4e8351262116b0a021ea12c421d3e07bda3a t/www/js/asset.js
 SHA1 1e7722a842a9ff46f6caa7a62d10ba8add41f1fd t/www/js/create_pw.js
 SHA1 a796b79577bab13be5ccc925819cea1c1bf1e558 t/www/js/javascriptAES.js
 SHA1 b75990598ee8d3895448ed9d08726af63109f842 t/www/js/jquery.js
@@ -204,9 +230,9 @@ SHA1 e94e959d169e67af503e76d2443582ca984e4742 t/www/js/script.js
 SHA1 69e11a51f25c0afa0b29433aec303ac1d2e4a662 t/www/js/signup.js
 SHA1 63657cbb7d7086c56b0cd4e5c6999bb683664868 t/www/robots.txt
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
+Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk8O6vYACgkQAR68wSDJd64cDQCgvAOlY66NQy/wcyLaSsqbED96
-IrEAnRVdxjGayPlId2VsEZUF2vh8CPXU
-=kQKU
+iEYEARECAAYFAk8w+Y4ACgkQAR68wSDJd65U2gCfRdeYSUtI0br1OFvy6hpoQzcX
+lesAniAWvm1EXh9pNCOsbMOEIo/DWk/k
+=cdSp
 -----END PGP SIGNATURE-----
