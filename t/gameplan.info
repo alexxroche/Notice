@@ -1,0 +1,74 @@
+Notice::CRM
+    contacts for sales (uses the account,people,addresses tables to store the data)
+    uses the CRM table to store info about sales leads
+Notice::Beekeeping
+    free for anyone to register through cgi-bin/index.cgi/Beekeeping
+    they can then add their apiaries and then hives
+    also members of the public can enter "Swarm landings" locations with images
+        (if they know they can enter the type: wasp, bumble, honey, hornet)
+    each beekeeper can enter the distance they are willing to go and their location
+    then they will get Atom Syndication Format messages
+    Digital hive-record cards. When the user logs in they are presented with a list of
+    the tasks they entered in old hive-record cards.
+Notice::Hedgehog
+    use Beekeeping code for any other animal
+::IP
+	ip_shoehorn.pl zone importer and updater (this will take a zone and import the IPs, OR update them if they exist)
+ 	API for ip_allocator.cgi { SOAP::XML[PGP enc+signed message] }
+	display (html table or png) available ip if $slash > 24 ip_CIDR
+	vlan edit
+	network edit
+	CIDR boundry check in ipp_insert so no 192.168.1.0/8 !
+	ip_admin.cgi 	- this checks that rate of allocation and predicts when they will be exausted
+			- also check/report on ip addresses that do not have blocks (or have the wrong network)
+	search::ip it MUST look for blocks as well as IP
+
+::base
+Notice::domains::zone_editor
+	CNAME and A record check (so you can not have BOTH)
+	enforce RFC SOA minimums for TLDRR (.de .fr!)
+	force sub-domain for almost EVERYTHING
+	display live and future data
+Notice::HR
+	holiday booking and approval
+    use groups to define minimun cover so that there is always a vital member of staff
+        (also does on-call)
+Notice::groups
+    The real power of Notice, (the white box in the logo)
+Notice::SSL
+	set view control so only SSL_sysadmin can view key
+	set view control so only [SSL_admin,SSL_sysadmin] can view csr
+	email SSL_admin group leader for the certs linked to that group (probably via ssl_acid)
+		( so each cert has an ssl_acid, each ac_id that has a SSL_admin group will be emailed
+		  warnings at 30 days - the member of the SSL_admin group who is either leader or highest ranking
+		  is the To: and all of the other members are CC:
+		)
+	SSL admin - edit default CSR for [pe_id_]ac_id
+Notice::SSH
+	ssh_id
+	ssl_peid
+	ssl_host_asid
+	ssl_server_asid
+	ssl_idrsa_pub
+	ssl_expires
+	ssl_sudo
+	ssl_notes
+Notice::websites
+	list sites
+	add sites
+	update sites
+	remove sites
+	.htaccess
+Noitce::User
+	lockdown - you can limit the class or IP addresses from where you can log in
+		This needs a lockdown recovery just like we need a password recory
+		and an email confirmation
+Notice::Modules
+each comes with
+        Notice/lib/Notice/C/$mod.pm
+        Notice/lib/Notice/C/$mod.po
+Link in www.dotproject.net
+Link in http://bestpractical.com/rt/ 
+Link in www.nagios.org/
+(no point re-inventing the wheel)
+

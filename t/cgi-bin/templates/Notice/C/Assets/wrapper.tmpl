@@ -1,0 +1,186 @@
+[% IF no_wrapper OR template.no_wrapper %] [% content %] [% ELSE %]
+<?xml version="2.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"; xml:lang="en" lang="en">
+<head>
+<title>[% title or template.title or "Notice CRaAM" %]</title>
+<link rel="stylesheet" href="/css/[% template.css or 'main.css' %]" />
+<meta name="description" content="IP database" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta name="keywords" content="extended, customer, resource, management, system, for, internet, companies" />
+<link rel="stylesheet" type="text/css" media="screen" href="/css/asset.css" />
+<script type="text/javascript" src="/js/jquery.js"></script>
+<script src="/js/asset.js" type="text/javascript"></script>
+</head>
+
+<body>
+<div id="outer">
+<div id="header">
+  <span id="top_menu">
+ <table class="headtable"><tr class="headtable">
+ <td class="headtable top_logo">
+  <span id="logo"> <img src="/images/top_logo.png" alt="Welcome to Notice"/> </span>
+</td>
+<td class="headtable"> &nbsp; </td>
+
+<td class="headtable"> &nbsp; </td>
+<td class="headtable"> &nbsp; Search: &nbsp; </td>
+<td class="headtable">Person:</td><td class="headtable"> <form method="post" action="search.cgi?ud=20110328203332_::1_726df427a7dc96baff0d3cfd4742adc5_2?ud=20110328203332_::1_726df427a7dc96baff0d3cfd4742adc5_2&amp;search=ppl"><input type="text" maxlength="30" name="person" value=""/></form></td>
+<td class="headtable">Place:</td>
+<td class="headtable"><form method="post" action="addresses.cgi?ud=20110328203332_::1_726df427a7dc96baff0d3cfd4742adc5_2?ud=20110328203332_::1_726df427a7dc96baff0d3cfd4742adc5_2"><input type="text" maxlength="30" name="place" value=""/></form></td>
+<td class="headtable"> Thing:</td><td class="headtable"><form method="post" action="search.cgi?ud=20110328203332_::1_726df427a7dc96baff0d3cfd4742adc5_2?ud=20110328203332_::1_726df427a7dc96baff0d3cfd4742adc5_2&amp;Search=thing"><input type="text" maxlength="30" name="search" value=""/><input type="hidden" name="Search" value="thing"/></form></td>
+
+<td class="headtable-links"><span class="headtable-links">
+<script language="javascript">
+	<!--
+	function bookmarksite(title, url) {
+		if (navigator.userAgent.indexOf('Opera') != -1) 
+			alert("Press CTRL T to bookmark " + url);
+		else if (document.all)
+			window.external.AddFavorite(url, title);
+		else if (window.sidebar)
+			alert("Press Ctrl D to bookmark the " + url);
+		else
+			alert("You will have to bookmark " + url + " the long-hand way");
+	}
+	function clearForms(){
+  // declare element type
+  var type = null;
+  // loop through forms on HTML page
+  for (var x=0; x<document.forms.length; x++){
+    // loop through each element on form
+    for (var y=0; y<document.forms[x].elements.length; y++){
+      // define element type
+      type = document.forms[x].elements[y].type
+      // alert before erasing form element
+      //alert('form='+x+' element='+y+' type='+type);
+      // switch on element type
+      switch(type){
+        case "text":
+        case "textarea":
+        case "password":
+        //case "hidden":
+          document.forms[x].elements[y].value = "";
+          break;
+        case "radio":
+        case "checkbox":
+          document.forms[x].elements[y].checked = "";
+          break;
+        case "select-one":
+          document.forms[x].elements[y].options[0].selected = true;
+          break;
+        case "select-multiple":
+          for (z=0; z<document.forms[x].elements[y].options.length; z++){
+            document.forms[x].elements[y].options[z].selected = false;
+          }
+        break;
+      }
+    }
+  }
+}
+	//-->
+</script>
+<style type="text/css">
+
+.helpermenu{ position: relative; z-index: 3; }
+.helpermenu:hover{ position: relative; top: 0px; left: 0px; background-color: transparent; z-index: 50; }
+
+.helpermenu span.hone{ position: absolute; background-color: lightyellow; top: 11px; right: -45px; padding: 0px; border: 1px dashed gray; visibility: hidden; color: black; text-decoration: none; }
+.helpermenu:hover span.hone{ visibility: visible; position: absolute; top: 15px; right: -40px; white-space:nowrap; text-align: right; }
+.helpermenu:hover span.hone:first-line{ font-size:3.5em; font-weight:bold; text-align: center;}
+
+.helpermenu span.htwo{ position: absolute; background-color: lightyellow; top: 11px; padding: 0px; left: -270px; border: 1px dashed gray; visibility: hidden; color: black; text-decoration: none; }
+.helpermenu:hover span.htwo{ visibility: visible; position: absolute; top: 10px; left: -270px; white-space:nowrap; text-align: right; }
+.helpermenu:hover span.htwo:first-line{ font-size:2.5em; font-weight:bold; text-align: center;}
+.headtable-helpers { margin-left: auto; margin-right: 45px; }
+.helpermenu span.smallhelp { font-size:0.9em; color:#fff; font-weight:normal; }
+.helpermenu span.largehelp { text-align: center; font-size:1.5em; color:#000; font-weight:bold; }
+
+</style>
+	<a href="javascript:bookmarksite('Notice index.cgi?ud=20110328203332_::1_726df427a7dc96baff0d3cfd4742adc5_2','https://notice.alexx.net//sites/notice.alexx.net/wwwindex.cgi')" class="navigation">(B)</a>
+
+ <span class="helpermenu">&lt;css&gt;<span class="htwo">
+      <span class="largehelp">&lt;css&gt;</span><br />
+        This link lets you edit the css, (page colours and text size)<br /> for this page<br />
+
+        (For now use the option under preferences over on the left)
+</span></span> 
+<a class="helpermenu navigation" id="menuthree" href="#nada" >[H]
+<span class="htwo">
+      <span class="largehelp"> &nbsp; &nbsp; &nbsp; Help request</span><br />
+        <span class="smallhelp" style="color:#000">(User details and the location of this page will be included)</span>
+      <form name="help" action="help_form.cgi?ud=20110328203332_::1_726df427a7dc96baff0d3cfd4742adc5_2" method="post">
+
+        <table border="0">
+	<tr><th colspan="2" style="text-align:right;">Options/Type</th><th style="text-align:center;">Message</th></tr>
+        <tr><td>Bug:</td><td><input name="help_type" id="bug" value="bug" type="radio"></td>
+        <td rowspan="5"><textarea name="help" rows="6" colls="17"></textarea><br /></td>
+        </tr>
+        <tr><td>Feature request:</td><td><input name="help_type" id="feature" value="feature" type="radio"></td></tr>
+
+        <tr><td>Help:</td><td><input name="help_type" id="help" value="help" type="radio"></td></tr>
+        <tr><td>Praise:</td><td><input name="help_type" id="hi5" value="hi5" type="radio"></td></tr>
+        <tr><td>Other:</td><td><input name="help_type" id="other" value="other" type="radio"></td></tr>
+        <tr><td colspan="2">
+        <input type="submit" value="Send for help" onclick="javascript: alert(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Help is on the way... &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; once we read your message.. \n\n\n &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (probably tomorrow.. I would get on with something else for now)'); submitform(); clearForms(); return false;">
+        <!--input type="submit" value="Send for help" onclick="javascript: alert(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Help is on the way... &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; once we read your message.. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;'); alert('(probably tomorrow..)'); alert('I would get on with something else for now'); submitform(); document.help.reset(); this.reset(); reset(); return false;"-->
+        <input type="hidden" name="URI" value="index.cgi?ud=20110328203332_::1_726df427a7dc96baff0d3cfd4742adc5_2" />
+
+        <input type="hidden" name="ud" value="20110328203332_::1_726df427a7dc96baff0d3cfd4742adc5_2" />
+	<input type="hidden" name="subject" value="[notice] help Alexx Roche" />
+	<input type="hidden" name="realname" value="Alexx Roche" />
+	<input type="hidden" name="recipient" value="bugs" />
+	<input type="hidden" name="email" value="alexx@alexx.net" />
+        <input type="hidden" name="date" value="Tue Mar 29 13:30:39 2011" />
+        </td>
+	<td><input type="button" value="Clear help form" onclick="javascript:clearForms()" title="reset form" /></td></tr>
+        </table>
+
+        </form>
+</span></a></span></td>
+</tr>
+</table>
+
+  </span>
+</div>
+<div id="bodyblock">
+<span class="warning">[% IF warning; '&lt;WARNING&gt;'; warning; '&lt;/WARNING&gt;'; END %]</span>
+<table id="body">
+<tr><td>
+<div id="menu">
+    Navigation:
+    <ul>
+        <li><a class="navigation" href="/cgi-bin/index.cgi/main/">Home</a></li>
+        <li><a class="navigation" href="/cgi-bin/index.cgi/domains/">Domains</a>
+        <li><a class="navigation" href="/cgi-bin/index.cgi/email/">Email</a>
+        <li><a class="navigation" href="/cgi-bin/index.cgi/assets/list/">Assets</a>
+		<ul>
+        	<li><a class="navigation" href="[% c.uri_for('/') %]">This Page</a></li>
+        	<li><a class="navigation" href="/cgi-bin/index.cgi/assets/list/">Full List</a></li>
+		</ul>
+	</li>
+        <li><a class="navigation" href="/cgi-bin/index.cgi/users/">People</a>
+        <li><a class="navigation" href="/cgi-bin/index.cgi/addresses/">Addresses</a>
+        <li><a class="navigation logout" href="/cgi-bin/index.cgi/logout/" title="for security (and great justice)" >Logout</a></li>
+    </ul>
+</div><!-- end menu -->
+</td>
+<td>
+<div id="content">
+    [%# Status and error messages %]
+    <span class="message">[% status_msg or message %]</span>
+    <span class="error">[% error_msg or error %]</span>
+    [% content %]
+</div><!-- end content -->
+</td>
+</tr>
+</table>
+</div><!-- end bodyblock -->
+
+<div id="footer">Copyright (c) 2007-2011 Alexx Roche</div>
+</div><!-- end outer -->
+
+</body>
+</html>
+[% END %]

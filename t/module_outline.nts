@@ -1,0 +1,33 @@
+Manifest of a module
+DISH		: (Digital Integrity Signed Hash)
+lang_msg	: non error messages
+land_error	: error messages in $erro{$lang}{msg_id_unique}
+db_strongs	: the SQL strings needed to manage the data (external to the scripts to make this more portable)
+db_conf		: the tables needed and the entries for other tables
+Notice::Module_name/scripts
+
+Module name
+Authors
+Maintainers
+id
+function/desc
+Catagories (or tags)
+dependencies: ! = must be installed , ? = must be accessable
+src_url
+update_url
+integrity hash
+menu locations (default. This can be changed by each user changing the order of pe_menu
+version
+noties
+
+0	0
+1	1 user_use	(the functions)
+2	2 user_access	(the module itself)
+4	3 limited_read	(some of the data)
+8	4 user_read	(the data)
+16	5 user_insert
+32	6 user_update	(change data)
+64	7 admin_read	(tread module config)
+128	8 admin_write	(alter module config)
+
+latitudes "The ability to access data beyond the scope of the locality afforded in the hierarchy"
