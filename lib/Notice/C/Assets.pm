@@ -71,18 +71,43 @@ sub setup {
 
 }
 
+=head3 plt
+
+find out when this page finished loading
+
+=cut
+
+sub plt {
+    my $self = shift;
+    my $page_loaded = 0;
+    eval {
+        use Time::HiRes qw ( time );
+        $page_loaded = time;
+    };
+    if($@){
+        $page_loaded = time;
+    }
+    $self->tt_params({page_load_time => sprintf("Page created %.3f seconds", ($page_loaded - $self->param('page_load_time')))});
+    #return $page_loaded;
+}
+
 
 =head2 RUN MODES
 
 =head3 main
 
 the default page
+This has a long way to go. If the user is not in the admin group then they should not get
+warnings about undefined asset catagories.
+
+If there are no asset catagories then the user should be directed, (walked through) creating one.)
 
 =cut
 
 sub main: StartRunmode {
     my ($self) = @_;
     my $surl;
+
     $surl = ($self->query->self_url);
     my $message='';
     my $user_msg;
@@ -96,6 +121,8 @@ sub main: StartRunmode {
     # we should warn if there is an asset_category entry that has no asset_cat_data
     # select asc_id, asc_name, asc_description from asset_categories LEFT JOIN asset_cat_data ON acd_cid = asc_id WHERE acd_id is NULL;
     # so that they can go and define them
+
+
     my @c_missing_data = $self->resultset('AssetCategory')->search({
            'acd_id' => undef
         },{
@@ -118,7 +145,7 @@ sub main: StartRunmode {
     
     $page =qq ( 
         <p>
-    <h4><a href="$surl/define">
+    <h4><a class="small black button so we can see it which monkey wrote this css" href="$surl/define">
 <strike>Define a type of Asset</strike></a></h4>
 </p>);
 
@@ -178,6 +205,7 @@ sub main: StartRunmode {
     ac      => \@ac,
     page => $page,
           });
+    $self->plt;
     return $self->tt_process();
     
 }
@@ -506,7 +534,7 @@ function goHome(url)
         #$key{'asd_cid'} = $id; #asset_data.asd_cid is really asset_cat_data.acd_id not asset_categories.asc_id
         }
         #$warning = Dumper(%create_data);
-    # NTS you are HERE preparing the update (key seems not to work)
+    # NTS you are preparing the update (key seems not to work)
     if(%create_data && %key){
             # my %create_data = ({ as_date => \'NOW()'});   #NOTE or this
             # my %create_data = ( as_date => \'NOW()');     #NOTE this might work
@@ -778,6 +806,7 @@ sub define: Runmode {
     message => $message,
     page => $page,
           });
+    $self->plt;
     return $self->tt_process();
 
 }
