@@ -3,7 +3,7 @@
  [% IF c_missing_data %]
 <div class="warn">
 <h4><span class="warning"> N.B.</span> Warning:</h4> There are undefined asset catagories, that you can define
-Here you can add an asset <form action="/cgi-bin/index.cgi/assets/define">
+<form action="/cgi-bin/index.cgi/assets/define">
     <select name="cid">
  [%- FOREACH acl = c_missing_data; -%]
         <option class="very" value="[%- acl.asc_id -%]">[%- acl.asc_name -%] - [%- acl.asc_description -%]</option>

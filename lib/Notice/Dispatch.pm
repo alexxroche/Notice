@@ -5,6 +5,9 @@ package Notice::Dispatch;
 Template URL dispatcher for CGI::Application::Structured apps.
 
 =cut 
+my @clr = caller();
+my $caller = 'index.cgi';
+if( $clr[1]=~m/server.pl/){ $caller = ''; } # we don't want to sete page_load_time
 
 use base 'CGI::Application::Dispatch';
 require Notice;
@@ -13,11 +16,14 @@ my $page_load_time = 0;
 { #should this be here or in Notice.pm ?
   eval {
     use Time::HiRes qw( time );
-    $page_load_time = time;
+    $page_load_time = time if $caller;
   };
   if($@){
-    $page_load_time = time;
+    $page_load_time = time if $caller;
   }
+    # If this is called by server.pl  we need to let Notice.pm set plt
+    # due to persistence.
+  
 }
 
 =head2 dispatch_args
@@ -33,7 +39,7 @@ if(! -d 'config'){ $cfg_file = '../../config/config.pl'; } # for server.pl
 sub dispatch_args {
 	return {
 		prefix      => Notice::C, #lets protect against arbitrary code being run
-		args_to_new =>{PARAMS =>{cfg_file => $cfg_file}, plt => $page_load_time},
+		args_to_new =>{PARAMS =>{cfg_file => $cfg_file, caller => $caller, plt => $page_load_time} },
         #args_to_new => {PARAMS =>{cfg_file => ['config.ini'], format => 'equal'}}, #if you prefer
 		table       => [
 			''                   => {app => 'Notice', rm =>'main'},

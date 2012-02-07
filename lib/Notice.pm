@@ -32,7 +32,7 @@ use CGI::Application::Plugin::Forward;
 use CGI::Application::Plugin::TT;
 use Data::Dumper;
 
-our $VERSION = 3.03;
+our $VERSION = 3.04;
 
 =head1 NAME
 
@@ -334,13 +334,23 @@ sub cgiapp_init {
         unless($self->param('id')){ $self->param('id' => $id ); }
         unless($self->param('mod')){ $self->param('mod' => $module ); }
         if($CFG{'default_lang'} && !$self->param('i18n')){ $self->param('i18n' => $CFG{'default_lang'}); }
+        $self->tt_params({caller  => $self->param('caller')});
         $self->tt_params({REMOTE_ADDR  => $ENV{REMOTE_ADDR}});
         $self->tt_params({title => 'Notice CRaAM  ' . $runmode ." - $known_as AT ". $ENV{REMOTE_ADDR}});
     }else{
         $self->tt_params({title => 'Notice CRaAM -' . $known_as . ' ON '. $ENV{REMOTE_ADDR}});
     }
-    # Maybe this was not called using cgi-bin/index.cgi 
-    unless($self->param('page_load_time')){
+    # Maybe this was not called using cgi-bin/index.cgi  (e.g. server.pl)
+    if($self->param('plt') && $self->param('caller')){
+        $self->param('page_load_time' => $self->param('plt') );
+    }else{
+        eval {
+            use Time::HiRes qw( time );
+            $page_load_time = time;
+        };
+        if($@){
+            $page_load_time = time;
+        }
         $self->param('page_load_time' => $page_load_time);
     }
 }
