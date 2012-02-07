@@ -1,0 +1,44 @@
+Scratch-pad: {
+
+    Lets you record each medical event in a private blog (encrypted!)
+
+    The code should be able to output a micro-blog (search for day-to-day events)
+    or a macro-diary (major trends)
+
+    In the setup enter DoB, hight,  weight and medical history for each parent and grand-parents.
+    (until scratch-pad is used by a whole family, then you just link your parents)
+
+    Output daily-recommendations in the micro-calendar, for exercise.
+
+    Parents start this when their child is born so that when both parents have died the 'child' will know what they are inoculated against.
+
+    "Today you should have to do one round of 8-piece brocade."
+
+    Must factor in work. If you go from being a programmer to being a farmer then exercise is dealt with, but possibly stress is not ->meditation/tai chi
+
+}
+
+Own-school: {
+    Guided autodidactic learning.
+    Each child is given a tablet-computer and it interactively guages their level at each subject.
+
+    When they are 1 year old it discovers, (and develops) their dexterity and timeing, checks colour-blindness.
+    At other ages it will encorage stengths and drop subjects that they show no aptitude for, (though each subject just drops in probability rather than being dropped.)
+    
+}
+
+Social-standing: {
+    This integrates with the other two and your social details and automates social gatherings down to the invitations and the ordering of provisions.
+    Also lets people anonymously search for others with similar interests in their geographically local area
+}
+
+bypass: {
+    Stores password and personal data store, (bank account numbers, pass phrases and other details like that.)
+    Can export into keepass,xml,csv,{user defined via a template}
+    each bypass password, (and Notice 4.0 people.pe_password) is randomly generated and locked, (hashed) using the users password, (people.pe_passwd). 
+    if the user wants they can use http://en.wikipedia.org/wiki/Secret_sharing on the underlying password: {
+        normally they would create one share for each significant friend and family member and one for their laywer.
+        bypass will suggest a sensible quarum needed by the group after they are dead. 
+        After they have not logged in for {user defined length, e.g. one week} the quarum can gather to enter their share to access the data/passwords
+    }
+}
