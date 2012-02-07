@@ -28,12 +28,13 @@
     <tr>
     <th colspan="10">Data</th>
     </tr>
- [%- IF acd.size >=1 -%]
+ [%- IF acd and acd.size >=1 -%]
   [%- FOREACH cd = acd -%]
   <tr>
-  <td>name</td><td><input type="text" name="d_name" value="[%- cd.acd_name -%]" size="12"/></td>
-  <td>order</td><td><input type="text" name="d_order" value="[%- cd.acd_order -%]" size="2" id="order" /></td>
-  <td>type</td><td><select name="d_type">
+  <td>name<input type="hidden" name="d_id" value="[%- cd.acd_id -%]" /></td>
+  <td><input type="text" name="d_name_[%- cd.acd_id -%]" value="[%- cd.acd_name -%]" size="12" /></td>
+  <td>order</td><td><input type="text" name="d_order_[%- cd.acd_id -%]" value="[%- cd.acd_order -%]" size="2" id="order" /></td>
+  <td>type</td><td><select name="d_type_[%- cd.acd_id -%]">
                             <option value="text" [%- IF cd.acd_type == 'text'; 'selected="selected"'; END -%]>text</option>
                             <option value="checkbox">checkbox</option>
                             <option value="select">select</option>
@@ -48,8 +49,8 @@
  [%- ELSE -%]
   <tr>
   <td>name</td><td><input type="text" name="d_name" value="" size="12"/></td>
-  <td>order</td><td><input type="text" name="order" value="10" size="2" id="order" /></td>
-  <td>type</td><td><select name="type">
+  <td>order</td><td><input type="text" name="d_order" value="10" size="2" id="order" /></td>
+  <td>type</td><td><select name="d_type">
                             <option value="text">text</option>
                             <option value="checkbox">checkbox</option>
                             <option value="select">select</option>
@@ -57,19 +58,19 @@
                             <option value="textarea">textarea</option>
                         </select>
                     </td>
-  <td><a class="blacktext" title="A regular expression to control/limit the data that can be entered">regexp</a></td><td><input id="regexp" type="text" name="regexp" value="" size="10"/></td>
+  <td><a class="blacktext" title="A regular expression to control/limit the data that can be entered">regexp</a></td><td><input id="regexp" type="text" name="d_regexp" value="" size="10"/></td>
   <td>grid</td><td><input type="text" name="d_grid" value="" size="2"/></td>
    </tr>
  [%- END -%]
           </tbody>
         </table>
    [%- IF acd -%]
-        <input type="submit" value="Update this Asset type" class="button orange" /> &nbsp;
+        <input id="updatebutton" type="submit" value="Update this Asset type" class="button orange" /> &nbsp;
         <input id="addrow" type="button" value="Add a new data row" class="small green button" /></td>
    [%- ELSE -%]
-        <input type="submit" value="Add this new Asset type" class="button green" /></td>
+        <input id="addbutton" type="submit" value="Add this new Asset type" class="button green" /></td>
    [%- END -%]
-        </form>
-    </div>
+    </form>
+ </div>
 [% page %]</span>
 [% END %]

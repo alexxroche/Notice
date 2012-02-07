@@ -521,35 +521,35 @@ function goHome(url)
       $debug .= '<br />\n';
       UPDATE: foreach my $ak (keys %{ $q->{'param'} } ){
         # might be better to pull this from an array, but there must be a
-    my $v = $q->param($ak);
-    my %key;
-    if($v){
-      $debug .=qq |AK:$ak = $v <br />\n |; #/ vi-fix
-    }else{ next UPDATE; }
-        # better DBIx::Class way to know which collums we are looking for
-          if( $ak=~m/^\d+$/ && $v){
-                $create_data{'asd_value'} = $q->param($ak);
-        $key{'asd_cid'} = $ak;
-        $key{'asd_asid'} = $q->param('sid');
-        #$key{'asd_cid'} = $id; #asset_data.asd_cid is really asset_cat_data.acd_id not asset_categories.asc_id
-        }
-        #$warning = Dumper(%create_data);
-    # NTS you are preparing the update (key seems not to work)
-    if(%create_data && %key){
-            # my %create_data = ({ as_date => \'NOW()'});   #NOTE or this
-            # my %create_data = ( as_date => \'NOW()');     #NOTE this might work
-            $create_data{'asd_date'} = $now;
-            #my $comment = $self->resultset('AssetData')->update( \%create_data, {asd_cid => $ak, asd_asid => "$q->param('sid')" });
-            my $comment = $self->resultset('AssetData')->search( { asd_cid => $ak, asd_asid => $q->param('sid') });
-            #my $comment = $self->resultset('AssetData')->update( \%create_data, \%key);
-            $comment->update_or_create( \%create_data );
-            #$warning .= "WARNING: " . Dumper($comment);
-            #$warning .= "WARNING: tried to do the update " . $comment->as_query();
-            #$self->tt_params( headmsg => qq |Asset data updated! <a href='?'>&laquo;back</a> ($comment)|);
-            $self->tt_params( headmsg => qq |Asset data updated!|);
-    }else{
-        $debug .= "INFO: " . Dumper(%key);
-    }
+        my $v = $q->param($ak);
+        my %key;
+        if($v){
+          $debug .=qq |AK:$ak = $v <br />\n |; #/ vi-fix
+        }else{ next UPDATE; }
+            # better DBIx::Class way to know which collums we are looking for
+            if( $ak=~m/^\d+$/ && $v){
+                    $create_data{'asd_value'} = $q->param($ak);
+            $key{'asd_cid'} = $ak;
+            $key{'asd_asid'} = $q->param('sid');
+            #$key{'asd_cid'} = $id; #asset_data.asd_cid is really asset_cat_data.acd_id not asset_categories.asc_id
+            }
+            #$warning = Dumper(%create_data);
+            # NTS you are preparing the update (key seems not to work)
+            if(%create_data && %key){
+                    # my %create_data = ({ as_date => \'NOW()'});   #NOTE or this
+                    # my %create_data = ( as_date => \'NOW()');     #NOTE this might work
+                    $create_data{'asd_date'} = $now;
+                    #my $comment = $self->resultset('AssetData')->update( \%create_data, {asd_cid => $ak, asd_asid => "$q->param('sid')" });
+                    my $comment = $self->resultset('AssetData')->search( { asd_cid => $ak, asd_asid => $q->param('sid') });
+                    #my $comment = $self->resultset('AssetData')->update( \%create_data, \%key);
+                    $comment->update_or_create( \%create_data );
+                    #$warning .= "WARNING: " . Dumper($comment);
+                    #$warning .= "WARNING: tried to do the update " . $comment->as_query();
+                    #$self->tt_params( headmsg => qq |Asset data updated! <a href='?'>&laquo;back</a> ($comment)|);
+                    $self->tt_params( headmsg => qq |Asset data updated!|);
+            }else{
+                $debug .= "INFO: " . Dumper(%key);
+            }
       }
     }else{
         $self->tt_params( headmsg => qq |Enter Asset Data here|);
@@ -744,13 +744,38 @@ sub define: Runmode {
     }elsif($q->param('cid')){ 
         $cid = $q->param('cid');
     }else{
-     $message .= "id:".$self->param('id')  ."sid:". $self->param('sid'); 
+     #$message .= "id:".$self->param('id')  ."sid:". $self->param('sid'); 
     }
     if($cid=~m/^(\d+)$/){
         my %AssetCatData_search =('acd_cid' => {'=', "$1"});
         my %AssetCatData_search_orderby=(order_by => 'acd_order');
         my $ac = $self->resultset('AssetCategory')->search({ asc_id => {'=', $cid}}, {})->first;
         my @acd = $self->resultset('AssetCatData')->search( { %AssetCatData_search }, { %AssetCatData_search_orderby});
+
+        if($q->param('id')){ #we might have new data or an update
+
+        # NTS you are HERE preparing the data for insert
+            $message .= "Looks like you are updating Asset Category " . $q->param('id');
+            $message .= Dumper($q->param);
+            my $this_count=0;
+            foreach my $ak (keys %{ $q->{'param'} } ){
+                my $v = $q->param($ak);
+                $message .= "\n<br />";
+                $this_count++; $message .= "\n<br /> $this_count $ak = " . $q->param($ak);
+            }
+
+
+            $self->tt_params({
+            heading => "Changed the '" . $ac->asc_name . "' category",
+            ac     => $ac,
+            acd     => \@acd,
+            message => $message,
+            page => $page,
+                  });
+            $self->plt;
+            return $self->tt_process();
+
+        }
 
         #$message .= Dumper($ac);
         if(defined $ac){
@@ -764,6 +789,12 @@ sub define: Runmode {
             $self->plt;
             return $self->tt_process();
         }
+    }elsif(defined $q->param){
+    no strict "refs"; #debug
+        $message .= "So you want to add " . Dumper($q->param);
+        my $qp = $q->param;
+        $message .= "\n<br />"; my $this_count=0;
+        foreach my $key (keys %{ $qp }){ $this_count++; $message .= "\n<br /> $this_count $key = " . $qp->("$key"); }
     }
     #else we have a new category
 
