@@ -62,6 +62,16 @@ function ac_select() {
         }
 }
 
+function acd_table_addrow() {
+    var last_order = $("#acd_table tr:last #order").val();
+    last_order++;
+    $("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
+    $("#acd_table tr:last #order").val(last_order);
+    $("#acd_table tr:last input:first").val('');
+    $("#acd_table tr:last #regexp").val('');
+}
+
+
 
 // Trying to get focus to work again!
 $("#display").load("?control=msgs", {}, function() { $('#pe_email').focus(); });
@@ -86,17 +96,8 @@ $(document).ready(function() {
     	$(".message").addClass('opthi');
     };
 
-   $("#acd_table tr:last input").live('change', function() {
-    var last_order = $("#acd_table tr:last #order").val();
-    last_order++;
-    $("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
-    $("#acd_table tr:last #order").val(last_order);
-    $("#acd_table tr:last input:first").val('');
-    //$("#acd_table tr:last #d_name").val('');
-//$("#acd_table > tbody:last").append("<tr><td>acd_name</td><td><input type=\"text\" name=\"\" value=\"\" size=\"12\"/></td><td>acd_order</td><td><input type=\"text\" name=\"order\" value=\"" + last_order + "\" size=\"2\" id=\"order\" /></td><td>acd_type</td><td><select name=\"type\"><option value=\"text\">text</option><option value=\"checkbox\">checkbox</option><option value=\"select\">select</option><option value=\"radio\">radio</option><option value=\"textarea\">textarea</option></select></td><td>acd_regexp</td><td><input type=\"text\" name=\"regexp\" value=\"\" size=\"10\"/></td><td>acd_grid</td><td><input type=\"text\" name=\"d_grid\" value=\"\" size=\"2\"/></td></tr>"); 
-   });
-
-
+   $("#acd_table tr:last input").live('change', acd_table_addrow );
+   $("#addrow").click( acd_table_addrow );
 
     //$("#ac_select").change(function() {
     $("#ac_select").keyup(function(){ ac_select(); });

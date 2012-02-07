@@ -1,4 +1,74 @@
 [% WRAPPER site_wrapper.tmpl %]
-        <h1>[% heading %]</h1>
-        <span class="page">[% page %]</span>
+[% USE Dumper %]
+[% #Dumper.dump(ac) %]
+
+ <h1>[% heading %]</h1>
+ <span class="warning">(New data rows will be added as needed; Empty rows will be ignored/deleted)</span>
+    <span class="page">
+ <div id="form">
+    <form method="post" action="" id="add_asset_cat">
+    <table id="acd_table" border="1">
+      <tbody>
+        <tr>
+            <th colspan="2">Asset Data</th>
+        </tr>
+        <tr>
+            <td>Asset Categorie Name</td>
+            <td><input type="text" name="name" value="[%- ac.asc_name -%]" /></td>
+        </tr>
+        <tr>
+            <td>Asset Description</td>
+            <td><input type="text" name="description" value="[%- ac.asc_description -%]" /></td>
+        </tr>
+        <tr>
+            <td>Group (if known)</td>
+            <td><input type="text" name="grid" value="[%- ac.asc_group -%]" /></td>
+        </tr>
+    <tr>
+    <th colspan="10">Data</th>
+    </tr>
+ [%- IF acd.size >=1 -%]
+  [%- FOREACH cd = acd -%]
+  <tr>
+  <td>name</td><td><input type="text" name="d_name" value="[%- cd.acd_name -%]" size="12"/></td>
+  <td>order</td><td><input type="text" name="d_order" value="[%- cd.acd_order -%]" size="2" id="order" /></td>
+  <td>type</td><td><select name="d_type">
+                            <option value="text" [%- IF cd.acd_type == 'text'; 'selected="selected"'; END -%]>text</option>
+                            <option value="checkbox">checkbox</option>
+                            <option value="select">select</option>
+                            <option value="radio">radio</option>
+                            <option value="textarea">textarea</option>
+                        </select>
+                    </td>
+  <td><a class="blacktext" title="A regular expression to control/limit the data that can be entered">regexp</a></td><td><input id="regexp" type="text" name="d_regexp" value="[%- cd.acd_regexp -%]" size="10"/></td>
+  <td>group id</td><td><input type="text" name="d_grid" value="[%- cd.acd_grid -%]" size="2"/></td>
+  </tr>
+  [%- END -%]
+ [%- ELSE -%]
+  <tr>
+  <td>name</td><td><input type="text" name="d_name" value="" size="12"/></td>
+  <td>order</td><td><input type="text" name="order" value="10" size="2" id="order" /></td>
+  <td>type</td><td><select name="type">
+                            <option value="text">text</option>
+                            <option value="checkbox">checkbox</option>
+                            <option value="select">select</option>
+                            <option value="radio">radio</option>
+                            <option value="textarea">textarea</option>
+                        </select>
+                    </td>
+  <td><a class="blacktext" title="A regular expression to control/limit the data that can be entered">regexp</a></td><td><input id="regexp" type="text" name="regexp" value="" size="10"/></td>
+  <td>grid</td><td><input type="text" name="d_grid" value="" size="2"/></td>
+   </tr>
+ [%- END -%]
+          </tbody>
+        </table>
+   [%- IF acd -%]
+        <input type="submit" value="Update this Asset type" class="button orange" /> &nbsp;
+        <input id="addrow" type="button" value="Add a new data row" class="small green button" /></td>
+   [%- ELSE -%]
+        <input type="submit" value="Add this new Asset type" class="button green" /></td>
+   [%- END -%]
+        </form>
+    </div>
+[% page %]</span>
 [% END %]

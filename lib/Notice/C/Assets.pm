@@ -98,9 +98,9 @@ sub plt {
 
 the default page
 This has a long way to go. If the user is not in the admin group then they should not get
-warnings about undefined asset catagories.
+warnings about undefined asset categories.
 
-If there are no asset catagories then the user should be directed, (walked through) creating one.)
+If there are no asset categories then the user should be directed, (walked through) creating one.)
 
 =cut
 
@@ -730,76 +730,42 @@ This lets you define an asset
 =cut
 
 sub define: Runmode {
+    use Data::Dumper;
     my ($self) = @_;
     my ($surl,$page);
     $surl = ($self->query->self_url);
+    my $q = \%{ $self->query() };
     my $message='';
     my $user_msg;
+    my $cid = '';
+    #$cid = $self->param('cid')=~m/^\d+$/ ? $self->param('cid') : $q->param('cid');
+    if(defined $self->param('id') && $self->param('id')=~m/^(\d+)$/){ 
+        $cid = $1; 
+    }elsif($q->param('cid')){ 
+        $cid = $q->param('cid');
+    }else{
+     $message .= "id:".$self->param('id')  ."sid:". $self->param('sid'); 
+    }
+    if($cid=~m/^(\d+)$/){
+        my %AssetCatData_search =('acd_cid' => {'=', "$1"});
+        my %AssetCatData_search_orderby=(order_by => 'acd_order');
+        my $ac = $self->resultset('AssetCategory')->search({ asc_id => {'=', $cid}}, {})->first;
+        my @acd = $self->resultset('AssetCatData')->search( { %AssetCatData_search }, { %AssetCatData_search_orderby});
 
-    $page .=qq (Here we will have a form so that the details for a new asset can be added);
-        # why isn't this in the template?
-    $page .=qq (
-    <div id="form">
-        <form method="post" action="" id="add_asset_cat">
-        <table id="acd_table" border="1">
-          <tbody>
-            <tr>
-                <th colspan="2">Asset Data</th>
-            </tr>
-            <tr>
-                <td>Asset Categorie Name</td>
-                <td><input type="text" name="name" value="" /></td>
-            </tr>
-            <tr>
-                <td>Asset Description</td>
-                <td><input type="text" name="description" value="" /></td>
-            </tr>
-            <tr>
-                <td>Group (if known)</td>
-                <td><input type="text" name="grid" value="" /></td>
-            </tr>
-    <tr>
-    <th colspan="10">Data</th>
-    </tr>
-    <tr>
-  <td>acd_name</td><td><input type="text" name="d_name" value="" size="12"/></td>
-  <td>acd_order</td><td><input type="text" name="order" value="1" size="2" id="order" /></td>
-  <td>acd_type</td><td><select name="type">
-                            <option value="text">text</option>
-                            <option value="checkbox">checkbox</option>
-                            <option value="select">select</option>
-                            <option value="radio">radio</option>
-                            <option value="textarea">textarea</option>
-                        </select>
-                    </td>
-  <td>acd_regexp</td><td><input type="text" name="regexp" value="" size="10"/></td>
-  <td>acd_grid</td><td><input type="text" name="d_grid" value="" size="2"/></td>
-    </tr>
-          </tbody>
-        </table>
-        <input type="submit" value="Add this new Asset type" class="button green" /></td>
-        </form>
-
-     <span class="warning">(New data rows will be added as needed; Empty rows will be ignored/deleted)</span>
-    </div>
-);
-
-=pod
-
- $opt{asset_categories}{asc_name};
- $opt{asset_categories}{asc_description};
- $opt{asset_categories}{asc_grid};
-
- CREATE TABLE `asset_cat_data` (
-  `acd_id` int(255) NOT NULL auto_increment COMMENT 'used to group categories',
-  `acd_cid` int(255) NOT NULL COMMENT 'used to group categories',
-  `acd_name` varchar(255) default NULL,
-  `acd_order` int(255) default NULL COMMENT 'so we know what order to display them in',
-  `acd_type` varchar(255) default NULL COMMENT 'so we know how to deal with this',
-  `acd_regexp` varchar(255) default NULL COMMENT 'so we can control the data',
-  `acd_grid` int(255) default NULL,
-
-=cut
+        #$message .= Dumper($ac);
+        if(defined $ac){
+            $self->tt_params({
+            heading => "Update the '" . $ac->asc_name . "' Asset category",
+            ac     => $ac,
+            acd     => \@acd,
+            message => $message,
+            page => $page,
+                  });
+            $self->plt;
+            return $self->tt_process();
+        }
+    }
+    #else we have a new category
 
     $self->tt_params({
     heading => 'Add a new type of Assets',
@@ -808,7 +774,6 @@ sub define: Runmode {
           });
     $self->plt;
     return $self->tt_process();
-
 }
 
 1;

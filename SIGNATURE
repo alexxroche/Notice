@@ -28,7 +28,7 @@ SHA1 d583149666bf6db74f93915e165da0d16be5a1dd lib/Notice.pm
 SHA1 f3cbf6214e9a1ec8a57a115fa618bd021945c40c lib/Notice/Base.pm
 SHA1 7c27e132588b09a9bc7ebe7a9ae2d24839754c1d lib/Notice/C/Account.pm
 SHA1 b1dd731a184ef5a830e924ea0f94150e89c7f8c6 lib/Notice/C/Addresses.pm
-SHA1 6f2ace304f617f454d8a22cf7f4a85348843bbec lib/Notice/C/Assets.pm
+SHA1 cb619eb0cfa54a4562e2355b6000d5edeaef6ea6 lib/Notice/C/Assets.pm
 SHA1 96bc29d79a936c8342c80a96d22cb4428793c319 lib/Notice/C/Beekeeping.pm
 SHA1 69ee97331f435e91f3fb6766be3f71d31aca8ae7 lib/Notice/C/Config.pm
 SHA1 3c984793e3a3bfa1d8d4da2beb986034c971275e lib/Notice/C/Details.pm
@@ -157,7 +157,7 @@ SHA1 f2533df4938b32d14861d450383aba2f2cf1cde8 t/cgi-bin/index.cgi
 SHA1 9a386c9849620b98d2a7d23985b6445c238dc021 t/cgi-bin/templates/Notice/C/Account/index.tmpl
 SHA1 aa49143a3e6f26091dfa6fe6fd2fe51d35b28f1d t/cgi-bin/templates/Notice/C/Addresses/index.tmpl
 SHA1 4e3fdfcbb19a9b48583f79203a4121f852fe7c99 t/cgi-bin/templates/Notice/C/Assets/data.tmpl
-SHA1 9afcb1b863cba1ef60f669d5a4c8f1bbe5cf086f t/cgi-bin/templates/Notice/C/Assets/define.tmpl
+SHA1 13df884786b4c60fbcc8e8b7adaa30abf4ca38fb t/cgi-bin/templates/Notice/C/Assets/define.tmpl
 SHA1 217eda5f8fac8ef7593d2042933b04f3d75ffa8d t/cgi-bin/templates/Notice/C/Assets/delete.tmpl
 SHA1 5b94408b640e35f9ad2163f7d300734ee59d2ae3 t/cgi-bin/templates/Notice/C/Assets/details.tmpl
 SHA1 2741b0f95e68939958172a759f4ce8e0b6ba23fc t/cgi-bin/templates/Notice/C/Assets/list.tmpl
@@ -220,7 +220,7 @@ SHA1 40f681a481932ba593b4910c28cf6860263d73fb t/www/favicon.ico
 SHA1 548b27444c7d2576fb824c2e66267acd766b4ae5 t/www/images/orphus.gif
 SHA1 4b772b939292e57eb8b6997206d8f888b57323fb t/www/images/top_logo.png
 SHA1 e98d0d086f790e026f5c8c73f4422282e93d99c8 t/www/index.html
-SHA1 95dc4e8351262116b0a021ea12c421d3e07bda3a t/www/js/asset.js
+SHA1 b3b3c98ef8a40929181cc6e77eeef934ced573fd t/www/js/asset.js
 SHA1 1e7722a842a9ff46f6caa7a62d10ba8add41f1fd t/www/js/create_pw.js
 SHA1 a796b79577bab13be5ccc925819cea1c1bf1e558 t/www/js/javascriptAES.js
 SHA1 b75990598ee8d3895448ed9d08726af63109f842 t/www/js/jquery.js
@@ -232,7 +232,7 @@ SHA1 63657cbb7d7086c56b0cd4e5c6999bb683664868 t/www/robots.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk8w+Y4ACgkQAR68wSDJd65U2gCfRdeYSUtI0br1OFvy6hpoQzcX
-lesAniAWvm1EXh9pNCOsbMOEIo/DWk/k
-=cdSp
+iEYEARECAAYFAk8xgHsACgkQAR68wSDJd67WOACgqlyeWSsOCrP68ML3oMzwKXVc
+VNUAoLMALaenUyUOImKBTuii8Wwg+CNM
+=4dVO
 -----END PGP SIGNATURE-----
