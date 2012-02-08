@@ -62,13 +62,93 @@ function ac_select() {
         }
 }
 
+
+function increment_name() {
+  var last_name = $(this).attr('name');
+  var next_id = last_name.replace(/^.*_/,'');
+  var next_name = last_name.replace(next_id,'');
+  next_id++;
+  $(this).attr({
+    //'id': function(_, id) { return id + i },
+    'name': function(_, name) { return next_name + next_id },
+   // 'value': ''
+  });
+  i=next_id;
+}
+
 function acd_table_addrow() {
+    var last_id = $("#acd_table tr:first #order").attr('name').replace('d_order_', '');
+    alert(last_id);
+    var last_order = $("#acd_table tr:last #order").val();
+    last_order++;
+    $("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
+    $("#acd_table tr:last").find("input").each(function() {
+     $(this).attr({
+      'id': function(_, id) { return id + last_id },
+      'name': function(_, name) { return name + last_id },
+      'value': function(_, value) { return last_id }
+     });
+     if($(this).attr('name').match(/d_order_/)){
+        // do something
+      }
+    });
+    //$("#acd_table tr:last input:first").val('');
+    $("#acd_table tr:last #order").val(last_order);
+    //$("#acd_table tr:last #regexp").val('');
+
+// NTS you are here incrementing the ID for each input in the row
+/*
+var i = 1;
+$("button").click(function() {
+  $("table tr:first").clone().find("input").each(function() {
+    $(this).val('').attr('id', function(_, id) { return id + i });
+  }).end().appendTo("table");
+  i++;
+})
+*/
+
+/*
+var i = 1;
+$("button").click(function() {
+  $("table tr:first").clone().find("input").each(function() {
+    $(this).attr({
+      'id': function(_, id) { return id + i },
+      'name': function(_, name) { return name + i },
+      'value': ''               
+    });
+  }).end().appendTo("table");
+  i++;
+});​
+*/
+
+}
+
+function table_addrow() {
+  var last_id = $("#acd_table tr:last #order").attr('name');
+  var next_id = last_id.replace('d_order_', '');
+    alert(next_id);
     var last_order = $("#acd_table tr:last #order").val();
     last_order++;
     $("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
     $("#acd_table tr:last #order").val(last_order);
     $("#acd_table tr:last input:first").val('');
     $("#acd_table tr:last #regexp").val('');
+
+/*
+    //$("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
+  $("#acd_table tr:last").clone().find("input").each(function() {
+     $(this).attr({
+        'name': function(_, name) { return name + next_id },
+        'value': function(_, value){ return next_id },
+    });
+   }).find("select").each(function() {
+     $(this).attr({
+        'name': function(_, name) { return name + next_id },
+     });
+   }).end().appendTo("#acd_table");
+  */
+   next_id++;
+   last_id++;
 }
 
 
@@ -96,8 +176,55 @@ $(document).ready(function() {
     	$(".message").addClass('opthi');
     };
 
-   $("#acd_table tr:last input").live('change', acd_table_addrow );
-   $("#addrow").click( acd_table_addrow );
+// NTS you are HERE
+   //$("#acd_table tr:last input").live('change', acd_table_addrow );
+
+ //if($(this).attr('name').match(/d_order_/)){
+
+  var last_id = $("#acd_table tr:last #order").attr('name');
+  var next_id = last_id.replace('d_order_', '');
+/*
+    alert(next_id);
+    $("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
+    $("#acd_table tr:last #order").val(last_order);
+    $("#acd_table tr:last input:first").val('');
+    $("#acd_table tr:last #regexp").val('');
+*/
+
+var i = 1;
+   //$("#acd_table tr:last input:first").change(  
+   $("#acd_table tr:last input:first").live('change',
+    function(event) {
+        var last_order = $("#acd_table tr:last #order").val();
+        last_order++;
+      $("#acd_table tr:last").clone().find("input").each(function() {
+        var last_name = $(this).attr('name');
+        var next_id = last_name.replace(/^.*_/,'');
+        var next_name = last_name.replace(next_id,'');
+        next_id++;
+        $(this).attr({
+          //'id': function(_, id) { return id + i },
+          'name': function(_, name) { return next_name + next_id },
+         // 'value': 
+        });
+        i=next_id;
+      }).end().appendTo("#acd_table");
+    $("#acd_table tr:last").find("select").each(function() {
+        var last_name = $(this).attr('name');
+        var next_id = last_name.replace(/^.*_/,'');
+        var next_name = last_name.replace(next_id,'');
+        next_id++;
+        $(this).attr({
+          'name': function(_, name) { return next_name + next_id },
+        });
+    });
+    $("#acd_table tr:last #order").val(last_order);
+    $("#acd_table tr:last input:first").val('');
+    $("#acd_table tr:last #regexp").val('');
+    i++;
+   });
+
+   $("#addrow").click( table_addrow );
 
     //$("#ac_select").change(function() {
     $("#ac_select").keyup(function(){ ac_select(); });
