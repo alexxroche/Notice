@@ -758,9 +758,9 @@ sub define: Runmode {
             $message .= "Looks like you are updating Asset Category " . $q->param('id');
             $message .= Dumper($q->param);
             my $this_count=0;
+            $message .= "\n<br />";
             foreach my $ak (keys %{ $q->{'param'} } ){
                 my $v = $q->param($ak);
-                $message .= "\n<br />";
                 $this_count++; $message .= "\n<br /> $this_count $ak = " . $q->param($ak);
             }
 
@@ -790,11 +790,13 @@ sub define: Runmode {
             return $self->tt_process();
         }
     }elsif(defined $q->param){
-    no strict "refs"; #debug
         $message .= "So you want to add " . Dumper($q->param);
         my $qp = $q->param;
         $message .= "\n<br />"; my $this_count=0;
-        foreach my $key (keys %{ $qp }){ $this_count++; $message .= "\n<br /> $this_count $key = " . $qp->("$key"); }
+        foreach my $ak (keys %{ $q->{'param'} } ){
+                my $v = $q->param($ak);
+                $this_count++; $message .= "\n<br /> $this_count $ak = " . $q->param($ak);
+        }
     }
     #else we have a new category
 

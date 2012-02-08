@@ -31,15 +31,15 @@
  [%- IF acd and acd.size >=1 -%]
   [%- FOREACH cd = acd -%]
   <tr>
-  <td>name<input type="hidden" name="d_id" value="[%- cd.acd_id -%]" /></td>
-  <td><input type="text" name="d_name_[%- cd.acd_id -%]" value="[%- cd.acd_name -%]" size="12" /></td>
+  <td>name<input id="d_id" type="hidden" name="d_id_[%- cd.acd_id -%]" value="[%- cd.acd_id -%]" /></td>
+  <td><input id="d_name" type="text" name="d_name_[%- cd.acd_id -%]" value="[%- cd.acd_name -%]" size="12" /></td>
   <td>order</td><td><input type="text" name="d_order_[%- cd.acd_id -%]" value="[%- cd.acd_order -%]" size="2" id="order" /></td>
   <td>type</td><td><select name="d_type_[%- cd.acd_id -%]">
-                            <option value="text" [%- IF cd.acd_type == 'text'; 'selected="selected"'; END -%]>text</option>
-                            <option value="checkbox">checkbox</option>
-                            <option value="select">select</option>
-                            <option value="radio">radio</option>
-                            <option value="textarea">textarea</option>
+                            <option value="text"[%- IF cd.acd_type == 'text'; ' selected="selected"'; END -%]>text</option>
+                            <option value="checkbox"[%- IF cd.acd_type == 'checkbox'; ' selected="selected"'; END -%]>checkbox</option>
+                            <option value="select"[%- IF cd.acd_type == 'select'; ' selected="selected"'; END -%]>select</option>
+                            <option value="radio"[%- IF cd.acd_type == 'radio'; ' selected="selected"'; END -%]>radio</option>
+                            <option value="textarea"[%- IF cd.acd_type == 'textarea'; ' selected="selected"'; END -%]>textarea</option>
                         </select>
                     </td>
   <td><a class="blacktext" title="A regular expression to control/limit the data that can be entered">regexp</a></td><td><input id="regexp" type="text" name="d_regexp" value="[%- cd.acd_regexp -%]" size="10"/></td>
@@ -48,9 +48,10 @@
   [%- END -%]
  [%- ELSE -%]
   <tr>
-  <td>name</td><td><input type="text" name="d_name" value="" size="12"/></td>
-  <td>order</td><td><input type="text" name="d_order" value="10" size="2" id="order" /></td>
-  <td>type</td><td><select name="d_type">
+    [%# you are HERE - we have to get jQuery to increment the acd_id part of the name in each input name="d_thing_[% acd_id %\]" %] 
+  <td>name</td><td><input type="text" name="d_name_1" value="" size="12"/></td>
+  <td>order</td><td><input type="text" name="d_order_1" value="10" size="2" id="order" /></td>
+  <td>type</td><td><select name="d_type_1">
                             <option value="text">text</option>
                             <option value="checkbox">checkbox</option>
                             <option value="select">select</option>
@@ -58,8 +59,8 @@
                             <option value="textarea">textarea</option>
                         </select>
                     </td>
-  <td><a class="blacktext" title="A regular expression to control/limit the data that can be entered">regexp</a></td><td><input id="regexp" type="text" name="d_regexp" value="" size="10"/></td>
-  <td>grid</td><td><input type="text" name="d_grid" value="" size="2"/></td>
+  <td><a class="blacktext" title="A regular expression to control/limit the data that can be entered">regexp</a></td><td><input id="regexp" type="text" name="d_regexp_1" value="" size="10"/></td>
+  <td>grid</td><td><input type="text" name="d_grid_1" value="" size="2"/></td>
    </tr>
  [%- END -%]
           </tbody>

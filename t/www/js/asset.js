@@ -71,86 +71,43 @@ function increment_name() {
   $(this).attr({
     //'id': function(_, id) { return id + i },
     'name': function(_, name) { return next_name + next_id },
-   // 'value': ''
+    'value': ''
   });
   i=next_id;
 }
 
-function acd_table_addrow() {
-    var last_id = $("#acd_table tr:first #order").attr('name').replace('d_order_', '');
-    alert(last_id);
+
+var hammering_monkey=0;
+
+function table_addrow () {
+    // don't add a blank line if we already have one
+    if ( $("#acd_table tr:last input:first").val() == "" && hammering_monkey<=1){ 
+        hammering_monkey++;
+        alert("Try filling in the boxes you already have"); return true; 
+    }else if(hammering_monkey==2){
+        hammering_monkey++;
+        alert("OK then, have your boxes");
+    }
     var last_order = $("#acd_table tr:last #order").val();
     last_order++;
-    $("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
-    $("#acd_table tr:last").find("input").each(function() {
-     $(this).attr({
-      'id': function(_, id) { return id + last_id },
-      'name': function(_, name) { return name + last_id },
-      'value': function(_, value) { return last_id }
-     });
-     if($(this).attr('name').match(/d_order_/)){
-        // do something
-      }
-    });
-    //$("#acd_table tr:last input:first").val('');
-    $("#acd_table tr:last #order").val(last_order);
-    //$("#acd_table tr:last #regexp").val('');
-
-// NTS you are here incrementing the ID for each input in the row
-/*
-var i = 1;
-$("button").click(function() {
-  $("table tr:first").clone().find("input").each(function() {
-    $(this).val('').attr('id', function(_, id) { return id + i });
-  }).end().appendTo("table");
-  i++;
-})
-*/
-
-/*
-var i = 1;
-$("button").click(function() {
-  $("table tr:first").clone().find("input").each(function() {
-    $(this).attr({
-      'id': function(_, id) { return id + i },
-      'name': function(_, name) { return name + i },
-      'value': ''               
-    });
-  }).end().appendTo("table");
-  i++;
-});​
-*/
-
-}
-
-function table_addrow() {
-  var last_id = $("#acd_table tr:last #order").attr('name');
-  var next_id = last_id.replace('d_order_', '');
-    alert(next_id);
-    var last_order = $("#acd_table tr:last #order").val();
-    last_order++;
-    $("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
+    $("#acd_table tr:last").clone().find("input").each(increment_name).end().appendTo("#acd_table");
+    $("#acd_table tr:last").find("select").each(increment_name);
     $("#acd_table tr:last #order").val(last_order);
     $("#acd_table tr:last input:first").val('');
     $("#acd_table tr:last #regexp").val('');
-
-/*
-    //$("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
-  $("#acd_table tr:last").clone().find("input").each(function() {
-     $(this).attr({
-        'name': function(_, name) { return name + next_id },
-        'value': function(_, value){ return next_id },
-    });
-   }).find("select").each(function() {
-     $(this).attr({
-        'name': function(_, name) { return name + next_id },
-     });
-   }).end().appendTo("#acd_table");
-  */
-   next_id++;
-   last_id++;
+    i++;
 }
 
+function addrow_to_table(event){
+    var last_order = $(event.data.id + "tr:last " + event.data.ref).val();
+    last_order++;
+    $(event.data.id + " tr:last").clone().find("input").each(increment_name).end().appendTo(event.data.id);
+    $(event.data.id + " tr:last").find("select").each(increment_name);
+    $(event.data.id + " tr:last #order").val(last_order);
+    $(event.data.id + " tr:last input:first").val('');
+    $(event.data.id + " tr:last #regexp").val('');
+    i++;
+}
 
 
 // Trying to get focus to work again!
@@ -176,57 +133,30 @@ $(document).ready(function() {
     	$(".message").addClass('opthi');
     };
 
-// NTS you are HERE
-   //$("#acd_table tr:last input").live('change', acd_table_addrow );
-
- //if($(this).attr('name').match(/d_order_/)){
-
   var last_id = $("#acd_table tr:last #order").attr('name');
   var next_id = last_id.replace('d_order_', '');
-/*
-    alert(next_id);
-    $("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
-    $("#acd_table tr:last #order").val(last_order);
-    $("#acd_table tr:last input:first").val('');
-    $("#acd_table tr:last #regexp").val('');
-*/
 
-var i = 1;
-   //$("#acd_table tr:last input:first").change(  
-   $("#acd_table tr:last input:first").live('change',
-    function(event) {
-        var last_order = $("#acd_table tr:last #order").val();
-        last_order++;
-      $("#acd_table tr:last").clone().find("input").each(function() {
-        var last_name = $(this).attr('name');
-        var next_id = last_name.replace(/^.*_/,'');
-        var next_name = last_name.replace(next_id,'');
-        next_id++;
-        $(this).attr({
-          //'id': function(_, id) { return id + i },
-          'name': function(_, name) { return next_name + next_id },
-         // 'value': 
-        });
-        i=next_id;
-      }).end().appendTo("#acd_table");
-    $("#acd_table tr:last").find("select").each(function() {
-        var last_name = $(this).attr('name');
-        var next_id = last_name.replace(/^.*_/,'');
-        var next_name = last_name.replace(next_id,'');
-        next_id++;
-        $(this).attr({
-          'name': function(_, name) { return next_name + next_id },
-        });
-    });
-    $("#acd_table tr:last #order").val(last_order);
-    $("#acd_table tr:last input:first").val('');
-    $("#acd_table tr:last #regexp").val('');
-    i++;
+// prevent the clicking of the add button from adding another row
+
+   $("#addbutton").click(function () {
+    $("#acd_table").off("change", "#acd_table tr:last input:first", table_addrow);
    });
+  
+    $("#acd_table").off("change", "#acd_table tr:last input", table_addrow);
+    // 1.4.4
+    //$("#acd_table tr:last input:first").live('change', table_addrow );
+    // 1.7.0 
+    // $(document).on("change", $("#acd_table tr:last input:first"), table_addrow );
+    // general case 
+    //$(document).on("change", $("#acd_table tr:last input:first"), { id: "#acd_table", ref: "#order" }, addrow_to_table );
 
-   $("#addrow").click( table_addrow );
+    $(document).on("change", $("#acd_table tr:last input:first"), table_addrow );
+    //$(document).on("change", $("#acd_table tr:last input:first #d_id").filter(':first'), table_addrow );
+    //$(document).on("change", $("#acd_table tr:last input:first #d_id"), table_addrow );
 
-    //$("#ac_select").change(function() {
+
+    $("#addrow").click( table_addrow );
+
     $("#ac_select").keyup(function(){ ac_select(); });
     $("#ac_select").bind($.browser.msie ? 'propertychange': 'change', function() { ac_select(); });
 
