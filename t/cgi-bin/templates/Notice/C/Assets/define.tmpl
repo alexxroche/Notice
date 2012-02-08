@@ -66,8 +66,10 @@
           </tbody>
         </table>
    [%- IF acd -%]
-        <input id="updatebutton" type="submit" value="Update this Asset type" class="button orange" /> &nbsp;
-        <input id="addrow" type="button" value="Add a new data row" class="small green button" /></td>
+        <input id="updatebutton" type="submit" name="update" value="Update this Asset type" class="button orange" /> &nbsp;
+        <input id="addrow" type="button" name="newrow" value="Add a new data row" class="small green button" />
+        <input id="deleteAssetCat" type="submit" name="delete" value="Delete this Asset type" class="small red button" /> &nbsp;
+        </td>
    [%- ELSE -%]
         <input id="addbutton" type="submit" value="Add this new Asset type" class="button green" /></td>
    [%- END -%]
