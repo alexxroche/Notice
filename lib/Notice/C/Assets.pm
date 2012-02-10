@@ -146,7 +146,7 @@ sub main: StartRunmode {
     $page =qq ( 
         <p>
     <h4><a class="small black button so we can see it which monkey wrote this css" href="$surl/define">
-<strike>Define a type of Asset</strike></a></h4>
+<!--strike-->Define a type of Asset<!--/strike--></a></h4>
 </p>);
 
     if(defined $user_msg){ $page .=qq ( $user_msg; <br /> ); }
@@ -741,8 +741,10 @@ sub define: Runmode {
     #$cid = $self->param('cid')=~m/^\d+$/ ? $self->param('cid') : $q->param('cid');
     if(defined $self->param('id') && $self->param('id')=~m/^(\d+)$/){ 
         $cid = $1; 
-    }elsif($q->param('cid')){ 
+    }elsif(defined $q->param('cid')){ 
         $cid = $q->param('cid');
+    }elsif(defined $q->param('id')){ 
+        $cid = $q->param('id');
     }else{
      #$message .= "id:".$self->param('id')  ."sid:". $self->param('sid'); 
     }
@@ -753,17 +755,21 @@ sub define: Runmode {
         my @acd = $self->resultset('AssetCatData')->search( { %AssetCatData_search }, { %AssetCatData_search_orderby});
 
         if($q->param('id')){ #we might have new data or an update
+            my $action = 'update';
+            if( $q->param('delete') ){ $action = 'delete'; }
 
-        # NTS you are HERE preparing the data for insert
-            $message .= "Looks like you are updating Asset Category " . $q->param('id');
-            $message .= Dumper($q->param);
+        # NTS you are HERE preparing the data for update or deleting
+        
+            $message .= "Looks like you are " . $action . "ing Asset Category " . $q->param('id') . "\n<br />";
+            #$message .= Dumper($q->param);
             my $this_count=0;
             $message .= "\n<br />";
             foreach my $ak (keys %{ $q->{'param'} } ){
                 my $v = $q->param($ak);
                 $this_count++; $message .= "\n<br /> $this_count $ak = " . $q->param($ak);
             }
-
+         # we can't presume that the acd_id is ready as the HTML auto-increments and MAY CLASH with existing rows!!
+         # N.B. we MUST check the acd_cid
 
             $self->tt_params({
             heading => "Changed the '" . $ac->asc_name . "' category",
@@ -776,7 +782,6 @@ sub define: Runmode {
             return $self->tt_process();
 
         }
-
         #$message .= Dumper($ac);
         if(defined $ac){
             $self->tt_params({
@@ -790,13 +795,21 @@ sub define: Runmode {
             return $self->tt_process();
         }
     }elsif(defined $q->param){
-        $message .= "So you want to add " . Dumper($q->param);
+      if($q->param('name') eq ''){
+            $message =qq |<span class="error">How about a name for this shiny new Asset Category of yours?</span>|;
+      }else{
+        $message .= "So you want to add " ;#. Dumper($q->param);
+
+        # NTS check that we don't already have that 
+        # NTS collect the data
         my $qp = $q->param;
         $message .= "\n<br />"; my $this_count=0;
         foreach my $ak (keys %{ $q->{'param'} } ){
                 my $v = $q->param($ak);
                 $this_count++; $message .= "\n<br /> $this_count $ak = " . $q->param($ak);
         }
+        # NTS insert the data
+      }
     }
     #else we have a new category
 

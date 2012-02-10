@@ -82,8 +82,9 @@ var hammering_monkey=0;
 function table_addrow () {
     // don't add a blank line if we already have one
     if ( $("#acd_table tr:last input:first").val() == "" && hammering_monkey<=1){ 
-        hammering_monkey++;
-        alert("Try filling in the boxes you already have"); return true; 
+        //hammering_monkey++;
+        //alert("Try filling in the boxes you already have"); 
+        return false; 
     }else if(hammering_monkey==2){
         hammering_monkey++;
         alert("OK then, have your boxes");
@@ -137,6 +138,7 @@ $(document).ready(function() {
   var next_id = last_id.replace('d_order_', '');
 
 // prevent the clicking of the add button from adding another row
+// NOTE this does not work (we need an .unless($("#addbutton").click()).on("change",... )
 
    $("#addbutton").click(function () {
     $("#acd_table").off("change", "#acd_table tr:last input:first", table_addrow);
@@ -150,8 +152,8 @@ $(document).ready(function() {
     // general case 
     //$(document).on("change", $("#acd_table tr:last input:first"), { id: "#acd_table", ref: "#order" }, addrow_to_table );
 
-    $(document).on("change", $("#acd_table tr:last input:first"), table_addrow );
-    //$(document).on("change", $("#acd_table tr:last input:first #d_id").filter(':first'), table_addrow );
+    //$(document).on("change", $("#acd_table tr:last input:first"), table_addrow ); //this bugs out and triggers on the top inputs
+    $(document).on("change", $("#acd_table tr:last input:first #d_id").filter(':first'), table_addrow );
     //$(document).on("change", $("#acd_table tr:last input:first #d_id"), table_addrow );
 
 
