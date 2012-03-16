@@ -38,12 +38,9 @@ __PACKAGE__->add_columns(
 	  size => 254,
 	},
 );
-#__PACKAGE__->result_class('Notice::DB::Result::GroupMembers');
-  # do not attempt to deploy() this view
 __PACKAGE__->result_source_instance->is_virtual(1);
 
 
-#__PACKAGE__->result_source_instance->name(q[
 __PACKAGE__->result_source_instance->view_definition(q[
 SELECT gr.gr_id,gr.gr_name FROM group_members me 
   JOIN group_members gm on me.gg_miag = gm.gg_grid 
@@ -51,18 +48,22 @@ SELECT gr.gr_id,gr.gr_name FROM group_members me
   JOIN asset_cat_data acd on acd.acd_grid = me.gg_grid 
   and acd.acd_id = ?
 ]);
-#__PACKAGE__->add_columns(
-#  'gr_id' => {
-#    data_type => 'integer',
-#    is_auto_increment => 1,
-#  },
-#  'artist' => {
-#    data_type => 'integer',
-#  },
-#  'title' => {
-#    data_type => 'varchar',
-#    size      => 100,
-#  },
-#);
 
 1;
+
+__END__
+
+=head2 Note
+
+You need to have entries in the groups table AND the group_members table
+to make this work.
+
+I'm sure we had a reason for nesting groups in groups, (probably
+something to do with taxonimy) but when we could just have a group
+e.g. Trees and then have group_members of [ "apple", "pear" ]
+it would seem easier than this. The problem is that that group_members
+table is there to link other tables using unique id from those tables
+so it is no good for storing group members. This is because
+Notice is heirachical and not strictly normailsed.
+
+=cut

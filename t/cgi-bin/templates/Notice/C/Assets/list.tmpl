@@ -12,6 +12,10 @@
     /* border-collapse:collapse; */
     white-space:nowrap;
     }
+    /* seperate each entry with a dashed line, to make the sudo-nested tables clearer */
+    /*
+    .as_row {  border-top: dashed 5px purple; }
+    */
     tr th.under { border-bottom-style:dotted; }
     tr.asset th { border-bottom-style:solid; }
     tr.odd td { background-color: #999; color: white; }
@@ -40,21 +44,22 @@
     <th colspan="3">Action</th>
      </tr>
       [% USE Dumper %]
-      [% FOREACH asset = assets %]
-         <tr class="[% loop.parity %] nowrap">
-           <td>[% asset.as_id  or '' %]</td>
-           <td><a class="[% loop.parity %]" title="[% asset.category.asc_description %]">[% asset.category.asc_name or asset.as_cid or '---------' %]</a></td>
-           <td>[% asset.as_acid or '' %]</td>
-           <td>[% IF asset.as_owner_name %]
+      [% loopToggle = 'odd'; FOREACH asset = assets %]
+        [%- IF loopToggle == 'odd'; loopToggle = 'even'; ELSE; loopToggle = 'odd'; END -%]
+         <tr class="[%- loop.parity OR loopToggle -%] nowrap">
+           <td class="as_row" >[% asset.as_id  or '' %]</td>
+           <td class="as_row"><a class="[% loop.parity %]" title="[% asset.category.asc_description %]">[% asset.category.asc_name or asset.as_cid or '---------' %]</a></td>
+           <td class="as_row">[% asset.as_acid or '' %]</td>
+           <td class="as_row">[% IF asset.as_owner_name %]
             [% asset.as_owner_name %]
         [% ELSIF asset.as_owner %]
             &nbsp;([% asset.as_owner %])
         [% END %]
         </td>
-           <td>[% asset.as_user_name or '' %]</td>
-           <td>[% asset.as_date or '' %]</td>
-           <td>[% IF asset.as_in_asid; '<a href="/cgi-bin/index.cgi/assets/list/'; asset.as_in_asid; '">'; asset.as_in_asid; '</a>'; END %]</td>
-           <td>[% IF asset.as_notes; 
+           <td class="as_row">[% asset.as_user_name or '' %]</td>
+           <td class="as_row">[% asset.as_date or '' %]</td>
+           <td class="as_row">[% IF asset.as_in_asid; '<a href="/cgi-bin/index.cgi/assets/list/'; asset.as_in_asid; '">'; asset.as_in_asid; '</a>'; END %]</td>
+           <td class="as_row">[% IF asset.as_notes; 
             IF asset.as_notes.length >= 12; 
                 '<a title="'; asset.as_notes; '">';
                 asset.as_notes.substr(0, 12); '...</a>'; 
@@ -63,16 +68,16 @@
                 asset.as_notes; 
             END; 
         END %]</td>
-           <td class="nowrap">
+           <td class="as_row nowrap">
         <form method="POST" action="/cgi-bin/index.cgi/assets/details/[% asset.as_cid %]/[% asset.as_id %]/">
         <input class="edit button green" type="submit" name="Edit" value="Edit Details" />
         </form>
-       </td><td>
+       </td><td class="as_row">
         <form method="POST" action="/cgi-bin/index.cgi/assets/data/[% asset.as_cid %]/[% asset.as_id %]/">
         <input class="edit button blue" type="submit" name="Edit" value="Edit Data" />
         </form>
        </td>
-       <td>
+       <td class="as_row">
         <form method="POST" action="/cgi-bin/index.cgi/assets/delete/[% asset.as_id %]/">
         <input class="del button red small" type="submit" name="Delete" value="Delete" />
         </form>
@@ -87,7 +92,7 @@
      <th class="under">Date Changed</th>
     </tr>
     [% FOREACH d IN asd.$key %]
-     <tr class="as_data as_data_[% loop.parity %]">
+     <tr class="as_data as_data_[%- loop.parity OR loopToggle -%]">
        <!--td class="as_data bg_white" colspan="2">&nbsp; [% 
         #Dumper.dump(d.value.asd_date) 
         #Dumper.dump(d(asd_date)) 

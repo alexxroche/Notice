@@ -1,6 +1,6 @@
 [% WRAPPER site_wrapper.tmpl %]
  <h1>[% heading %]</h1>
- [% IF c_missing_data %]
+ [% IF c_missing_data && c_missing_data.size %]
 <div class="warn">
 <h4><span class="warning"> N.B.</span> Warning:</h4> There are undefined asset catagories, that you can define
 <form action="/cgi-bin/index.cgi/assets/define">
@@ -25,7 +25,16 @@
   <input class="small green button" type="submit" name="" value="Add" />
   </form>
   </p>
-
+<hr>
  [% END # IF ac %]
         <span class="page">[% page %]</span>
+<h4> List </h4> Here you can list all of one type of asset <form action="/cgi-bin/index.cgi/assets/list/cid/">
+    <select class="small blue select" name="sid">
+ [%- FOREACH acl = ac; cat = acl; -%]
+        <option class="very" value="[%- acl.asc_id -%]">[%- acl.asc_name -%] - [%- acl.asc_description -%]</option>
+ [%- END #FOREACH -%]
+  </select>
+  <input class="small blue button" type="submit" name="" value="View" />
+  </form>
+
 [% END %]

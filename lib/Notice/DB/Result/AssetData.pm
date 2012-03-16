@@ -72,5 +72,6 @@ __PACKAGE__->set_primary_key("asd_id");
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:DCsP7QFvvGUvpN6xajOQDA
 
 
-# You can replace this text with custom code or comments, and it will be preserved on regeneration
+__PACKAGE__->belongs_to('asset' => 'Notice::DB::Result::Assets', {'foreign.as_id' => 'self.asd_asid'});
+__PACKAGE__->belongs_to('assetcategory' => 'Notice::DB::Result::AssetCategory', {'foreign.asc_id' => 'self.asd_cid'});
 1;

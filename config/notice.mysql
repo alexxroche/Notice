@@ -682,9 +682,9 @@ CREATE TABLE `group_members` (
   `gg_state` enum('0','1','2','3','4') DEFAULT '1',
   `gg_date_added` datetime DEFAULT NULL,
   `gg_date_changed` datetime DEFAULT NULL,
-  PRIMARY KEY (`gg_peid`,`gg_grid`),
+  PRIMARY KEY (`gg_peid`,`gg_grid`,`gg_miag`),
   UNIQUE KEY `gg_id` (`gg_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1 COMMENT='who is in what group';
+) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=latin1 COMMENT='who is in what group';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -693,6 +693,7 @@ CREATE TABLE `group_members` (
 
 LOCK TABLES `group_members` WRITE;
 /*!40000 ALTER TABLE `group_members` DISABLE KEYS */;
+INSERT INTO `group_members` VALUES (1,1,1,0,'2','2009-01-14 11:43:09','2009-01-14 11:43:09'),(3,45,1,0,'1','2009-10-08 12:13:59','2009-10-08 12:13:59'),(4,0,2,1,'2','2009-10-08 12:16:30','2009-10-08 12:16:30'),(5,46,2,0,'1','2009-10-08 12:16:48','2009-10-08 12:16:48'),(6,48,2,0,'1','2009-10-08 12:17:03','2009-10-08 12:17:03'),(7,0,5,2,'1','2009-10-08 18:37:29','2009-10-08 18:37:29'),(8,0,6,5,'1','2009-10-08 19:01:14','2009-10-08 19:01:14'),(9,0,10,11,'0','0000-00-00 00:00:00','2011-02-18 18:35:50'),(10,0,10,13,'0','2011-02-18 18:43:18','2011-02-18 18:43:18'),(11,0,11,12,'0','2011-02-18 18:43:50','2011-02-18 18:43:50'),(12,0,11,15,'0','2011-02-18 18:51:46','2011-02-18 18:51:46'),(13,0,11,14,'0','2011-02-18 19:10:34','2011-02-18 19:10:34'),(14,0,11,16,'0','2011-02-18 19:10:45','2011-02-18 19:10:45'),(15,0,11,17,'0','2011-02-18 19:10:52','2011-02-18 19:10:52'),(16,0,11,18,'0','2011-02-18 19:10:56','2011-02-18 19:10:56'),(17,0,11,20,'0','2011-02-18 19:11:03','2011-02-18 19:11:03'),(18,0,11,21,'0','2011-02-18 19:11:11','2011-02-18 19:11:11'),(19,0,11,22,'0','2011-02-18 19:11:23','0000-00-00 00:00:00'),(20,0,11,23,'0','2011-02-18 19:11:26','2011-02-18 19:11:26'),(21,0,11,24,'0','2011-02-18 19:11:28','2011-02-18 19:11:28'),(22,0,11,25,'0','0000-00-00 00:00:00','2011-02-18 19:11:31'),(23,0,11,26,'0','2011-02-18 19:11:34','2011-02-18 19:11:34'),(24,0,11,27,'0','2011-02-18 19:11:36','0000-00-00 00:00:00'),(25,0,11,28,'0','2011-02-18 19:11:39','2011-02-18 19:11:39'),(26,0,11,29,'0','2011-02-18 19:11:41','2011-02-18 19:11:41'),(27,0,11,30,'0','0000-00-00 00:00:00','2011-02-18 19:11:48'),(28,0,11,31,'0','2011-02-18 19:11:51','2011-02-18 19:11:51'),(29,0,11,32,'0','2011-02-18 19:11:53','2011-02-18 19:11:53'),(30,0,13,19,'0','2011-02-18 19:13:05','2011-02-18 19:13:05');
 /*!40000 ALTER TABLE `group_members` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -722,6 +723,7 @@ CREATE TABLE `groups` (
 
 LOCK TABLES `groups` WRITE;
 /*!40000 ALTER TABLE `groups` DISABLE KEYS */;
+INSERT INTO `groups` VALUES (1,1,'Senior IP sysadmin','People who can make serious changes to the IP database','',NULL,NULL),(2,1,'IP sysadmin','People who can make minor changes to the IP database','',NULL,NULL),(3,0,'External Domain','Email Domains that can transit externally','1',NULL,NULL),(4,0,'Reflexive Email Domains','Email Domains that can only send to themselves','0',NULL,NULL),(5,0,'Local Email Domains','Local Email Domains that can transit externally','0',NULL,NULL),(6,1,'Server','A computer that performs a function','0','8','2'),(7,1,'Data Centre Admin','People with access to datacentres','0','','1'),(8,1,'StrongBox Domains','Let any account use this domain for StrongBox activity','0','7.1','3'),(9,0,'A Field','Type of Farming object holding plants and animals','0','','2'),(10,0,'A Tree','Tall thing made of wood','0','','2'),(11,0,'Deciduous Trees','The leaves die off in autumn','0','','2'),(12,0,'Common Ash','Fraxinus excelsior','0','','2'),(13,0,'Evergreen Trees','Most Coniferous and some others','0','','2'),(14,0,'Horse Chestnut','Aesculus hippocastanum','0','','2'),(15,0,'Sycamore','Acer pseudoplatanus','0','','2'),(16,0,'Hazel','Corylus avellana','0','','2'),(17,0,'Elder','Sambucus nigra','0','','2'),(18,0,'Lime','Tilia X europaea','0','','2'),(19,0,'Holly','Acrifolium ilex','0','','2'),(20,0,'Blackthorn','Prunus spinosa [Sloes, from Old English slah \"plum\"]','0','','2'),(21,0,'Larch','Larix decidua','0','','2'),(22,0,'Hawthorn','Crataegus monogyna','0','','2'),(23,0,'Rowan','Sorbus aucuparia [Mountain Ash]','0','','2'),(24,0,'Beech','Fagus sylvatica','0','','2'),(25,0,'Birch','Betula pubescens','0','','2'),(26,0,'Silver Birch','Betula pendula','0','','2'),(27,0,'Apple','Malus domestica','0','','2'),(28,0,'Quince','Cydonia oblong [sole member of the genus Cydonia]','0','','2'),(29,0,'Damson','PrunusÂ domesticaÂ subsp.Â insititia','0','','2'),(30,0,'Victoria Plumb','Prunus victoria','0','','2'),(31,0,'Yellow Plumb','Prunus mirabelle','0','','2'),(32,0,'Green Pear','Pyrus communis','0','','2'),(33,0,'Scots Pine','Pinus sylvestris','','','2'),(34,0,'Corsican Pine','Pinus nigra var. calabrica','','','2');
 /*!40000 ALTER TABLE `groups` ENABLE KEYS */;
 UNLOCK TABLES;
 

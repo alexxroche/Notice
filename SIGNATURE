@@ -22,13 +22,13 @@ SHA1 f1ab271c088fb5865a8294c9c39fbed6ae9413a7 Makefile.PL
 SHA1 895dbf730924745ed8bbabc1c9cf3ecf9145a5ff README
 SHA1 378a9927a24e2ab7c6e116b09bff53828da8fb6f README.whois
 SHA1 d1cd3255d3f636c31b1d87ba004632c7dc45bfd5 config/config.pl
-SHA1 ba37f0cde8a4efca63e161e00b902754b09944e5 config/notice.mysql
+SHA1 7d76db3c5be3ffebf928cc5a853203e556ae8d05 config/notice.mysql
 SHA1 086941a4b8d9523c225aba691faab0b397315da2 debug.sh
 SHA1 8db4f7c52afc9277525aaca6ce736843f6e95160 lib/Notice.pm
 SHA1 f3cbf6214e9a1ec8a57a115fa618bd021945c40c lib/Notice/Base.pm
 SHA1 7c27e132588b09a9bc7ebe7a9ae2d24839754c1d lib/Notice/C/Account.pm
 SHA1 b1dd731a184ef5a830e924ea0f94150e89c7f8c6 lib/Notice/C/Addresses.pm
-SHA1 b249cefd8bd2cf157643f25a4b1cd5eb4137beb2 lib/Notice/C/Assets.pm
+SHA1 cb81591145d2903bde867df69cd63b2eff503e22 lib/Notice/C/Assets.pm
 SHA1 96bc29d79a936c8342c80a96d22cb4428793c319 lib/Notice/C/Beekeeping.pm
 SHA1 69ee97331f435e91f3fb6766be3f71d31aca8ae7 lib/Notice/C/Config.pm
 SHA1 3c984793e3a3bfa1d8d4da2beb986034c971275e lib/Notice/C/Details.pm
@@ -66,11 +66,11 @@ SHA1 748db6aee3fe2c33678b9e9a65f9341e7342532e lib/Notice/DB/Result/Alhistory.pm
 SHA1 51558e61a36d18e0f3be103452bacefadf2a79af lib/Notice/DB/Result/AliasDetail.pm
 SHA1 e2b800ccb484b4c2867eb4e2ddf7ce64f5ee2040 lib/Notice/DB/Result/Aliase.pm
 SHA1 413daf67bc241d6372a76b4282ecd8b01aeeb205 lib/Notice/DB/Result/Asset.pm
-SHA1 d0dabbf5b3b8582d15c1fd4f9fde1f5fe223e84b lib/Notice/DB/Result/AssetCatData.pm
+SHA1 90ea03c23b7b0591f6e29d272bf3f01c1952670c lib/Notice/DB/Result/AssetCatData.pm
 SHA1 f71326ca300cd87e8c4bb7724bb927220fa4fddd lib/Notice/DB/Result/AssetCatDataGroupEntry.pm
-SHA1 9917831bac3c67f0f75e51fbc9de8dfda13b84e2 lib/Notice/DB/Result/AssetCatDataGroupMembers.pm
+SHA1 63678d35071d8802c7d840a500f8324e6d1c5c2d lib/Notice/DB/Result/AssetCatDataGroupMembers.pm
 SHA1 43baebd94efaa685b42c4da5dc0eda00bb5a72af lib/Notice/DB/Result/AssetCategory.pm
-SHA1 2f2c1cf71dc5811f8dbd235e7b3d32358554ab86 lib/Notice/DB/Result/AssetData.pm
+SHA1 3eb85683cae61f75c338debdbfa2efc1d95d071c lib/Notice/DB/Result/AssetData.pm
 SHA1 3b84d59b84c70e1419e93d1ca9d7ba892a9cfa04 lib/Notice/DB/Result/AssetLocation.pm
 SHA1 be5f66985a8fb0d0a4064767d5d1aed25f981eb7 lib/Notice/DB/Result/ConfData.pm
 SHA1 81d6c6381d46b927d9bb47da618fde307cede60a lib/Notice/DB/Result/Config.pm
@@ -158,9 +158,9 @@ SHA1 aa49143a3e6f26091dfa6fe6fd2fe51d35b28f1d t/cgi-bin/templates/Notice/C/Addre
 SHA1 4e3fdfcbb19a9b48583f79203a4121f852fe7c99 t/cgi-bin/templates/Notice/C/Assets/data.tmpl
 SHA1 e7ed0b50148dd4c33575c88abb138a61261ca461 t/cgi-bin/templates/Notice/C/Assets/define.tmpl
 SHA1 217eda5f8fac8ef7593d2042933b04f3d75ffa8d t/cgi-bin/templates/Notice/C/Assets/delete.tmpl
-SHA1 5b94408b640e35f9ad2163f7d300734ee59d2ae3 t/cgi-bin/templates/Notice/C/Assets/details.tmpl
-SHA1 2741b0f95e68939958172a759f4ce8e0b6ba23fc t/cgi-bin/templates/Notice/C/Assets/list.tmpl
-SHA1 c1a1ad84ac690cc940b01b663eb2e7b142591b23 t/cgi-bin/templates/Notice/C/Assets/main.tmpl
+SHA1 ed5355e30568422bf5c73c445890fe08b33c62d9 t/cgi-bin/templates/Notice/C/Assets/details.tmpl
+SHA1 4ea92aceea936f517574dd6bd2009ed7f4d64445 t/cgi-bin/templates/Notice/C/Assets/list.tmpl
+SHA1 d54d80feefb785451fa259709b070aedf75044be t/cgi-bin/templates/Notice/C/Assets/main.tmpl
 SHA1 325a84d372b8d2f9c287f7e1be7401b7d4617004 t/cgi-bin/templates/Notice/C/Assets/wrapper.tmpl
 SHA1 9a386c9849620b98d2a7d23985b6445c238dc021 t/cgi-bin/templates/Notice/C/Beekeeping/main.tmpl
 SHA1 7618e99ea6b6d2d5e5c0af718255c53bbf2fb382 t/cgi-bin/templates/Notice/C/Beekeeping/wrapper.tmpl
@@ -233,7 +233,7 @@ SHA1 63657cbb7d7086c56b0cd4e5c6999bb683664868 t/www/robots.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk9jQwcACgkQAR68wSDJd666NgCgiaIKm7+/1mkY04nLRRRe9a4/
-GngAoJUIQuq/RCyyYVuLUXRGU2FdrcRB
-=XdFk
+iEYEARECAAYFAk9jesEACgkQAR68wSDJd65P8gCeNoKMymgNh2oB+xWuDSXwLjuO
+WtkAn0upj1PzS6YQJrv+vrVhPPmu/4/W
+=Opk0
 -----END PGP SIGNATURE-----

@@ -151,8 +151,7 @@ sub main: StartRunmode {
     
     $page .=qq ( 
         <p>
-    <h4><a class="small black button so we can see it, which monkey wrote this css?" href="$surl/define">
-<!--strike-->Define a type of Asset<!--/strike--></a></h4>
+    <h4><a class="small black button so we can see it, which monkey wrote this css?" href="$surl/define">Define a new Asset</a></h4>
 </p>);
 
     if(defined $user_msg){ $page .=qq ( $user_msg; <br /> ); }
@@ -475,6 +474,7 @@ function goHome(url)
 <input type="button" value="Maybe try going back" onclick="goBack()" />
 <input type="button" value="or searching" onclick="goHome(\'/cgi-bin/index.cgi/assets\')" />'
                 );
+            $self->plt;
             return $self->tt_process();
         }
         # we should only have one entry!
@@ -505,6 +505,7 @@ function goHome(url)
             title => 'Error - unknown asset type',
             error => $error,
             message => $message);
+        $self->plt;
         return $self->tt_process();
     }
 
@@ -577,7 +578,7 @@ function goHome(url)
         #'+as' => ['assetcategory.type'],
         order_by => 'acd_order',
         });
-    # could loop through @asc looking or if we want something that is probaly slower...
+    # could loop through @asc looking or if we want something that is probably slower...
     my $ass_rs = $self->resultset('AssetCatData')->search(
         { 'acd_cid' => { '=', "$acd_id"}, 'acd_type' => { '=', 'select'}},
         {});
@@ -620,7 +621,7 @@ function goHome(url)
         my $v = $r->gr_id;
         my $n = $r->gr_name;
         $asd{$ass} .=qq |<option value="$v"|;
-        if($asd{$ass} && $existing_value eq $v){ $asd{$ass} .=qq | selected="selected"|; }
+        if($asd{$ass} && $existing_value eq "$v"){ $asd{$ass} .=qq | selected="selected"|; }
         $asd{$ass} .=qq |>$n</option>\n|;
     }
     }
@@ -636,10 +637,12 @@ function goHome(url)
                         title => 'Error - unknown asset type',                                       
                         error => $error,                       
                         message => $message); 
+                $self->plt;
                 return $self->tt_process();
     }
     #$message='';
     $self->tt_params( submit => $submit, title => 'Asset Data', asid => $as_id, asc => \@asc, message => $message, asd => \%asd);
+    $self->plt;
     return $self->tt_process();
 
 }
@@ -658,7 +661,9 @@ sub list: Runmode{
     my ($self) = @_;
     my $as_id = $self->param('id')=~m/^\d+$/ ? $self->param('id') : '%';
     my (%Asset_search,%AssetData_search,%AssetCatData_search, %AssetCatData_search_orderby);
-    if($self->param('id') eq 'cid' && $self->param('sid')=~m/^(\d+)$/){ 
+    my $q = \%{ $self->query() };
+    if(defined($q->param('sid'))){ $self->param('sid' => $q->param('sid')); }
+    if(defined($self->param('id')) && $self->param('id') eq 'cid' && $self->param('sid')=~m/^(\d+)$/){ 
         %AssetData_search = ('asd_cid' => { '=', "$1"});
         %AssetCatData_search =('acd_cid' => {'=', "$1"});
         %Asset_search =('as_cid' => {'=', "$1"});
@@ -676,6 +681,7 @@ sub list: Runmode{
 
     unless(@assets){
         $self->tt_params( title => 'Error - no such asset', message => "Can't seem to see that asset", error => '1');
+        $self->plt;
         return $self->tt_process();
     }
     
@@ -727,6 +733,7 @@ sub list: Runmode{
         }
     $self->tt_params( assets =>\@assets, asd => \%asd, message => $message, ac => \%ac);
     #if($as_id!~m/^\d+$/){ $self->tt_params( heading => 'Asset List'); }
+    $self->plt;
     return $self->tt_process();
 
 }
@@ -846,7 +853,7 @@ sub define: Runmode {
                         }
                         my $done = $rs->acd_id;
                         if($done=~m/^\d+$/){
-                            $message .= "added date $done to asset $cid <br />\n";
+                            $message .= "added data (" . $rs->acd_name .") $done to this asset $cid <br />\n";
                         }else{
                             $message .= Dumper($ch{$acdkey}) . " not added<br />\n";
                         }
