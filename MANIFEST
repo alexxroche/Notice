@@ -115,7 +115,6 @@ script/create_whois_cdb.pl
 script/git.add
 script/palm.pl
 script/patch_cgi_app_server
-script/patch_module_signature
 script/pin
 script/prep_db.pl
 script/publish_zone.pl
@@ -209,6 +208,8 @@ t/www/js/asset.js
 t/www/js/create_pw.js
 t/www/js/javascriptAES.js
 t/www/js/jquery.js
+t/www/js/jquery_1.4.4.js
+t/www/js/jquery_1.7.1_min.js
 t/www/js/jsapi
 t/www/js/orphus.js
 t/www/js/script.js

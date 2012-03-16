@@ -26,10 +26,10 @@
             <td><input type="text" name="grid" value="[%- ac.asc_group -%]" /></td>
         </tr>
     <tr>
-    <th colspan="10">Data</th>
+    <th colspan="11">Data</th>
     </tr>
  [%- IF acd and acd.size >=1 -%]
-  [%- FOREACH cd = acd -%]
+  [%- rcount=0; FOREACH cd = acd -%]
   <tr>
   <td>name<input id="d_id" type="hidden" name="d_id_[%- cd.acd_id -%]" value="[%- cd.acd_id -%]" /></td>
   <td><input id="d_name" type="text" name="d_name_[%- cd.acd_id -%]" value="[%- cd.acd_name -%]" size="12" /></td>
@@ -44,6 +44,11 @@
                     </td>
   <td><a class="blacktext" title="A regular expression to control/limit the data that can be entered">regexp</a></td><td><input id="regexp" type="text" name="d_regexp" value="[%- cd.acd_regexp -%]" size="10"/></td>
   <td>group id</td><td><input type="text" name="d_grid" value="[%- cd.acd_grid -%]" size="2"/></td>
+ [%- IF rcount >=1 -%]
+  <td><input class="small red button" type="button" action="delete_the_values_in_this_row_using_jquery_and_then_hide_it" name="Delete row" value="Remove Row" /></td>
+ [%- ELSE -%]
+   <td>Action</td>
+ [%- END; rcount = rcount + 1 -%]
   </tr>
   [%- END -%]
  [%- ELSE -%]

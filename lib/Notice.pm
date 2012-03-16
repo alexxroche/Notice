@@ -267,11 +267,11 @@ sub cgiapp_init {
                     #warn Dumper($menu_rs);
                     # GOT HERE! NTS
 
-
                     #my $menu_cols = $menu_rs->all;
+                    # NOTE we may have to sort these 
                     my $menu_cols = keys %{ $menu_rs[0]->{_column_data} };
                     my $menu_rows = @menu_rs;
-                    warn "Cols: $menu_cols, Rows: $menu_rows";
+                    #warn "Cols: $menu_cols, Rows: $menu_rows";
 
                     # NOTE we can add global default menu items here
                     push @menu_order, '1.2';

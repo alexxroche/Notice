@@ -3,6 +3,7 @@ package Notice::C::Assets;
 use warnings;
 use strict;
 use base 'Notice';
+my %opt; #options; nice to have.
 
 =head1 NAME
 
@@ -142,16 +143,22 @@ sub main: StartRunmode {
         })->all;
 
     my $page;
+    $page .=qq |
+            The assets section will have the asset definitions off in a sub section, (once we get this organised and written).
+            For now you just need to know that defining an asset is not the same as adding an asset. Once an asset is defined, (e.g. "That a CD has a name, an artits and a number of tracks" ) we can then add a CD to the database, including some or all of the asset atributes.
+     For now asset attributes are universal, (why define a CD twice?) but using the asc_grid it is possible to have an asset that is bound to a particular account or person, (or group of accounts or people). So if you only have Pop CDs then you probably do not need an entry for composer. The flip side to this is that each piece of asset data is stored seperatly, so if your CD does not have a composer then by leaving it blank no database space will be used. It is even possible for a user to edit their CSS so that the asset table does not display the composer option.
+    |;
     
-    $page =qq ( 
+    $page .=qq ( 
         <p>
-    <h4><a class="small black button so we can see it which monkey wrote this css" href="$surl/define">
+    <h4><a class="small black button so we can see it, which monkey wrote this css?" href="$surl/define">
 <!--strike-->Define a type of Asset<!--/strike--></a></h4>
 </p>);
 
     if(defined $user_msg){ $page .=qq ( $user_msg; <br /> ); }
 
-    $page .=qq (<h4><strike>Search</strike></h4>
+    $page .=qq (<h4><strike>Edit Asset Category Data (especially delete an entry)</strike></h4>
+    <h4><strike>Search</strike></h4>
     <p>
     <h4> List </h4>
     <a class="navigation" href="/cgi-bin/index.cgi/assets/list/cid/19">list all trees</a> in the asset database or
@@ -397,6 +404,7 @@ sub details: Runmode{
                 title => 'Error - unknown asset',
                 error => $error,
                 message => $message);
+        $self->plt;
         return $self->tt_process();
     }
 
@@ -407,6 +415,7 @@ sub details: Runmode{
          message => $message,
          warning => $warning
     );
+    $self->plt;
     return $self->tt_process();
     
 }
@@ -735,6 +744,7 @@ sub define: Runmode {
     my ($surl,$page);
     $surl = ($self->query->self_url);
     my $q = \%{ $self->query() };
+    if(defined($q->param('debug'))){ $opt{debug}= $self->param('debug') if $q->param('debug')=~m/^\d+$/; }else{ $opt{'debug'}=0; }
     my $message='';
     my $user_msg;
     my $cid = '';
@@ -751,25 +761,108 @@ sub define: Runmode {
     if($cid=~m/^(\d+)$/){
         my %AssetCatData_search =('acd_cid' => {'=', "$1"});
         my %AssetCatData_search_orderby=(order_by => 'acd_order');
-        my $ac = $self->resultset('AssetCategory')->search({ asc_id => {'=', $cid}}, {})->first;
+        my $ac = $self->resultset('AssetCategory')->search({ asc_id => {'=', $cid}}, {})->first;  #NOTE acs1n
         my @acd = $self->resultset('AssetCatData')->search( { %AssetCatData_search }, { %AssetCatData_search_orderby});
 
         if($q->param('id')){ #we might have new data or an update
             my $action = 'update';
             if( $q->param('delete') ){ $action = 'delete'; }
 
-        # NTS you are HERE preparing the data for update or deleting
-        
             $message .= "Looks like you are " . $action . "ing Asset Category " . $q->param('id') . "\n<br />";
-            #$message .= Dumper($q->param);
             my $this_count=0;
+            my %change;
+            my %check;
             $message .= "\n<br />";
             foreach my $ak (keys %{ $q->{'param'} } ){
                 my $v = $q->param($ak);
-                $this_count++; $message .= "\n<br /> $this_count $ak = " . $q->param($ak);
+                my(@que) = (split/_/, $ak);
+                if($que[0] eq 'd' ){ # && $que[(@que - 1)])=~m/^\d+$/){
+                    $change{data}{$que[2]}{"acd_$que[1]"} = $q->param($ak);
+                }else{
+                    if($ak eq 'id'){
+                        $check{asc_id} = $q->param($ak);
+                    }elsif($ak ne 'update'){
+                        $change{def}{"asc_$ak"} = $q->param($ak);
+                    }
+                }
+                #$this_count++; $message .= "\n<br /> $this_count $ak = " . $q->param($ak);
             }
+            #$message .= Dumper(\%change);
+
+            my $ef_acid;
+            my $username = $self->authen->username;
+            if($self->param('ef_acid')){
+                $ef_acid = $self->param('ef_acid');
+                $message .= "effective acid = $ef_acid for $username" if $opt{debug}>=9
+            }else{
+                $message .= "we have no idea which acid $username is from";
+            }
+
+            #$change_domain{do_acid} = $ef_acid;
+            my $sth = $self->resultset('AssetCategory')->search( \%check )->first;  #redundent? we have already made this call
+                                                                                    # at acs1n (but with uglyer code)
+            if(defined($sth) && defined($cid) && ($sth->asc_id eq $cid) ){
+                # first we update the asset_category (if needed) before we move onto the asset_cat_data.
+                if(!defined($change{def}{asc_name}) || $sth->asc_name ne $change{def}{asc_name} || #do we need to quote these?
+                   !defined($change{def}{asc_description}) || $sth->asc_description ne $change{def}{asc_description} ||
+                   !defined($change{def}{asc_grid}) ||  $sth->asc_grid ne $change{def}{asc_grid}
+                    ){
+                        my %c = %{ $change{def} };
+                        $sth->update( \%c );
+                        if($sth->is_changed()){
+                           $message .= 'Update did not happen, sorry.';
+                        }else{
+                           $message .= 'Asset status updated';
+                        }
+                }else{ # debug
+                       $message .= "<br />The definition for this asset category has not changed" if $opt{debug}>=5;
+                } 
+
+                # right! onto the main event
+                if(defined($change{data})){
+                    my %ch = %{ $change{data} }; 
+
          # we can't presume that the acd_id is ready as the HTML auto-increments and MAY CLASH with existing rows!!
          # N.B. we MUST check the acd_cid
+                # we loop through $change{data} and see if there is anything with acd_id matching this AND acd_cid = $change{def}{asc_id}
+            # check for blank lines (delete them from the database if they exist and from %change if they do not)
+                    ASSET_DATA: foreach my $acdkey (keys %ch){
+                        my $rs = $self->resultset('AssetCatData')->search({
+                             #acd_cid => {'=', $change{def}{asc_id}},
+                             acd_cid => {'=', $cid},
+                             acd_id => {'=', $acdkey},
+                            }, {})->first;
+                        if(defined($rs) && $rs->acd_cid == $change{def}{asc_id}){
+                             my %cha = %{ $ch{$acdkey} };
+                             $cha{acd_id} = $acdkey;
+                             # probably just need an update here
+                             $rs = $self->resultset('AssetCatData')->update_or_create( \%cha );
+                        }else{
+                             my %new_data = %{ $ch{$acdkey} };
+                             next ASSET_DATA unless $new_data{acd_name} ne ''; # don't want blank entries
+                                #$new_data{acd_cid} = $change{def}{asc_id};
+                                $new_data{acd_cid} = $cid;
+                             $rs = $self->resultset('AssetCatData')->create( \%new_data )->update;
+                        }
+                        my $done = $rs->acd_id;
+                        if($done=~m/^\d+$/){
+                            $message .= "added date $done to asset $cid <br />\n";
+                        }else{
+                            $message .= Dumper($ch{$acdkey}) . " not added<br />\n";
+                        }
+                    }
+##### debug to check that we have the data in the right order
+#$self->tt_params({heading=>"Changed/updated the '".$ac->asc_name."' category", ac=>$ac,acd=>\@acd,message=>$message,page=>$page});
+#$self->plt; return $self->tt_process(); exit;
+##### end of debug
+
+                }
+            }else{
+                $message .= "<br />cid = " . $cid . "<br />sth defined = " . defined($sth) . "<br /> and (" . $sth->asc_id . " eq " . $change{def}{asc_id} . ")";
+            }
+        # we could just update this with the data that we have, but, you know, XSS
+        @acd = $self->resultset('AssetCatData')->search( { %AssetCatData_search }, { %AssetCatData_search_orderby});
+
 
             $self->tt_params({
             heading => "Changed the '" . $ac->asc_name . "' category",

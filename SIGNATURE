@@ -16,7 +16,7 @@ Hash: SHA1
 
 SHA1 9fc744d1a76b93645a786aa70aab24c3e7971c0e ABOUT
 SHA1 d6149c7501ae89385513e7e0b4e0c4a75ca0243c Changes
-SHA1 9f27ed875be6d42975ac6c07a1e3228c44c253ea MANIFEST
+SHA1 f2f4f0446d22865f13da4c6641894b6a5309ffda MANIFEST
 SHA1 f45a89654b926fe753218eef91639df99b93d53d META.yml
 SHA1 f1ab271c088fb5865a8294c9c39fbed6ae9413a7 Makefile.PL
 SHA1 895dbf730924745ed8bbabc1c9cf3ecf9145a5ff README
@@ -24,11 +24,11 @@ SHA1 378a9927a24e2ab7c6e116b09bff53828da8fb6f README.whois
 SHA1 d1cd3255d3f636c31b1d87ba004632c7dc45bfd5 config/config.pl
 SHA1 ba37f0cde8a4efca63e161e00b902754b09944e5 config/notice.mysql
 SHA1 086941a4b8d9523c225aba691faab0b397315da2 debug.sh
-SHA1 d583149666bf6db74f93915e165da0d16be5a1dd lib/Notice.pm
+SHA1 8db4f7c52afc9277525aaca6ce736843f6e95160 lib/Notice.pm
 SHA1 f3cbf6214e9a1ec8a57a115fa618bd021945c40c lib/Notice/Base.pm
 SHA1 7c27e132588b09a9bc7ebe7a9ae2d24839754c1d lib/Notice/C/Account.pm
 SHA1 b1dd731a184ef5a830e924ea0f94150e89c7f8c6 lib/Notice/C/Addresses.pm
-SHA1 2e0c9bfebe1fdb6e9eafb42e51be8e425e4a7f2e lib/Notice/C/Assets.pm
+SHA1 b249cefd8bd2cf157643f25a4b1cd5eb4137beb2 lib/Notice/C/Assets.pm
 SHA1 96bc29d79a936c8342c80a96d22cb4428793c319 lib/Notice/C/Beekeeping.pm
 SHA1 69ee97331f435e91f3fb6766be3f71d31aca8ae7 lib/Notice/C/Config.pm
 SHA1 3c984793e3a3bfa1d8d4da2beb986034c971275e lib/Notice/C/Details.pm
@@ -131,7 +131,6 @@ SHA1 2c08e5da4cf7259baab0feccde97e9e1bc51c483 script/create_whois_cdb.pl
 SHA1 b90bec8ad7fb9af63be9148bcebe4ee25af531fd script/git.add
 SHA1 f8814d73d45c104a05d269c8efa714460489e609 script/palm.pl
 SHA1 e88217e433c247cff13a0236814f0eb856442072 script/patch_cgi_app_server
-SHA1 18b23e9c88a582e48a7231e10652a185456d0254 script/patch_module_signature
 SHA1 b115b971a72f81303cd711ef96983308833e6d24 script/pin
 SHA1 05bc34cd6ba7e20c63f1a7cae3f961e3dea9977e script/prep_db.pl
 SHA1 6d52fe6735a97b420b11f1ae2b61b092305e90c1 script/publish_zone.pl
@@ -157,7 +156,7 @@ SHA1 f2533df4938b32d14861d450383aba2f2cf1cde8 t/cgi-bin/index.cgi
 SHA1 9a386c9849620b98d2a7d23985b6445c238dc021 t/cgi-bin/templates/Notice/C/Account/index.tmpl
 SHA1 aa49143a3e6f26091dfa6fe6fd2fe51d35b28f1d t/cgi-bin/templates/Notice/C/Addresses/index.tmpl
 SHA1 4e3fdfcbb19a9b48583f79203a4121f852fe7c99 t/cgi-bin/templates/Notice/C/Assets/data.tmpl
-SHA1 24115de8e7490408dd6f4be994fa1f80735f18c1 t/cgi-bin/templates/Notice/C/Assets/define.tmpl
+SHA1 e7ed0b50148dd4c33575c88abb138a61261ca461 t/cgi-bin/templates/Notice/C/Assets/define.tmpl
 SHA1 217eda5f8fac8ef7593d2042933b04f3d75ffa8d t/cgi-bin/templates/Notice/C/Assets/delete.tmpl
 SHA1 5b94408b640e35f9ad2163f7d300734ee59d2ae3 t/cgi-bin/templates/Notice/C/Assets/details.tmpl
 SHA1 2741b0f95e68939958172a759f4ce8e0b6ba23fc t/cgi-bin/templates/Notice/C/Assets/list.tmpl
@@ -220,10 +219,12 @@ SHA1 40f681a481932ba593b4910c28cf6860263d73fb t/www/favicon.ico
 SHA1 548b27444c7d2576fb824c2e66267acd766b4ae5 t/www/images/orphus.gif
 SHA1 4b772b939292e57eb8b6997206d8f888b57323fb t/www/images/top_logo.png
 SHA1 e98d0d086f790e026f5c8c73f4422282e93d99c8 t/www/index.html
-SHA1 b3b3c98ef8a40929181cc6e77eeef934ced573fd t/www/js/asset.js
+SHA1 78ade228a8aa14b7093ff31b4519f2f7a890c52c t/www/js/asset.js
 SHA1 1e7722a842a9ff46f6caa7a62d10ba8add41f1fd t/www/js/create_pw.js
 SHA1 a796b79577bab13be5ccc925819cea1c1bf1e558 t/www/js/javascriptAES.js
-SHA1 b75990598ee8d3895448ed9d08726af63109f842 t/www/js/jquery.js
+SHA1 9eb9ac595e9b5544e2dc79fff7cd2d0b4b5ef71f t/www/js/jquery.js
+SHA1 b75990598ee8d3895448ed9d08726af63109f842 t/www/js/jquery_1.4.4.js
+SHA1 9eb9ac595e9b5544e2dc79fff7cd2d0b4b5ef71f t/www/js/jquery_1.7.1_min.js
 SHA1 010455109cd47ac8274b776bd3c7b0ff7f754868 t/www/js/jsapi
 SHA1 1c5a878f552b786be042369bc1f46a0a29dd198f t/www/js/orphus.js
 SHA1 e94e959d169e67af503e76d2443582ca984e4742 t/www/js/script.js
@@ -232,7 +233,7 @@ SHA1 63657cbb7d7086c56b0cd4e5c6999bb683664868 t/www/robots.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk8xtCcACgkQAR68wSDJd64EIwCcCFu/xRUxblGEwdlVCBA6tLDR
-UWAAoL4O1LijBjeZwyZLiNWp3zeZxSho
-=FPh0
+iEYEARECAAYFAk9jQwcACgkQAR68wSDJd666NgCgiaIKm7+/1mkY04nLRRRe9a4/
+GngAoJUIQuq/RCyyYVuLUXRGU2FdrcRB
+=XdFk
 -----END PGP SIGNATURE-----
