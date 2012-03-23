@@ -647,12 +647,50 @@ function goHome(url)
 
 }
 
+=head3 search
+
+  * This lets us search for an asset. 
+  * It will have to be quite clever as there are lots of places where data could be stored:
+
+select * from groups where gr_name like '%syca%';
+select * from assets where as_notes like '%Roche%';
+select * from asset_data where asd_value like '%wood%';
+
+SELECT DISTINCT(as_id),as_cid,as_date,as_acid,as_owner,as_user,as_adid,as_grid,as_in_asid,as_notes 
+ FROM assets JOIN asset_data asd ON assets.as_id=asd.asd_asid AND ( asd_value LIKE '%wood%' OR as_notes LIKE '%Roche%');
+
+SELECT DISTINCT(as_id),as_cid,as_date,as_acid,as_owner,as_user,as_adid,as_grid,as_in_asid,as_notes
+ FROM assets JOIN asset_data asd ON assets.as_id=asd.asd_asid JOIN groups gr ON gr.gr_id=asd.asd_asid AND asd_value LIKE '%syca%';
+
+SELECT DISTINCT(as_id),as_cid,as_date,as_acid,as_owner,as_user,as_adid,as_grid,as_in_asid,as_notes FROM (
+SELECT * FROM assets JOIN asset_data asd ON assets.as_id=asd.asd_asid JOIN groups gr ON gr.gr_id=asd.asd_asid AND asd_value LIKE '%syca%'
+) me;
+
+SELECT * FROM assets
+JOIN asset_data asd ON assets.as_id=asd.asd_asid
+#JOIN groups gr ON gr.gr_id=asd.asd_value
+ AND ( 
+    asd_value LIKE '%wood%' 
+    OR as_notes like '%wood%' 
+    #OR gr_name like '%syca%'
+);
+
+select * from asset_data where asd_asid = 31;
+select * from asset_cat_data where acd_id = 30;
+select * from groups where gr_id = 10;
+
+  * we might be able to force &list into displaying the results for us
+
+=cut
+
+sub search: Runmode{
+}
+
 =head3 list
 
   * Purpose - list assets (or one asset) from the database
   * Expected parameters - are optional, but if there is one then it should be an as_id
-  * Function on success
-  * Function on failure
+
 
 =cut
 
