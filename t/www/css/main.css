@@ -271,7 +271,7 @@ background-color: #ffcc00;
 border: solid 2px #e2c822;
 }
 
-.blacktext { color: rgb(000, 000, 000); text-decoration: none; }
+.blacktext, .black { color: rgb(000, 000, 000); text-decoration: none; }
 
 table.stripe {
         border-collapse: collapse;
