@@ -127,6 +127,7 @@ my %mlist = (
 14  => { name=>'mySQL', menu=>1,    level=>4,},
 15  => { name=>'CRM',   menu=>1,    level=>4,},
 16  => { name=>'FTP',   menu=>1,    level=>4,},
+21  => { name=>'Sales',   menu=>1,    level=>4,},
 ####################################################################
 );
 
@@ -217,6 +218,7 @@ my %old_modules = (
         #19.2 API module
     # 7.2 is technically "optional" but without, other copies of Notice will ignore you by default
 20=>'SOAP::API',
+21=>'Sales',
         # pluggable with any other module e.g. Domains::Email::API
 ####################################################################
 );

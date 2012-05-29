@@ -29,22 +29,6 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(qr/^(?!main)/);
-    my $page_loaded = 0;
-    eval {
-        use Time::HiRes qw ( time );
-        $page_loaded = time;
-    };
-    if($@){
-        $page_loaded = time;
-    }
-
-    # we /could/ put this in Notice.pm but then it would be less accurate
-    if($self->param('cgi_start_time')){
-        $self->tt_params({page_load_time => sprintf("Page built in: %.2f seconds", ($page_loaded - $self->param('cgi_start_time')))});
-    }elsif($self->param('page_load_time')){
-        $self->tt_params({page_load_time => sprintf("Page loaded %.2f seconds", ($page_loaded - $self->param('page_load_time')))});
-    }
-
     # debug message
     if($self->param('i18n') && $self->param('debug')){ 
         $self->tt_params({warning => '<span class="small lang i18n">Lang:' . $self->param('i18n') . '</span>'}); 
@@ -79,6 +63,7 @@ sub main: StartRunmode {
             no_wrapper => $no_wrapper,
             message => $message,
         });
+        $self->plt;
         return $self->tt_process();
     }
     if($q->param('debug')){
@@ -122,6 +107,7 @@ sub main: StartRunmode {
     no_wrapper => $no_wrapper,
 	message => $message,
 		  });
+    $self->plt;
     return $self->tt_process();
     
 }

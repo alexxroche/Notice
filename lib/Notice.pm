@@ -32,7 +32,7 @@ use CGI::Application::Plugin::Forward;
 use CGI::Application::Plugin::TT;
 use Data::Dumper;
 
-our $VERSION = 3.04;
+our $VERSION = 3.05;
 
 =head1 NAME
 
@@ -354,6 +354,27 @@ sub cgiapp_init {
         $self->param('page_load_time' => $page_load_time);
     }
 }
+
+=head3 plt
+
+find out when this page finished loading
+
+=cut
+
+sub plt {
+    my $self = shift;
+    my $page_loaded = 0;
+    eval {
+        use Time::HiRes qw ( time );
+        $page_loaded = time;
+    };
+    if($@){
+        $page_loaded = time;
+    }
+    $self->tt_params({page_load_time => sprintf("Took %.3f ms", (($page_loaded - $self->param('page_load_time'))*1000))});
+    #return $page_loaded;
+}
+
 
 =head3 teardown
 

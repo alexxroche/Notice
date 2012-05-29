@@ -66,23 +66,6 @@ sub setup {
     }
     $runmode=~s/.*\///;
 
-    my $page_loaded = 0;
-    eval {
-        use Time::HiRes qw ( time );
-        $page_loaded = time;
-    };
-    if($@){
-        $page_loaded = time;
-    }
-
-    # we /could/ put this in Notice.pm but then it would be less accurate
-    if($self->param('cgi_start_time')){
-        $self->tt_params({page_load_time => sprintf("Page built in: %.2f seconds", ($page_loaded - $self->param('cgi_start_time')))});
-    }elsif($self->param('page_load_time')){
-        $self->tt_params({page_load_time => sprintf("Page loaded %.2f seconds", ($page_loaded - $self->param('page_load_time')))});
-    }
-
-
     my $known_as;
     $known_as = $self->param('known_as')||'';
     # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/blah/1/ has a $runmode of '1'
@@ -134,6 +117,7 @@ sub main: StartRunmode {
 	message => $message,
     body    => $body
 		  });
+    $self->plt;
     return $self->tt_process();
 }
 
@@ -160,6 +144,7 @@ sub css: Runmode {
     message => $message,
     body    => $body
           });
+    $self->plt;
     return $self->tt_process();
 }
 
@@ -178,16 +163,14 @@ sub menu: Runmode {
     $body .=qq |
 |; 
 
-
     $self->tt_params({
     submenu => \%submenu,
     message => $message,
     body    => $body
           });
+    $self->plt;
     return $self->tt_process();
 }
-
-
 
 
 1;

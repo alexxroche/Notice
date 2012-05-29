@@ -117,6 +117,7 @@ sub main: StartRunmode {
 	message => $message,
     body    => $body
 		  });
+    $self->plt;
     return $self->tt_process();
 }
 

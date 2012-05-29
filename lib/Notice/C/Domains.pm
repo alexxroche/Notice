@@ -155,6 +155,7 @@ sub main: StartRunmode {
     domain_list => \@domains,
     message => $message,
 		  });
+    $self->plt;
     return $self->tt_process();
     #return $self->tt_process('Notice/C/Domains/index.tmpl');
     
@@ -255,6 +256,7 @@ sub edit: Runmode{
             $message .= Dumper( $q->param ) if $self->param('debug')>=12;
             #$self->tt_params({message => "Domain not found in this account ($ef_acid)"});
             $self->tt_params({message => $message});
+            $self->plt;
             return $self->tt_process();
         }
         #my $frs = $self->resultset('Domain')->search( \%find_domain );
@@ -264,6 +266,7 @@ sub edit: Runmode{
             $self->param(no_display => 1);
             $self->tt_params({domain => $find_domain{'do_name'}});
             $self->tt_params({no_display=> '1'});
+            $self->plt;
             return $self->tt_process();
             exit;
         }
@@ -312,6 +315,7 @@ sub edit: Runmode{
                 $self->param(no_display => 1);
                 $self->tt_params({domain => $domain_details->{do_name}});
                 $self->tt_params({no_display=> '1'});
+                $self->plt;
 	            return $self->tt_process();
                 exit;
                 #$zone_file .= $q->param('domain'); #dangerous! (NTS fix this)
@@ -392,6 +396,7 @@ sub edit: Runmode{
         $self->tt_params({message=> "Which domain are you looking for? ($guess)"});
      }
      $self->tt_params({type=> $type});
+     $self->plt;
 	 return $self->tt_process();
 }
 
@@ -657,6 +662,7 @@ sub search: Runmode{
     if(@domains){ $self->tt_params({domains => \@domains}); }
     $self->tt_params({message => $message});
     if($opt{body}){ $self->tt_params({results_table => $opt{body}}); }
+    $self->plt;
     return $self->tt_process();
 }
 
@@ -715,6 +721,7 @@ sub delete: Runmode{
         return $self->redirect("$surl/domains/");
       }else{
            $self->tt_params({message => 'That seems to be in another account'});
+           $self->plt;
            return $self->tt_process('Notice/C/Domains/main.tmpl');
       }
     }else{
@@ -727,6 +734,7 @@ sub delete: Runmode{
                 $message .= "$key = $value<br />\n";
         }
        $self->tt_params({message => $message});
+       $self->plt;
        return $self->tt_process('Notice/C/Domains/main.tmpl');
     }
 }

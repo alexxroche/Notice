@@ -53,45 +53,7 @@ sub setup {
     my $known_as;
     #$known_as = $self->param('known_as');
     #$self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $known_as at ". $ENV{REMOTE_ADDR}});
-
-    my $page_loaded = 0;
-    eval {
-        use Time::HiRes qw ( time );
-        $page_loaded = time;
-    };
-    if($@){
-        $page_loaded = time;
-    }
-
-    # we /could/ put this in Notice.pm but then it would be less accurate
-    if($self->param('cgi_start_time')){
-        $self->tt_params({page_load_time => sprintf("Page built in: %.2f seconds", ($page_loaded - $self->param('cgi_start_time')))});
-    }elsif($self->param('page_load_time')){
-        $self->tt_params({page_load_time => sprintf("Page loaded %.2f seconds", ($page_loaded - $self->param('page_load_time')))});
-    }
-
 }
-
-=head3 plt
-
-find out when this page finished loading
-
-=cut
-
-sub plt {
-    my $self = shift;
-    my $page_loaded = 0;
-    eval {
-        use Time::HiRes qw ( time );
-        $page_loaded = time;
-    };
-    if($@){
-        $page_loaded = time;
-    }
-    $self->tt_params({page_load_time => sprintf("Took %.3f ms", (($page_loaded - $self->param('page_load_time'))*1000))});
-    #return $page_loaded;
-}
-
 
 =head2 RUN MODES
 

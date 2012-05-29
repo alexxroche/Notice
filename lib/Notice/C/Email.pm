@@ -126,6 +126,7 @@ sub main: StartRunmode {
 	message => $message,
     body    => $body
 		  });
+    $self->plt;
     return $self->tt_process();
 }
 
@@ -188,6 +189,7 @@ sub aliases: Runmode{
                     # we could do a foreach but for now
                     $opt{error} .= "Just one destination address for now";
                     $self->tt_params({ error => $opt{error} });
+                    $self->plt;
                     return $self->tt_process();
                 }elsif($to=~m/^|/){ #we have a pipe
                     $create_data{'ea_touser'} = $to;
@@ -208,6 +210,7 @@ sub aliases: Runmode{
                  #if($this_domain[0]->{_column_data}{do_id} == $create_data{'doid'}){
                  if($create_data{'doid'} && int($this_doid) == int($create_data{'doid'})){
                     $self->tt_params({ error => 'I think we will skip the email loop today'});
+                    $self->plt;
                     return $self->tt_process();
                  }else{
                     $opt{'from_domain'} = $this_domain[0]->{_column_data}{do_name};
@@ -259,6 +262,7 @@ sub aliases: Runmode{
 
     unless($opt{do_name} && $opt{do_name} ne ''){
         $self->tt_params({ error => $error });
+        $self->plt;
         return $self->tt_process();
     }
 
@@ -281,6 +285,7 @@ sub aliases: Runmode{
     body    => $body,
     alias   => \@alias,
           });
+    $self->plt;
     return $self->tt_process();
 
 }
@@ -343,6 +348,7 @@ sub edit_alias: Runmode{
     # If we don't have any data then this is an error
     unless($ref[0]->{_column_data}{ea_touser}){
         $self->tt_params({error => 'Unknown Email Alias'});
+        $self->plt;
         return $self->tt_process('site_wrapper.tmpl');
     }        
 
@@ -352,6 +358,7 @@ sub edit_alias: Runmode{
     message => $message,
     body    => $body,
           });
+    $self->plt;
     return $self->tt_process();
 
 }
@@ -383,6 +390,7 @@ sub imap: Runmode{
     message => $message,
     body    => $body,
           });
+    $self->plt;
     return $self->tt_process();
 }
 
