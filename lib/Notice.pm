@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use base 'CGI::Application';
 our %opt; # nice to have them
+use lib 'lib';
 
 use Notice::DB;
 our $page_load_time = time;
@@ -32,7 +33,7 @@ use CGI::Application::Plugin::Forward;
 use CGI::Application::Plugin::TT;
 use Data::Dumper;
 
-our $VERSION = 3.05;
+our $VERSION = 3.04;
 
 =head1 NAME
 
@@ -353,6 +354,36 @@ sub cgiapp_init {
         }
         $self->param('page_load_time' => $page_load_time);
     }
+}
+
+=head3 cgiapp_prerun
+
+This lets us hook in the security module, (if it is installed)
+
+=cut
+
+sub cgiapp_prerun {
+    my $self = shift;
+    eval {
+        require Notice::Security;
+        Notice::Security->import();
+        $self->Notice::Security::prerun_callback();
+    };
+}
+
+=head3 cgiapp_postrun
+
+This lets us hook in the security module, (if it is installed)
+
+=cut
+
+sub cgiapp_postrun {
+    my $self = shift;
+    eval {
+        #require Notice::Security;
+        #Notice::Security->import();
+        $self->Notice::Security::postrun_callback();
+    };
 }
 
 =head3 plt
