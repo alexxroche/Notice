@@ -2,6 +2,7 @@ package Notice::Security;
 use strict;
 use warnings;
 our %opt; # nice to have them
+$opt{D}=0;
 use lib 'lib';
 use Notice::DB;
 our %__CONFIG;

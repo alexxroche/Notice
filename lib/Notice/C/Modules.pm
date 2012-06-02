@@ -188,6 +188,8 @@ my %mlist = (
 26 => { uuid=>'3cb603d4-acdc-11e1-9b44-00188bba79ac', name=>'Report'},
 '26.1' => { uuid=>'60ad2722-acdc-11e1-81af-00188bba79ac', name=>'Report graphs'},
 27 => { uuid=>'7713a115-1594-1155-9411-557A15059115', name=>'i18n', desc=>'i10n Internationalisation'},
+28 => { uuid=>'74BDD358-3C3C-D3D4-E817-6EEF5C5B15FC', name=>'Wiki'},
+'28.1' => { uuid=>'F1151111-2311-11F1-1511-11231111f1FC', name=>'FinikiWiki', runmode=>'wiki'},
 30 => { uuid=>'72579BC1-5E11-30D6-B044-47874BA19EC8', name=>'Security'},
 31  => { uuid=>'ADC80536-E33A-3AE8-AA49-36DF92377DC4', name=>'Calendar', runmode=>'calendar', desc=>'Calendar',  menu=>1,    level=>4,},
 '31.1'  => { uuid=>'87D21124-CAA4-3992-931A-AAF54F7CADCD', name=>'CalDAV server',   menu=>1,    level=>4,},
