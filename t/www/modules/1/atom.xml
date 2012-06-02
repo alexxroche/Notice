@@ -2,7 +2,7 @@
    <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
      <title>Base</title>
     <subtitle type="html">This is the details about the base module for Notice</subtitle>
-     <link rel="self" href="https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/"/>
+     <link rel="self" href="https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/atom.xml"/>
      <updated>2012-01-13T18:30:02Z</updated>
      <author>
        <name>Alexx Roche</name>
