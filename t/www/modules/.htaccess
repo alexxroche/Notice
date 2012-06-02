@@ -1,1 +1,1 @@
-AddType application/atom+xml atom.xml
+AddType application/atom+xml atom.xml *.atom
