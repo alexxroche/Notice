@@ -12,6 +12,7 @@ $CFG{db_dsn} = "dbi:mysql:database=notice";
 $CFG{db_user} = "notice_adminuser";
 $CFG{db_pw} = "12345678-abcd-1234-a693-00188bba79ac";
 $CFG{tt2_dir} = "templates";
+$CFG{www_path} = "/var/www/sites/github/Notice/t/www"; #used by custom css
 $CFG{using_tinyDNS} = 1;
 $CFG{tinyDNS_path} = '/var/www/sites/BytemarkDNS/data';
 $CFG{update_dns} = 'sudo /var/www/sites/BytemarkDNS/upload 1>/dev/null';

@@ -5,6 +5,8 @@ use base 'CGI::Application';
 our %opt; # nice to have them
 use lib 'lib';
 
+our $VERSION = 3.07;
+
 use Notice::DB;
 our $page_load_time = time;
 BEGIN {
@@ -33,7 +35,7 @@ use CGI::Application::Plugin::Forward;
 use CGI::Application::Plugin::TT;
 use Data::Dumper;
 
-our $VERSION = 3.04;
+my %CFG;
 
 =head1 NAME
 
@@ -63,7 +65,6 @@ sets an error mode and configures the TT template directory.
 
 sub cgiapp_init {
   my $self = shift;
-  my %CFG;
   if(-f 'config/config.pl'){
     use CGI::Application::Plugin::ConfigAuto (qw/cfg/);
     #$self->cfg_file('config/config.pl'); #only needed if ommited from Notice::Dispatch
@@ -221,6 +222,7 @@ sub cgiapp_init {
                     $self->session->param(pe_id => $pe_id);
 
 =pod
+
                     # NTS pull this from the database
                     my %modules = (
                     '3.1' => {name => 'Email', rm=> 'email' },
@@ -255,7 +257,12 @@ sub cgiapp_init {
                     #my $menu_rs = $self->resultset('Menu')->search({
                     my @menu_rs = $self->resultset('Menu')->search({
                         'pe_id' => { '=', $self->param('pe_id')},
-                        'modules.mo_catagorie' => { '=', 'base'}, #catagorie ?? IT IS Category !
+                        -or => [ 
+                                'modules.mo_catagorie' => { '=', 'base'},
+                                'modules.mo_catagorie' => { '=', 'details'},
+                                'modules.mo_catagorie' => { '=', 'service'},
+                                'modules.mo_catagorie' => { '=', 'sysadmin'},
+                        ],
                         'hidden' => { '<=', '0'}, #catagorie ?? IT IS Category !
                         },{
                         columns => ['menu','hidden',{ name => 'modules.mo_name AS name'},{ rm => 'modules.mo_runmode AS rm'} ],
@@ -329,7 +336,37 @@ sub cgiapp_init {
                 # pass that directly into $self->tt_params(menu => \%menu);
           }
         };
-        my $runmode = $self_url;
+        #my $runmode = $self_url;
+        my $runmode = '';
+        $runmode = ($self->query->self_url);
+        if($self->param('rm')){
+            $runmode = $self->param('rm');
+        }
+        # NOTE this still needs some tweeking
+        $runmode =~s/\/?$//;
+        if($self->param('id')){
+            my $id = $self->param('id');
+            if($self->param('did')){
+                my $did = $self->param('did');
+                $runmode =~s/\/$did[^\/]*//;
+            }
+            if($self->param('extra1')){
+                my $extra = $self->param('extra1');
+                $runmode =~s/\/$extra[^\/]*//;
+            }
+            if($self->param('sid')){
+                my $sid = $self->param('sid');
+                $runmode =~s/\/$sid[^\/]*(\/.*)?//;
+            }
+            if($id){
+                $runmode =~s/\/$id\/.*//;
+            }else{
+                $runmode =~s/\/$id[^\/]*$//;
+            }
+        }
+        $runmode=~s/.*\///;
+        $runmode=~s/\?.*//;
+
         if($self->param('rm')){ $runmode = $self->param('rm'); }else{ $self->param('rm' => $runmode); }
         my($module,$id) = ($self->query->self_url=~m/index.cgi\/([^\/]*)\/?([^\/]*)/);
         unless($self->param('id')){ $self->param('id' => $id ); }
@@ -366,9 +403,45 @@ sub cgiapp_prerun {
     my $self = shift;
     eval {
         require Notice::Security;
+        #Notice::Security->new();
         Notice::Security->import();
         $self->Notice::Security::prerun_callback();
     };
+
+    # This is where we dynamically set the css
+    my %user_details;
+    my $pe_id = $self->param('pe_id');
+    # still looking for a reliable way to collect the runmode
+    my $page = ($self->query->self_url);
+    # This has to be a little complicated to cove:
+    # with i18n in the URI
+    # without i18n in the URI
+    # we /may/ want to add complication so that email/edit_alias/ and email/aliases/ have the option of seperate CSS
+    if($page=~m/.*\/index.cgi\/[\w{2}][_\w{2}]?\/([^\/]*)\/?\??.*/){ 
+        $page=~s/.*\/index.cgi\/[\w{2}][_\w{2}]?\/([^\/]*)\/?\??.*/$1/; # we have a languge set
+    }elsif($page=~m/.*\/index.cgi\/([^\/|\?]*)\/?\??.*$/){
+        $page=~s/.*\/index.cgi\/([^\/|\?]*)\/?\??.*$/$1/;
+    }else{ $page = 'main'; }
+    my $acid = $self->param('ef_acid');
+    # this is fun. We, and by we I mean this script, can live in /usr/lib/cgi-bin
+    # and we are looking for ~www/css or where ever the static files are.
+    # we /could/ look up https://$ENV{hostname}/css but I think that I want 
+    #  if( -f "$css_path/file.css")
+    my $css_location_modifier='./';
+    my $css_path = $CFG{www_path} . "/css";
+    my $user_css = 'main.css';
+    {
+       no warnings; # about "Use of uninitialized value" WHO CARES!
+       if(-f "$css_path/${page}_${pe_id}_${acid}.css"){ $user_css = $page.'_'.${pe_id}.'_'.${acid}.'.css';}
+    elsif(-f "$css_path/${pe_id}_${acid}.css"){ $user_css = ${pe_id}.'_'.${acid}.'.css';}
+    elsif(-f "$css_path/css/${acid}.css"){ $user_css = "${acid}.css";}
+    elsif(-f "$css_path/${page}_${pe_id}_${acid}.css"){$user_css = $page.'_'.${pe_id}.'_'.${acid}.'.css';}
+    elsif(-f "$css_path/${pe_id}_${acid}.css"){ $user_css = ${pe_id}.'_'.${acid}.'.css';}
+    elsif(-f "$css_path/${acid}.css"){ $user_css = "${acid}.css";}
+    }
+
+    $self->param('css' => $user_css);
+    $self->tt_params({'css' => $user_css});
 }
 
 =head3 cgiapp_postrun
@@ -384,6 +457,38 @@ sub cgiapp_postrun {
         #Notice::Security->import();
         $self->Notice::Security::postrun_callback();
     };
+}
+
+=head3 tt_post_process
+
+Globally tinkering with the templates after they have been parsed and populated
+
+=cut
+
+
+sub tt_post_process {
+  my $self    = shift;
+  my $htmlref = shift;
+  if( $self->param('debug') || $self->query->self_url=~m/debug=dirty/){
+    # crazy! add a class to each bare html tag
+    while($$htmlref =~m/(.*<body.*<\w+)(>.*<\/body>.*)/si){
+        $$htmlref = $1 . ' class="red"' . $2;
+        #$$htmlref =~s/(<body.*<\w+)(>.*<\/body>)/$1 class="red" $2/sig;
+    }
+    $$htmlref =~s/Alexx Roche/Alexx Roche <br\/>NOT Cleaned by HTML::Clean/;
+  }else{
+    require HTML::Clean;
+    my $h = HTML::Clean->new($htmlref);
+    if($$htmlref=~m/<pre/){
+        $h->strip({whitespace => 0});
+    }else{
+        $h->level(9); #y,no11?
+        $h->strip;
+    }
+    $$htmlref = ${$h->data};
+    #my $newref=$h->data;$$htmlref=$$newref;
+  }
+  return;
 }
 
 =head3 plt
@@ -403,7 +508,7 @@ sub plt {
         $page_loaded = time;
     }
     $self->tt_params({page_load_time => sprintf("Took %.3f ms", (($page_loaded - $self->param('page_load_time'))*1000))});
-    #return $page_loaded;
+     return sprintf("%.3f", (($page_loaded - $self->param('page_load_time'))*1000));
 }
 
 
@@ -541,6 +646,7 @@ sub logout : Runmode {
 =head3 myerror
 
 or yours?
+This catches 500 errors but not 404 or 400
 
 =cut
 
@@ -548,14 +654,53 @@ sub myerror : ErrorRunmode {
   my $self = shift;
   my $error = shift;
   my $url = $self->query->self_url;
-     my $result = "<h1>error</h1>";
-    $result .= "<h2>$@</h2>$error";
-    $result .= "<br />p.s. URL = $url";
+     my $result = '<h1 class="red error">error</h1>';
+    $result .= "<h2>$@<!--$error-->";
+    $result .= "<br/> URL = $url</h2><br/>";
     # probably don't want a template as that might be what is going wrong
   $self->tt_params({no_wrapper => 1});
   $self->tt_params({message => $result});
-    warn "Notice has a 'myerror'";
-    return $self->tt_process('error.tmpl');
+    #my $plt = $self->param('page_load_time');
+    my $plt = $self->plt;
+    warn "Notice has a 'myerror' Notice.pm 613" if ($self->param('debug') || $url=~m/debug=\d+/);
+    # we seem to get here, but then we don't get our page
+    # NOTE this isn't working - fix it!
+    #return $self->tt_process('error500.tmpl');
+    # agh! this is painful! 
+    return qq |<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<title>Notice - 500 error</title>
+<link rel="stylesheet" href="/css/main.css" />
+<meta name="description" content="Notice CRaAM" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta name="keywords" content="extended, customer, resource, management, system, for, internet, companies" />
+<link rel="stylesheet" type="text/css" media="screen" href="/css/asset.css" />
+<script type="text/javascript" src="/js/jquery.js"></script>
+</head>
+<body>
+<div id="head_padding">&nbsp; <!-- add css to do this --></div>
+<div id="content">
+  <table id="body"><tr><td>
+    <div id="heading">
+        <span class="message">We have no Bananas today!</span>
+    </div>
+  </td></tr>
+  <tr><td>
+    <div id="bodyblock">
+        Nope, can't find any. Maybe you should <a class="red" href="#" onclick="history.back()">go back</a>
+    </div>
+  </td></tr>
+  </table>
+</div>
+<div id="sysops">If you are interested, or would like to report this error:
+$result
+<h1 class="error red">end of Error</h1>
+</div>
+<div id="footer">Copyright (c) 2007-2012 Alexx Roche<span class=pageLoadTime>(Took $plt ms)</span></div>
+</body>
+</html>|;
 }
 
 1;
