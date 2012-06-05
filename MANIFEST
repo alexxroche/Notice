@@ -2,15 +2,17 @@ ABOUT
 Changes
 config/config.pl
 config/notice.mysql
+config/notice.sqlite
+config/README
 debug.sh
 lib/Notice.pm
-lib/Notice/Base.pm
 lib/Notice/C/Account.pm
 lib/Notice/C/Addresses.pm
 lib/Notice/C/Assets.pm
 lib/Notice/C/Beekeeping.pm
 lib/Notice/C/Config.pm
 lib/Notice/C/Details.pm
+lib/Notice/C/Docs.pm
 lib/Notice/C/Domains.pm
 lib/Notice/C/Email.pm
 lib/Notice/C/groups.cgi
@@ -100,9 +102,14 @@ lib/Notice/DB/Result/TrollyItem.pm
 lib/Notice/DB/Result/Weblogin.pm
 lib/Notice/DB/Result/Whowhere.pm
 lib/Notice/Dispatch.pm
+lib/Notice/Security.pm
+lib/npm
 Makefile.PL
 MANIFEST			This list of files
+MANIFEST.SKIP
 META.yml
+MYMETA.json
+MYMETA.yml
 README
 README.whois
 script/broken_builddns.pl
@@ -128,6 +135,9 @@ t/00-signature.t
 t/01-load.t
 t/bio_ref.info
 t/boilerplate.t
+t/cgi-bin/docs/.htaccess
+t/cgi-bin/docs/fileinfo.txt
+t/cgi-bin/docs/readme.txt
 t/cgi-bin/i18n/I18N/de.mo
 t/cgi-bin/i18n/I18N/de.po
 t/cgi-bin/i18n/I18N/fr.mo
@@ -160,6 +170,7 @@ t/cgi-bin/templates/Notice/C/Config/main.tmpl
 t/cgi-bin/templates/Notice/C/Details/css.tmpl
 t/cgi-bin/templates/Notice/C/Details/main.tmpl
 t/cgi-bin/templates/Notice/C/Details/menu.tmpl
+t/cgi-bin/templates/Notice/C/Docs/main.tmpl
 t/cgi-bin/templates/Notice/C/Domains/edit.tmpl
 t/cgi-bin/templates/Notice/C/Domains/index.tmpl
 t/cgi-bin/templates/Notice/C/Domains/main.tmpl
@@ -175,6 +186,8 @@ t/cgi-bin/templates/Notice/C/Main/ajax.tmpl
 t/cgi-bin/templates/Notice/C/Main/index.tmpl
 t/cgi-bin/templates/Notice/C/Main/main.tmpl
 t/cgi-bin/templates/Notice/C/Modules/index.tmpl
+t/cgi-bin/templates/Notice/C/Modules/main.tmpl
+t/cgi-bin/templates/Notice/C/Modules/mysql.tmpl
 t/cgi-bin/templates/Notice/C/Mustlogin/index.tmpl
 t/cgi-bin/templates/Notice/C/Myerror/index.tmpl
 t/cgi-bin/templates/Notice/C/Okay/index.tmpl
@@ -214,4 +227,8 @@ t/www/js/jsapi
 t/www/js/orphus.js
 t/www/js/script.js
 t/www/js/signup.js
+t/www/modules/.htaccess
+t/www/modules/1/atom.xml
+t/www/modules/1/update/atom.xml
+t/www/modules/1/version.json
 t/www/robots.txt
