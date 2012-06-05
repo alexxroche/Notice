@@ -1,0 +1,8 @@
+.*\.swp
+.*\.bak
+^blib.*
+^pm_to_blib.*
+^\.git.*
+^Makefile$
+Makefile\.old
+MANIFEST.bak
