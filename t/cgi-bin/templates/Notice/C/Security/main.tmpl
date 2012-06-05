@@ -1,0 +1,32 @@
+[%- WRAPPER site_wrapper.tmpl -%]
+
+Securtity? Surely this is already secure? Well we hope that the site is secure, but when you give people access you might need to keep an eye on them.
+This module enables Notice to track the habits of its users and even put it checks to prevent a leak becoming a flood.
+
+Any action in any other module can be controled from here. How many times can a users log in. How many seaches per hour can they performe.
+How many accounts per week can they view or access.
+
+
+
+  <table id="people">
+  <tbody>
+        [%- # USE Dumper; '<tr><td colspan="5">'; Dumper.dump(p); '</td></tr>; -%]
+  [%- FOREACH p = ppl -%]
+   <tr class="as_data as_data_[%- loop.parity -%]">
+        <td class="as_data as_data_[%- loop.parity -%]">[%- p.pe_fname -%]</td>
+        <td>[%- p.pe_lname -%]</td>
+        <td>[%- p.pe_email -%]</td>
+        <td>[%- p.pe_level -%]</td>
+        <td>[%- p.pe_passwd -%]</td>
+   </tr>
+  [%- END -%]
+  </tbody>
+  </table>
+
+This will list the general settings for this install of Notice.
+
+There will be links to set or change the configurations.
+
+Lists of offenders or those getting closest will be available, (though we want to restrict access to that because "Innocent until proven..")
+
+[%- END -%]
