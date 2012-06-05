@@ -477,6 +477,7 @@ sub tt_post_process {
     }
     $$htmlref =~s/Alexx Roche/Alexx Roche <br\/>NOT Cleaned by HTML::Clean/;
   }else{
+   eval {
     require HTML::Clean;
     my $h = HTML::Clean->new($htmlref);
     if($$htmlref=~m/<pre/){
@@ -486,7 +487,9 @@ sub tt_post_process {
         $h->strip;
     }
     $$htmlref = ${$h->data};
-    #my $newref=$h->data;$$htmlref=$$newref;
+   }; 
+   if($@){ warn "install HTML::Clean.. maybe?"; }
+   #my $newref=$h->data;$$htmlref=$$newref;
   }
   return;
 }
