@@ -21,6 +21,12 @@ use Notice::DB qw( $db $dbhostname $dbusername $dbpassword );
 *dbpassword = \$Notice::DB::dbpassword;
 my $DEBUG=0;
 
+=head3 new
+
+guess what this does?
+
+=cut
+
 sub new
 {
         my($self);
@@ -36,12 +42,24 @@ sub new
         return($self);
 }
 
+=head3 groups
+
+Wow! This is so old. This has long since moved into the groups table in the database
+
+=cut
+
 sub groups {
 	my %groups = (
 	1.4	=> { 1 => 'IP Sysadmin', 2 => 'Senior IP Sysadmin' },
 	);
 	return(%groups);
 } 
+
+=head3 show_pool
+
+This displays the pool of IPv4 block
+
+=cut
 
 sub show_pool {
 	my($self,$ippool,$where,$there)=@_;
@@ -94,6 +112,12 @@ sub show_pool {
 	$sth->finish;
 	return($count-1);
 }
+
+=head3 show_slash
+
+This produces a jpeg of guitar players with names that can be represented by one character
+
+=cut
 
 sub show_slash
 {
@@ -190,6 +214,12 @@ sub show_slash
 }
 
 
+=head3 VLAN_html
+
+Display VLAN information in HTML
+
+=cut
+
 sub VLAN_html
 {
         my($self,$default_VLAN)=@_;
@@ -209,6 +239,12 @@ sub VLAN_html
 	$sth->finish;
 	return($code);
 }
+
+=head3 VLANs
+
+what no HTML? You raw and crazy person
+
+=cut
 
 sub VLANs
 {
@@ -264,6 +300,13 @@ sub VLANs
 #        return($code);
 #}
 # sub assigned_to_html is being replaced by list_assigned_to (though the former name is better)
+
+=head3 list_assigned_to
+
+this, um, lists to whom blocks are assigned to
+
+=cut
+
 sub list_assigned_to
 {
         my($self,$accounts,$default_assigned_to,$type)=@_;
@@ -293,6 +336,12 @@ sub list_assigned_to
         $sth->finish;
         return($code);
 }
+
+=head3 insert_ipp_assigned_to
+
+we are just giving these things away
+
+=cut
 
 sub insert_ipp_assigned_to{
 	my($self,$values)=@_;
@@ -337,6 +386,13 @@ sub insert_ipp_assigned_to{
         $sth->finish;
 }
 
+
+=head3 networks
+
+that seems useful when working with Internet Protocol
+
+=cut
+
 sub networks
 {
 
@@ -366,6 +422,14 @@ sub networks
         return($code);
 }
 
+
+=head3 show_networks
+
+that seems useful when working with Internet Protocol
+
+=cut
+
+
 sub show_networks
 {
         my($self,$networks)=@_;
@@ -385,9 +449,22 @@ sub show_networks
         $sth->finish;
 }
 
+=head3 update_ipp_network
+
+that seems useful when working with Internet Protocol
+
+=cut
+
 sub update_ipp_network{
 	# NTS! when updating a network "assigned_to" you MUST update the VLANS at the same time
 }
+
+=head3 insert_ipp_network
+
+that seems useful when working with Internet Protocol
+
+=cut
+
 sub insert_ipp_network{
 	my($self,$values)=@_;
 	#check that this person can create networks
@@ -445,6 +522,13 @@ sub insert_ipp_network{
         ($self->{dbh})->do('UNLOCK TABLES') or croak ("Can't unlock ippool L208");
         $sth->finish;
 }
+
+=head3 update_ipp_vlan
+
+you really need to learn about DBIx::Class
+
+=cut
+
 
 sub update_ipp_vlan{
       my($self,$values)=@_;
@@ -575,10 +659,23 @@ sub update_ipp_vlan{
         $sth->finish;
 }
 
+=head3 delete_ipp_vlan
+
+this is getting painful
+
+=cut
+
 sub delete_ipp_vlan{
       my($self,$values)=@_;
       $values->{return} .= qq|<span class="error">This function will be written soon(ish)</span>|; return; 
 }
+
+=head3 insert_ipp_vlan
+
+3 internet points if you can guess what this does
+
+=cut
+
 
 sub insert_ipp_vlan{
 	# I expect that we will have to auto-find the 'Assigned to' rather than be given it by 
@@ -675,6 +772,13 @@ sub insert_ipp_vlan{
         $sth->finish;
 }
 
+=head3 ipp_RIR_html
+
+make it stop!
+
+=cut
+
+
 sub ipp_RIR_html
 {
         my($self,$default_RIR)=@_;
@@ -691,7 +795,15 @@ sub ipp_RIR_html
 	$sth->finish;
         return($code);
 }
+
 # these two share far too much code... 
+
+=head3 list_rir
+
+the problem is that they exist at all
+
+=cut
+
 sub list_rir
 {
         my($self,$values)=@_;
@@ -706,6 +818,12 @@ sub list_rir
         $sth->finish;
 }
 
+
+=head3 insert_ipp
+
+no, totally, we need to be able to insert into the IP pool
+
+=cut
 
 sub insert_ipp
 {
@@ -788,6 +906,13 @@ sub insert_ipp
         $sth->execute() or croak("Can't execute query: $query $!");
 	$values->{return} = qq|<span class="withouterror">Row added to IP pool</span>|;
 }
+
+=head3 update_ipp
+
+got to keep the pool clean
+
+=cut
+
 
 sub update_ipp
 {
@@ -911,6 +1036,14 @@ sub update_ipp
 	}
 	$values->{return} .= "Row not found";
 }
+
+
+=head3 update_ip
+
+ooh, crafty, totally differnt table from ipp
+
+=cut
+
 
 sub update_ip 
 {
