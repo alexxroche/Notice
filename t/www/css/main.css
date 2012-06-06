@@ -19,10 +19,11 @@ Use: Reset Styles for all browsers
         -moz-box-shadow: -5px -5px 5px rgba(68,68,68,0.6);
         -webkit-box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
         box-shadow: 5px 5px 5px rgba(68,68,68,0.6);
-
+        /* some ms rubbish
         filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30);
         -ms-filter: "progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)";
         zoom: 1;
+        */
 }
 
 
@@ -36,9 +37,11 @@ div.warn {display: block; margin: 1em auto; border: 1px solid; border-color: #dd
     -webkit-box-shadow: -5px 0px 5px rgba(68,68,68,0.6);
     box-shadow: -5px 0px 5px rgba(68,68,68,0.6);
 
+    /* some ms rubbish
         filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30);
         -ms-filter: "progid:DXImageTransform.Microsoft.Blur(PixelRadius=3,MakeShadow=true,ShadowOpacity=0.30)";
         zoom: 1;
+    */
 
     position: relative; /* This protects the inner element from being blurred */
     padding: 8px;  
@@ -131,6 +134,8 @@ blockquote {
 	background: #00B0A8;
 }
 
+li.selected, a.selected { color: #900; }
+
 body {
     margin: 0;
 	padding: 0 10px;
@@ -205,7 +210,7 @@ th.headtable, td.headtable {
 	vertical-align: middle;
 }
 th, td {
-	padding: 2px 4px 2px 4px !important;
+	padding: 2px 4px 2px 4px;
 	text-align: left;
 	vertical-align: top;
 }
@@ -216,6 +221,10 @@ th {
 
 th:hover {
 	background-color: #fc7;
+}
+
+tbody tr.odd {
+       background-color: #eaf
 }
 
 tbody tr.even {
@@ -253,7 +262,102 @@ dl {
 
 .error {
 	background-color: #fee;
+    color:#FF6600;
+    font-family:monospace;
+    font-size:185%;
+    font-weight:bold;
 }
+
+span.withouterror {
+color:#00CC33;
+font-family:monospace;
+font-size:145%;
+font-weight:bold;
+}
+
+input.keygen {
+        text-align: left
+}
+input.keygenright {
+        text-align: right
+}
+td.keygen-small{ width:2%;
+        padding: 0px 0px !important;
+ }
+
+table.notice td.right {
+border-style:solid;
+color:#000000;
+font-family:sans-serif;
+font-size:75%;
+font-weight:normal;
+text-align:left;
+}
+
+td.onechar{ 
+vertical-align: middle;
+color:#000000;
+font-family:sans-serif;
+font-size:75%;
+font-weight:normal;
+width:10px; 
+        padding: 0px 0px !important;
+}
+
+input.border_right_white{
+    border-right-color: #ffffff;
+    border-right-style:solid;
+    border-right-width: 0px;
+}
+.border_faint {
+    border-style:dotted;
+    border-width: 1px;
+    border-color: #999999 #999999 #999999 #999999;
+}
+
+.border_faint_top_n_bottom {
+    border-style:dotted;
+    border-width: 1px 0px 1px 0px;
+    border-color: #999999 #ffffff #999999 #ffffff;
+}
+
+.border_right_white{
+    border-right-color: #ffffff;
+    border-right-style:solid;
+    border-right-width: 0px;
+}
+
+.border_left_white{
+    border-left-color: #ffffff;
+    border-left-style:solid;
+    border-left-width: 0px;
+}
+
+
+td.keygen {
+    text-align: left;
+vertical-align: middle;
+    padding: 0 0 !important;
+}
+td.keygenright {
+        text-align: right
+}
+input.keygen-ct {
+        text-align: center
+}
+td.keygen-ct {
+        text-align: center
+}
+
+.border0 { border: 0px solid #ffffff; padding: 0 !important;}
+.border_white { border: 1px solid #ffffff; }
+.border1 { border: 1px solid #00CCFF; }
+.border_one {
+        border-width: 1px;
+    border-color:#00CCFF #0066FF #0099FF #0033FF;
+    border-style:solid;
+}
+
 
 .warning .warn {
         color: #630; /* dark blue */
@@ -272,6 +376,20 @@ border: solid 2px #e2c822;
 }
 
 .blacktext, .black { color: rgb(000, 000, 000); text-decoration: none; }
+
+.underline, .underlined {text-decoration: underline}
+
+.pgp_details {
+color:#330099;
+font-weight:bold;
+}
+
+table.button {
+background-color:#FFFAFA;
+border:thick ridge green;
+border-collapse:separate;
+border-spacing:4px;
+}
 
 table.stripe {
         border-collapse: collapse;
@@ -322,9 +440,32 @@ font-size:138%;
 font-weight:bold;
 }
 
+table.event_show { padding: 0; margin: 0; border-collapse: collapse; }
+/* come on CSS tr.event_show { border: solid black; } should be possible */
+tr.event_show td { border-bottom: solid navy thin;  border-top: navy solid thin; border-left: thin dotted navy; border-right: thin dotted navy; }
+tr.event_show td:first-child { border-left: thin solid navy; border-right: 0px; }
+tr.event_show td:last-child { border-right: thin solid navy; }
+
+/**********************************
+
+Fancy table CSS example
+
+***********************************/
+
+table.fancy { border-collapse: collapse; } /* stop the seperation */
+table.fancy td, table.fancy th{ border-top:2px solid #98bf21; border-bottom:2px solid #98bf21; } /* add row seperation */
+table.fancy td.last, table.fancy th.last{ border-right:2px solid #98bf21; } /* cap off the ends to stop them leaking */
+table.fancy td.first, table.fancy th.first{ border-left:2px solid #98bf21; border-right:2px dotted #98bf21;}
+
 .strike { text-decoration: line-through; }
 .pageLoadTime { 
     position: absolute; /* This protects the inner element from being blurred */
     margin: auto 0 ;
         padding-left: 70%;
 text-align: right; color: #60c; font-family: monospace; font-size: 75%; text-shadow:0 2px 6px #000000; }
+
+.spoiler { background-color: black; color: black; }
+/*
+<span class="spoiler" onmounout="this.style.color='black'"
+onmousover="this.style.color='white';" style-"color: black;">Secret message</span>
+*/

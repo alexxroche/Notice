@@ -49,7 +49,7 @@ and by whom
 
 sub main: StartRunmode {
     my ($self) = @_;
-    my ($username,$message,%sec_stats,@people);
+    my ($username,$message,@sec_stats,@people,@acl);
        $username = $self->authen->username;
     if($username && $username ne 'a@b.com'){
         $self->tt_params({ message => 'I will not warn you again! You are not meant to be in here.' });
@@ -65,8 +65,12 @@ sub main: StartRunmode {
     }else{
         @people = $self->resultset('People')->search();
     }
+    eval {
+        @acl = $self->resultset('ActivityAcl')->search();
+        @sec_stats = $self->resultset('ActivityLog')->search();
+    };
 
-    $self->tt_params({s => \%sec_stats, message => $message, ppl => \@people});
+    $self->tt_params({s => \@sec_stats, acl => \@acl, message => $message, ppl => \@people});
     $self->plt;
     return $self->tt_process();
 }
