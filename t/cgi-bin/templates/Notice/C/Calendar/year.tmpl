@@ -1,0 +1,81 @@
+<style type="text/css">
+table.cal td.sub, .sub {
+    vertical-align: sub;
+    font-size: 7px;
+    font-weight: normal;
+    text-align: center;
+    width: 5px;
+    height: 5px;
+}
+table.cal td {
+    font-weight: bold;
+    text-shadow: 1px 1px #666;
+    text-align: right;
+    height: 50px;
+    width: 50px;
+    vertical-align: middle;
+}
+ .super {
+    vertical-align: super;
+    font-size: 7px;
+    display: block;
+/*
+    padding: 5px 10px;
+    border: none;
+    border-radius: 1px;
+    -moz-border-radius: 1px;
+    -webkit-border-radius: 1px;
+    text-shadow: 1px 1px #666;
+*/
+ }
+ .we, .sunday, .saturday { background-color: #fea; }
+ .holiday { background-color: #afa; }
+ .cv { background-color: #fae; }
+ .nholiday { background-color: #9f9; }
+ .today { background-color: #99f; }
+</style>
+
+[% USE Dumper %]
+[% USE date %]
+[%- y = date.format(mytime, '%Y'); woty = 1; yotw = 0; %]
+[%- m = date.format(mytime, '%m') + 0 -%]
+[%- d = date.format(mytime, '%d'); -%]
+[%- months = ['January','February','March','April','May','June','July','August','September','October','November','December']; -%]
+
+<table id="cal_year_of_months"><caption><b>[%- y -%]</b></caption>
+[% yc=0; FOREACH month = [1..12] -%]
+  [%- IF yc <= 0; '<tr>'; END -%]
+  <td>
+  [% USE cal = Calendar.Simple(month, y) %]
+  <table border="1"><caption>[%- # two ways to get the month -%]
+[%- this_month = ( month - 1 ); months.$this_month -%]
+[%- this_ymd = "0:0:0 3:$month:$y"; date.format(this_ymd, ' (%b) %Y') -%]
+[% woty = date.format(this_ymd, '%V') # week of the year %]
+</caption>
+   <tr><td class="sub"><span class="sub">woty</span></td>
+    [% FOREACH day = cal.days %]
+     <th>[% day %]</th>
+    [% END %]
+     </tr>
+
+  [% FOREACH row = cal.rows %]
+     <tr>
+      <td class="sub">[% woty;%]</td>
+     [% FOREACH col = row; ymd = "$ym$col" zp_col = "0$col" %]
+        <td[%- IF ( col == d || zp_col == d ) && month == m; ' class="today cv'; month; m; '"'; 
+               ELSIF ( events.$ymd.class ); ' class="'; events.$ymd.class; '"'; 
+               ELSIF (( col == row.first || col == row.last ) && col != '' ); ' class="sunday we"'; 
+               END -%]>
+        [%- col; yotw = yotw + 1 || '&nbsp;' -%]</td>
+     [% END %]
+     </tr>
+        [%- woty = woty + 1 # this fails on 201208 > 201209 -%]
+  [% END %]
+  </table>
+  </td>
+  [%- yc = yc + 1 -%]
+  [%- IF yc >= 3; '</tr>'; yc = 0; END -%]
+
+[%- END -%]
+</td></tr>
+</table>

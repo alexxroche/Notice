@@ -103,7 +103,21 @@ lib/Notice/DB/Result/Weblogin.pm
 lib/Notice/DB/Result/Whowhere.pm
 lib/Notice/Dispatch.pm
 lib/Notice/Security.pm
-lib/npm
+lib/Notice/C/Calendar.pm
+lib/Notice/C/Download.pm
+lib/Notice/C/Sales.pm
+lib/Notice/C/Search.pm
+lib/Notice/C/Security.pm
+t/cgi-bin/templates/Notice/C/Calendar/day.tmpl
+t/cgi-bin/templates/Notice/C/Calendar/event.tmpl
+t/cgi-bin/templates/Notice/C/Calendar/events.tmpl
+t/cgi-bin/templates/Notice/C/Calendar/main.tmpl
+t/cgi-bin/templates/Notice/C/Calendar/month.tmpl
+t/cgi-bin/templates/Notice/C/Calendar/todo.tmpl
+t/cgi-bin/templates/Notice/C/Calendar/week.tmpl
+t/cgi-bin/templates/Notice/C/Calendar/year.tmpl
+t/cgi-bin/templates/Notice/C/Security/main.tmpl
+t/cgi-bin/templates/sec_error.tmpl
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP

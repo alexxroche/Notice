@@ -52,10 +52,11 @@ sub main: StartRunmode {
     my ($username,$message,@sec_stats,@people,@acl);
        $username = $self->authen->username;
     if($username && $username ne 'a@b.com'){
-        $self->tt_params({ message => 'I will not warn you again! You are not meant to be in here.' });
+        $self->tt_params({ warning => 'I will not warn you again! You are not meant to be in here.' });
         $self->plt;
-        return $self->tt_process();
+        return $self->tt_process('sec_error.tmpl');
     }
+
     my $pe_id; # person that we are sooping on
 
     our $user_details; # everyone
@@ -70,7 +71,7 @@ sub main: StartRunmode {
         @sec_stats = $self->resultset('ActivityLog')->search();
     };
 
-    $self->tt_params({s => \@sec_stats, acl => \@acl, message => $message, ppl => \@people});
+    $self->tt_params({sec => \@sec_stats, acl => \@acl, message => $message, ppl => \@people});
     $self->plt;
     return $self->tt_process();
 }
@@ -111,5 +112,4 @@ or the Artistic License.
 See http://www.opensource.org/licenses/ for more information.
 
 =cut
-
 

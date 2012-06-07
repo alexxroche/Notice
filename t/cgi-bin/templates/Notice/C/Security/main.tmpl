@@ -1,32 +1,114 @@
 [%- WRAPPER site_wrapper.tmpl -%]
+[%- IF sec.warning -%]
+ [%- sec.warning -%]
+[%- ELSIF ppl.defined || acl.defined || s.defined -%]
+ [%- USE Dumper; #Dumper.dump(sec)  -%]
+<span class="message">[%- sec.message -%]</span> 
+<span class="green comment">[%- sec.comment -%]</span> 
 
-Securtity? Surely this is already secure? Well we hope that the site is secure, but when you give people access you might need to keep an eye on them.
+Security? Surely this is already secure? Well we hope that the site is secure, but when you give people access you might need to keep an eye on them.
 This module enables Notice to track the habits of its users and even put it checks to prevent a leak becoming a flood.
 
-Any action in any other module can be controled from here. How many times can a users log in. How many seaches per hour can they performe.
+Any action in any other module can be controlled from here. How many times can a users log in. How many searches per hour can they perform.
 How many accounts per week can they view or access.
 
 
 
-  <table id="people">
-  <tbody>
+<table id="people" class="fancy">
+ <tbody>
         [%- # USE Dumper; '<tr><td colspan="5">'; Dumper.dump(p); '</td></tr>; -%]
-  [%- FOREACH p = ppl -%]
-   <tr class="as_data as_data_[%- loop.parity -%]">
-        <td class="as_data as_data_[%- loop.parity -%]">[%- p.pe_fname -%]</td>
-        <td>[%- p.pe_lname -%]</td>
+[%- # USE iterator( ppl ); FOREACH p = iterator # it seems that loop.parity no longer works -%]
+   [%- lparity = 'odd' -%]
+    <tr>
+        <th class="first">count</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th class="last">SHA</th>
+    </tr>
+  [%- FOREACH p = ppl -%] [%- n = p.pe_id; name.$n = "$p.pe_fname $p.pe_lname" -%]
+   <tr class="[%- lparity -%] [%- loop.parity -%][%- IF lparity == 'even'; lparity = 'odd'; ELSE; lparity = 'even'; END -%]">
+        <td class="first">[%- loop.count; '/'; loop.size; loop.count.even -%]</td>
+        <td>[%- p.pe_fname %] [% p.pe_lname -%]</td>
         <td>[%- p.pe_email -%]</td>
-        <td>[%- p.pe_level -%]</td>
-        <td>[%- p.pe_passwd -%]</td>
+        <td class="last" style="font-family: Courier, monospace;">[%- p.pe_passwd -%]</span></td>
    </tr>
   [%- END -%]
-  </tbody>
-  </table>
+ </tbody>
+</table>
+
+<form method="post"><button name="press me" value="oh noez" type="submit" class="small black button">Don't press</button></form>
 
 This will list the general settings for this install of Notice.
 
+<table id="acl" class="fancy">
+  <tbody>
+ <tr>
+        <th class="first">count</th>
+        <th>Who</th>
+        <th>Period</th>
+        <th>Tally</th>
+        <th>Action</th>
+        <th>Type</th>
+        <th>Report</th>
+        <th class="last">Description</th>
+    </tr>
+  [%- FOREACH ac = acl -%]
+   <tr id="[%- ac.period -%]" class="period_[%- ac.period %] [% lparity %] [%- loop.parity -%][%- IF lparity == 'even'; lparity = 'odd'; ELSE; lparity = 'even'; END -%]">
+        <td class="first">[%- loop.count; '/'; loop.size; loop.count.even -%]</td>
+        <td class="first">[%- 
+            IF ac.acid > 0; 'Acc:'; ac.acid; 
+            ELSIF ac.group > 0; 'Grp:'; ac.group; 
+            ELSIF ac.user > 0; pe_id = ac.user; 'Usr:'; name.$pe_id;
+            ELSE; 'All'; 
+            END -%]</td>
+        <td class="first">[%- ac.period -%]</td>
+        <td class="first">[%- ac.tally -%]</td>
+        <td class="first">[%- ac.action -%]</td>
+        <td class="first">[%- ac.type -%]</td>
+        <td class="first">[%- ac.report -%]</td>
+        <td class="last">[%- ac.description -%]</td>
+   </tr>
+  [%- END -%]
+ </tbody>
+</table>
+
+
 There will be links to set or change the configurations.
 
+<br/>
 Lists of offenders or those getting closest will be available, (though we want to restrict access to that because "Innocent until proven..")
 
-[%- END -%]
+<br/>
+Obviously we will have to improve the layout of the reporting; make it searchable by user/action and constrained by date ranges, (probably defaulting to today), (because anything smaller than a day would have to be automated.)
+
+<table id="data" class="fancy">
+  <tbody>
+ <tr>
+        <th class="first">count</th>
+        <th>Who</th>
+        <th>Period</th>
+        <th>Tally</th>
+        <th>Action</th>
+        <th>Start</th>
+        <th>Last</th>
+        <th class="last">Description</th>
+    </tr>
+  [%- FOREACH s = sec -%]
+   <tr class="[%- lparity -%] [%- loop.parity -%][%- IF lparity == 'even'; lparity = 'odd'; ELSE; lparity = 'even'; END -%]">
+        <td class="first">[%- loop.count; '/'; loop.size; loop.count.even -%]</td>
+        <td class="first">[%- peid = s.user; name.$peid %]</td>
+        <td class="first">[%- s.period -%]</td>
+        <td class="first">[%- s.tally -%]</td>
+        <td class="first">[%- s.action -%]</td>
+        <td class="first">[%- s.start -%]</td>
+        <td class="first">[%- s.end -%]</td>
+        <td class="last">[%- s.description -%]</td>
+   </tr>
+  [%- END -%]
+ </tbody>
+</table>
+
+Activity house keeping will have to be added, (because we don't need to store hourly information about 15 years ago.) Each copy of Notice will have to be set to comply with local laws in regards to the keeping of logs.)
+
+[%- END # warning -%]
+[%- END # wrapper -%]

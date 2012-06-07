@@ -11,7 +11,7 @@ $opt{D}=0;
 my %submenu = (
    '1.0' => [
         '1' => { peer => 1, name=> 'Modules', rm => 'modules', class=> 'navigation'},
-        '2' => { peer => 1, name=> 'mysql', rm => 'modules/mysql', class=> 'navigation'},
+        '2' => { peer => 1, name=> 'mysql', type=>'square', indent=>'1', rm => 'modules/mysql', class=> 'navigation'},
     ],
 );
 
@@ -126,7 +126,7 @@ my %mlist = (
 7   => { uuid=>'94B07D87-FD2C-3C18-B1B8-68D6EEA327CA', name=>'PGP',   menu=>1,    level=>4,},
 '7.1'   => { uuid=>'98fdc608-4211-11e1-9b60-00188bba79ac', name=>'RESERVED for alexx', deps=>'0,1,3.1,7', desc=>'', runmode=>'', cat=>'base', ver=>'0.03', menu=>1, level=>4,},
 '7.2' => {uuid=>'140DEC47-0A19-3B88-8B4A-E14A99DA283F', name=>'INX - Inter Notice Exchange'}, #enables copies of Notice talk to each other. (used by 19.1,19.2) and pipeline messages
-'7.2.1' => {uuid=>'26B18C8B-7906-34A2-BADC-8A4A8AFC01F5', name=>'jsonINX - Inter Notice Exchange'}, #enables copies of Notice talk to each other. (used by 19.1,19.2) and pipeline messages
+'7.2.1' => {uuid=>'26B18C8B-7906-34A2-BADC-8A4A8AFC01F5', name=>'jsonINX'}, #enables copies of Notice talk to each other. (used by 19.1,19.2) and pipeline messages
 '7.3' => {uuid=>'2A6E82D2-879A-3D84-9892-C5EB39654533', name=>'approval signing'},
 '7.4' => {uuid=>'6DEC2857-09A9-3CBA-B221-BFC975F6657C', name=>'Key server'},
 8   => { uuid=>'756b67a0-9cb6-11e0-aedf-00188bba79ac', name=>'Assets', deps=>'1', order=>'3', cat=>'service', action=>'insert', ver=>"0.02", runmode=>'assets', desc=>'Asset inventory and manangement',   menu=>1,    level=>4,},
@@ -209,7 +209,7 @@ my %mlist = (
 
 # NTS YOU ARE HERE doing the next few lines to the above hash
 # NTS add desc,deps,cat,runmode,notes to each module + default-hierarchy=order
-# NTS add catagorie  = '' || base || service || details || sysadmin ||
+# NTS add catagorie  = '' || base || service || details || sysadmin || function || core
 # mo_id=>'3', deps=>'1', order=>'1', desc=>'Domain names', cat=>'service', action=>'insert', ver=>'0.03',
 # deps=>'1', order=>'1', cat=>'service', desc=>'', 
 # cat=>'service', action=>'insert', desc=>'', 
@@ -264,26 +264,8 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(qr/^(?!main)/);
-    my $page_loaded = 0;
-    eval {
-        use Time::HiRes qw ( time );
-        $page_loaded = time;
-    };
-    if($@){
-        $page_loaded = time;
-    }
-
-    # we /could/ put this in Notice.pm but then it would be less accurate
-    if($self->param('cgi_start_time')){
-        $self->tt_params({page_load_time => sprintf("Page built in: %.2f seconds", ($page_loaded - $self->param('cgi_start_time')))});
-    }elsif($self->param('page_load_time')){
-        $self->tt_params({page_load_time => sprintf("Page loaded %.2f seconds", ($page_loaded - $self->param('page_load_time')))});
-    }
-
     $self->tt_params({submenu => \%submenu});
-
-    # debug message
-    if($self->param('i18n')){ $self->tt_params({warning => '<span class="small lang i18n">Lang:' . $self->param('i18n') . '</span>'}); }
+    if($self->param('i18n') && $self->param('debug')){ $self->tt_params({warning => '<span class="small lang i18n">Lang:' . $self->param('i18n') . '</span>'}); }
 }
 
 =head2 mlist_sort
@@ -316,7 +298,51 @@ and optionally update them from a master server
 sub main: StartRunmode {
     my ($self) = @_;
 
-    my $message = "<pre><table>";
+    my $message = '<table id="modules" class="none"><tr><th>Modules and Functions</th><th>Menu Tag</th><th>Version</th><th>Installed</th><th>Enabled</th></tr>';
+
+    # collect the modules in the database and compare them with the list here
+    my $modules_rs = $self->resultset('Module')->search({
+                        #'mo_id' => { 'like', '%'},
+                       },{
+                        '+columns' => [ { is_active => 'mo_runmode AS is_active' } ], # WORKS
+                        # '+select' => [ { concat => 'me.mo_runmode', -as => 'is_active' } ], # WORKS
+                        #'+select' => [ \'me.mo_runmode AS is_active' ], #this creates the right sql, but no is_active in _column_data
+                        #'+select' => [ \'mo_runmode AS is_active' ], #this creates the right sql, but no is_active in _column_data
+                        # '+select' => [ 'mo_runmode', ], '+as' => [ 'is_active' ], NO help at all
+                        #'+select' => [ { mo_runmode => 'me.mo_runmode', '+as' => 'is_active' }, ],
+                        #'+select' => [ 'me.mo_runmode' ],
+                        #rows => 1, page => 2, #LIMIT, OFFSET
+                    });
+     # we are going to have to join the config table to find out is a module is disabled;
+
+    use Data::Dumper;
+
+    ROW: while( my $mo = $modules_rs->next){
+        my $mtid = $mo->mo_menu_tag;
+        eval {
+            
+            $mlist{$mtid}{active} = 
+            $mo->get_column('is_active') ne $mo->mo_runmode ? $mo->get_column('is_active') : '';
+            #$mo->get_column('is_active'); #works as $mo->{_column_data}{is_active};
+            #$mlist{$mtid}{active} = $mo->me->is_active; does not work
+        };
+        if($@){ 
+            #my %deref_mo; %deref_mo = %{ $mo }; $mlist{$mtid}{active} = $deref_mo{_column_data}{is_active} . " ERR";
+            $mlist{$mtid}{active} = $mo->{_column_data}{is_active};
+        }
+        $mlist{$mtid}{name} = $mo->mo_name;
+        $mlist{$mtid}{ver} = $mo->mo_version;
+        $mlist{$mtid}{rm} = $mo->mo_runmode;
+        $mlist{$mtid}{desc} = $mo->mo_description;
+        $mlist{$mtid}{installed} = 1;
+    }
+
+
+    # If they are in the database then they are installed, (and it is possible to install modules that are not in the %mlist hash!)
+    #
+    # How do we know if they are disabled? Disabled modules have an entry in the config table!
+    #
+
     foreach my $keynum (sort mlist_sort keys %mlist){
         my($checked,$disabled);
         my $indent;
@@ -331,14 +357,31 @@ sub main: StartRunmode {
         $class = 'fourtab' if $keynum=~m/\d+\.\d+\.\d+\.\d+\.\d+/;
 
         if($mlist{$keynum}{name}){
-            $message .= qq (<tr class="thinborder"><td><span class="$class">$indent$mlist{$keynum}{name}</span></td><td>$keynum</td></tr>);
+    # hmm we should really keep the HTML in the templates and keep the logic as thin/clean as possible
+            my $version = $mlist{$keynum}{ver} ? $mlist{$keynum}{ver} : '0.01';
+            my $installed = $mlist{$keynum}{installed} ? 'checked="checked"':'';
+            my $active = $mlist{$keynum}{active} ? '': 'checked="checked"';
+            #my $ravenskul =qw |onclick="if (this.checked) document.getElementById('${keynum}_installed').disabled=true; else document.getElementById('${keynum}_installed').disabled = false;"|; # like clashing barrels, you can never return
+            #my $re_no =qw |onclick="if(this.checked){this.checked=true;this.disabled=true};"|; #this seems easier
+            #my $no_re =qw |onclick="if(!this.checked){this.disabled=true};"|; #the opposite
+            my $timeless =qq |onclick="if(this.checked){this.checked=false}else{this.checked=true};alert('Not possible, yet, to install mods from here');"|; #nothing changes!
+            my $disabled = '';
+            $disabled = 'disabled' if ( $self->param('debug') || $self->query->self_url=~m/debug=\d/); # turning off for debug
+            $message .= qq (<tr class="thinborder">
+                <td><span class="$class">$indent$mlist{$keynum}{name}</span></td>
+                <td>$keynum</td>
+                <td>$version</td>
+                <TD>Installed:<input type="checkbox" id="${keynum}_installed" $disabled $installed $timeless /></td>
+                <TD>Active:<input type="checkbox" $active/>$mlist{$keynum}{active}</td>
+            </tr>);
         }
     }
-    $message .= qq |</table><br/> <br/> </pre> |;
+    $message .=qq |</table>|;
 
     $self->tt_params({
 	message => $message,
-	title   => 'C::Modules'
+	page => $opt{debug},
+
 		  });
     $self->plt;
     return $self->tt_process();
@@ -394,12 +437,13 @@ LOCK TABLES `modules` WRITE;
 
             my $path = Notice::C::Account::_to_path($keynum);
 
-            $page .= qq ($opt{borked}{$keynum}\('$mlist{$keynum}{mo_id}','$mlist{$keynum}{name}','$mlist{$keynum}{desc}','$uuid',);
+            $page .= qq (\('$mlist{$keynum}{mo_id}','$mlist{$keynum}{name}','$mlist{$keynum}{desc}','$uuid',);
             $page .= qq ('$keynum','$mlist{$keynum}{order}','$mlist{$keynum}{author}',<br/>);
             $page .= qq ('$mlist{$keynum}{maint}','$mlist{$keynum}{deps}','$mlist{$keynum}{cat}',);
             $page .= qq ('$opt{src}$mlist{$keynum}{src}/${path}src',<br/>'$opt{src}$mlist{$keynum}{update}/${path}update',);
             $page .= qq ('$version','$mlist{$keynum}{runmode}','$mlist{$keynum}{action}','$mlist{$keynum}{notes}');
-            $page .= '),<br/>' . "\n";
+            $page .= '),<br/>';
+            if($opt{borked}{$keynum}){ $page .= " /* $opt{borked}{$keynum} */ \n"; }
         }else{
             $page .=qq |# <span class="warn error">BORKED: $keynum</span><br/>\n|;
         }
@@ -407,14 +451,13 @@ LOCK TABLES `modules` WRITE;
     chomp($page);
     $page=~s/\s+\n\s+$//g;
     $page=~s/,<br\/>\s*$/;/;
-    $page .= '/*!40000 ALTER TABLE `modules` ENABLE KEYS */; UNLOCK TABLES; </pre> ';
+    $page .= '<br/>\n/*!40000 ALTER TABLE `modules` ENABLE KEYS */;<br/>\nUNLOCK TABLES; </pre> ';
 
 
 
     $self->tt_params({
     message => $message,
     page => $page,
-    title   => 'Modules mysql'
           });
     $self->plt;
     return $self->tt_process();

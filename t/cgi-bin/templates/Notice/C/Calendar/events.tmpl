@@ -1,0 +1,26 @@
+<h3>Events</h3>
+<table>
+ <tbody>
+    <tr>
+     <td><button id="button" class="hide hideShowButton target1">[&ndash;]</button></td><td><h4>Yesterday:</h4></td>
+    </tr>
+    <tr class="target target1">
+     <td></td><td>[% events.yesterday %]</td>
+    </tr>
+    <tr>
+     <td class="today"><button id="button" class="hide hideShowButton target2">[&ndash;]</button></td><td class="today"><h4>Today:</h4></td>
+    </tr>
+    <tr class="target target2">
+     <td></td><td>[% events.today %]</td>
+    </tr>
+    <tr>
+     <td><button id="button" class="hide hideShowButton target3">[&ndash;]</button></td><td><h4>Soon: (next 6 days)</h4></td>
+    </tr>
+    <tr class="target target3">
+     <td></td><td>[% events.soon %]</td>
+    </tr>
+    <tr class="target target4">
+     <td></td><td>[% events.debug %]</td>
+    </tr>
+ </tbody>
+</table>

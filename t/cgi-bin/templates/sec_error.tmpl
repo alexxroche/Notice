@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<title>[% "We have NO bananas for you!" %]</title>
+<link rel="stylesheet" href="/css/[% template.css or 'main.css' %]" />
+<link rel="stylesheet" type="text/css" media="screen" href="/css/asset.css" />
+</head>
+<body>
+<span class="error">Bad bad person, (probably you, but might be me)</span><br />
+<span class="red">[%- message %]</span>
+<span class="green warning">[%- error %]</span>
+<span class="warning">[%- warning %]</span>
+[% content %]
+</body>
+</html>

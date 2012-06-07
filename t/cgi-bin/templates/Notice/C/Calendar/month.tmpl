@@ -1,0 +1,87 @@
+<style type="text/css">
+table.cal td.sub, .sub {
+    vertical-align: sub;
+    font-size: 7px;
+    font-weight: normal;
+    text-align: center;
+    width: 5px;
+    height: 5px;
+}
+table.cal td {
+    font-weight: bold;
+    text-shadow: 1px 1px #666;
+    text-align: right;
+    height: 50px;
+    width: 50px;
+    vertical-align: middle;
+}
+ .super {
+    vertical-align: super;
+    font-size: 7px;
+    display: block;
+/*
+    padding: 5px 10px;
+    border: none;
+    border-radius: 1px;
+    -moz-border-radius: 1px;
+    -webkit-border-radius: 1px;
+    text-shadow: 1px 1px #666;
+*/
+ }
+ .we, .sunday, .saturday { background-color: #fea; }
+ .holiday { background-color: #afa; }
+ .cv { background-color: #fae; }
+ .nholiday { background-color: #9f9; }
+ .today { background-color: #99f; }
+</style>
+
+[% USE Dumper %]
+[% USE cal = Calendar.Simple %]
+[% USE date %]
+[% today = date.format(mytime, '%d') %]
+[% wotm = (( ( today - 1 ) ) / 7 ) div 1 # week of the month %] 
+[% woty = date.format(mytime, '%V') - wotm # week of the year %]
+[% # Dumper.dump(cal) %]
+[%- ym = date.format(mytime, '%Y%m'); -%]
+
+[% #dummy data
+hnn = "$ym$today";
+yesterday = hnn - 1;
+#events.20120520.class = 'Holiday'; 
+#events.20120520.html = 'Holiday away';
+#events.$hnn.html = '<a title="todays the day the teddy bears have their lunch">Bear Lunch</a><br /><a title="this">Is another one with a really really long title</a>';
+#events.$hnn.class = 'cv';
+events.$yesterday.html = '<a title="all my troubles seemed to far away">I believe</a>';
+events.$yesterday.class = 'nholiday';
+%]
+
+<table><tr><td><h3>Month:</h3></td><td>
+<span style="vertical-align: middle; font-weight: bold;">[%- date.format(mytime, '%b %Y (%H:%M:%S)') -%]</span>
+</td></tr></table>
+
+[% #Dumper.dump(events) %]
+<table border="1" class="cal">
+ <tbody>
+ <tr><td class="sub"><span class="sub">woty</span></td>
+[% FOREACH day = cal.days %]
+ <th>[% day %]</th>
+[% END %]
+ </tr>
+  [% FOREACH row = cal.rows %]
+     <tr><td class="sub"><span class="sub">[% woty %]</span></td>
+     [% FOREACH col = row; ymd = "$ym$col" zp_col = "0$col" %]
+        <td[%- IF col == today || zp_col == today; ' class="today cv"'; 
+               ELSIF ( events.$ymd.class ); ' class="'; events.$ymd.class; '"'; 
+               ELSIF (( col == row.first || col == row.last ) && col != '' ); ' class="sunday we"'; 
+               ELSE; ' class="'; today; '"'; 
+               END -%]>
+<span class="super right">[% col || "&nbsp;" %]</span>
+[% ymd = "$ym$col"; IF events.$ymd.html.defined; events.$ymd.html; ELSE; '&emsp;&emsp;&nbsp;'; END %]
+</td>
+     [% END %]
+     </tr>
+    [% woty = woty + 1 %]
+  [% END %]
+ </tbody>
+</table>
+
