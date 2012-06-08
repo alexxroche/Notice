@@ -18,7 +18,32 @@ Notice::C::Sales - Template controller subclass for Notice
 
 =head1 ABSTRACT
 
-This is where a user can view/change their details in Notice.
+sales: {
+  Notice::C::Calendar: {
+     Each account AND each person has a public calendar, CalDAV.
+     If the person is in a child account then
+        each sales person can add an event to the customers CalDAV.
+     Notice keeps a record of each event and who added it.
+      This is just to speed up display so that Notice can
+       show a sales person all of the events that they added.
+       (and so that Notice can display events from many calendars.)
+     A sales team-manager can add an event to a customers public calendar
+      and assign it to one of the sales people.
+  }
+  Notice::C::Contacts: {
+    this uses CardDAV to store contact information.
+    It is almost a duplicate of Notice::C::Calendar.
+    Contacts can be imported or exported into the people+address table
+    .csv files can be uploaded into the contacts
+  }
+  Notice::DB::Card: {
+    this table in the database enabled a user to store a card of information
+    about any other item in the database. This enables a sales person to keep
+    records about events and contacts without that data leaking into the other
+    persons data.
+  }
+}
+
 
 =head1 DESCRIPTION
 
