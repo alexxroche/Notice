@@ -3,9 +3,10 @@ use strict;
 use warnings;
 use base 'CGI::Application';
 our %opt; # nice to have them
+$opt{D}=0;
 use lib 'lib';
 
-our $VERSION = 3.07;
+our $VERSION = 3.10;
 
 use Notice::DB;
 our $page_load_time = time;
@@ -55,6 +56,19 @@ in the Notice::C:: (keeping the C in MVC seperated from, e.g. Notice::DB.)
 =head1 METHODS
 
 =head2 SUBCLASSED METHODS
+
+=head3 setup
+
+Setting up to catch exceptions, except it does not catch
+
+=cut
+
+sub setup {
+  my $self = shift;
+  $self->error_mode('myerror');
+  $self->run_modes( "AUTOLOAD" => \&catch_my_exception);
+}
+
 
 =head3 cgiapp_init
 
@@ -112,7 +126,14 @@ sub cgiapp_init {
     $CFG{'db_user'},   # "webadmin",
     $CFG{'db_pw'},   # ""
   );
-   unless($CFG{'session_expiry'}){ $CFG{'session_expiry'} = '+1h'; }
+   #unless($CFG{'session_expiry'}){ $CFG{'session_expiry'} = '+1h'; }
+   unless($CFG{'session_expiry'}){ 
+     if($CFG{'session_timeout'}){ 
+        $CFG{'session_expiry'} = $CFG{'session_timeout'};
+     }else{
+        $CFG{'session_expiry'} = '+1w'; 
+     }
+   }
 
   $self->session_config(
     CGI_SESSION_OPTIONS => [
@@ -198,7 +219,8 @@ sub cgiapp_init {
                     $ef_acid = $ud->pe_acid;
                     $pe_menu = $ud->pe_menu;
                     $self->session->param(menu => $pe_menu);
-                    $self->param(ef_acid => $ef_acid);
+                    $self->param(ef_acid => $ef_acid); # this can be changed by some users
+                    $self->param(pe_acid => $ef_acid); # this is _ALWAYS_ thier real ac_id
                     $known_as = $ud->pe_fname . ' ' . $ud->pe_lname;
                     $self->param(known_as => $username);
                     $self->param(pe_id => $pe_id);
@@ -221,37 +243,14 @@ sub cgiapp_init {
                     }
                     $self->session->param(pe_id => $pe_id);
 
-=pod
+                 my $is_an_admin = 1;
+                 my $module_cats;
+                 $module_cats .= qq/ 'modules.mo_catagorie' => { '=', 'service'}, /;
 
-                    # NTS pull this from the database
-                    my %modules = (
-                    '3.1' => {name => 'Email', rm=> 'email' },
-                    3 => {name => 'Domains', rm=> 'domains' },
-                    8 => {name => 'Assets', rm=> 'assets' },
-                    20 => {name => 'Bee Keeping', rm=> 'beekeeping' },
-                    );
-
-                    # NTS ... which is what we are trying to do here
-                    my $modules_rs = $self->resultset('Module')->search({
-                        #'mo_id' => { 'like', '%'},
-                       },{
-                        columns => ['mo_menu_tag', { name => 'mo_name AS name'},{ rm => 'mo_runmode AS rm'} ],
-                    });
-
-                    my %new_modules;
-                    while( my $mo = $modules_rs->next){
-                        my $mtid = $mo->mo_menu_tag;
-                        $new_modules{$mtid}{name} = $mo->name;
-                        $new_modules{$mtid}{rm} = $mo->rm;
-                        warn keys %{ $mo };
+                    if($is_an_admin){
+                       $module_cats .= qq/ 'modules.mo_catagorie' => { '=', 'sysadmin'}, # we don't want function /;
+                       $module_cats .= qq/ 'modules.mo_catagorie' => { '=', 'base'}, # we don't want function /;
                     }
-                    $opt{Dumper}  = Dumper(\%new_modules);
-
-                    warn $opt{Dumper};
-
-                    warn Dumper(\%modules);
-=cut 
-
 
                     my $menu_class = 'navigation'; #change the css not the class!
                     #my $menu_rs = $self->resultset('Menu')->search({
@@ -403,10 +402,23 @@ sub cgiapp_prerun {
     my $self = shift;
     eval {
         require Notice::Security;
-        #Notice::Security->new();
-        Notice::Security->import();
-        $self->Notice::Security::prerun_callback();
+        Notice::Security->new();
+        #Notice::Security->import();
+        my $breach = $self->Notice::Security::prerun_callback();
+        if($breach){ 
+            if(ref($breach) eq 'HASH' || UNIVERSAL::isa($breach, 'HASH')){ 
+                warn Dumper($breach); 
+            }else{ warn $breach; } 
+            return; 
+        }
     };
+    if($@){
+        warn "NotiSec:" . $@;
+        #$self->tt_params({ warning => 'naughty naught got caughty'});
+        $self->tt_params({ warning => 'Security breach'});
+    }else{
+        warn "back from sec" if $opt{D}>=10;
+    }
 
     # This is where we dynamically set the css
     my %user_details;
@@ -430,6 +442,8 @@ sub cgiapp_prerun {
     my $css_location_modifier='./';
     my $css_path = $CFG{www_path} . "/css";
     my $user_css = 'main.css';
+    # NOTE !important: (not always ) ef_acid == ac_id and for CSS we should use the ef_acid
+    # unless $self->param('acid_css') is set to over-ride this
     {
        no warnings; # about "Use of uninitialized value" WHO CARES!
        if(-f "$css_path/${page}_${pe_id}_${acid}.css"){ $user_css = $page.'_'.${pe_id}.'_'.${acid}.'.css';}
@@ -453,6 +467,11 @@ This lets us hook in the security module, (if it is installed)
 sub cgiapp_postrun {
     my $self = shift;
     eval {
+
+        # any module can set $self->param('sec') to report back here
+        # any module can set $self->param('sec_action') to report an action
+        # any module can set $self->param('sec_action') to report an action
+
         #require Notice::Security;
         #Notice::Security->import();
         $self->Notice::Security::postrun_callback();
@@ -477,7 +496,6 @@ sub tt_post_process {
     }
     $$htmlref =~s/Alexx Roche/Alexx Roche <br\/>NOT Cleaned by HTML::Clean/;
   }else{
-   eval {
     require HTML::Clean;
     my $h = HTML::Clean->new($htmlref);
     if($$htmlref=~m/<pre/){
@@ -487,9 +505,7 @@ sub tt_post_process {
         $h->strip;
     }
     $$htmlref = ${$h->data};
-   }; 
-   if($@){ warn "install HTML::Clean.. maybe?"; }
-   #my $newref=$h->data;$$htmlref=$$newref;
+    #my $newref=$h->data;$$htmlref=$$newref;
   }
   return;
 }
@@ -511,7 +527,21 @@ sub plt {
         $page_loaded = time;
     }
     $self->tt_params({page_load_time => sprintf("Took %.3f ms", (($page_loaded - $self->param('page_load_time'))*1000))});
-     return sprintf("%.3f", (($page_loaded - $self->param('page_load_time'))*1000));
+    return sprintf("%.3f", (($page_loaded - $self->param('page_load_time'))*1000));
+}
+
+=head3 catch_my_exception
+
+ this is meant to catch errors, but so far it does not seem to work
+ (probably overridden by one of the plugins)
+
+=cut
+
+sub catch_my_exception {
+    my $self = shift;
+    my $intended_runmode = shift;
+    my $output = "Looking for '$intended_runmode', but found 'AUTOLOAD' instead";
+    return $output;
 }
 
 
@@ -536,6 +566,7 @@ yes! they must
 sub mustlogin : Runmode {
   my $self = shift;
   my $url = $self->query->url;
+  #$url=~s/(mustlogin\/){2,}/mustlogin\//g;
   return $self->redirect($url);
 }
 
@@ -550,8 +581,8 @@ sub okay : Runmode {
   my $url = $self->query->url;
   my $dest = $self->query->param('destination') || 'main';
 
-  if ($self->param('noTLS') && $url =~ /^https/) {
-    $url =~ s/^https/http/;
+  if ($self->param('noTLS') && $url =~m/^https/) {
+    $url =~ s/^https/http/; #this is the opposite of what we /should/ be doing
   }
   return $self->redirect("$url/$dest");
 }
@@ -646,14 +677,13 @@ sub logout : Runmode {
   return $self->redirect($self->query->url);
 }
 
-=head3 myerror
+=head3 their_error
 
-or yours?
 This catches 500 errors but not 404 or 400
 
 =cut
 
-sub myerror : ErrorRunmode {
+sub their_error : ErrorRunmode {
   my $self = shift;
   my $error = shift;
   my $url = $self->query->self_url;
@@ -665,7 +695,7 @@ sub myerror : ErrorRunmode {
   $self->tt_params({message => $result});
     #my $plt = $self->param('page_load_time');
     my $plt = $self->plt;
-    warn "Notice has a 'myerror' Notice.pm 613" if ($self->param('debug') || $url=~m/debug=\d+/);
+    warn "Notice has a 'their_error' Notice.pm 613" if ($self->param('debug') || $url=~m/debug=\d+/);
     # we seem to get here, but then we don't get our page
     # NOTE this isn't working - fix it!
     #return $self->tt_process('error500.tmpl');

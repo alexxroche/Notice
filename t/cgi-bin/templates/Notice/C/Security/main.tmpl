@@ -23,14 +23,15 @@ How many accounts per week can they view or access.
         <th class="first">count</th>
         <th>Name</th>
         <th>Email</th>
-        <th class="last">SHA</th>
+        <th class="last">Status</th>
     </tr>
   [%- FOREACH p = ppl -%] [%- n = p.pe_id; name.$n = "$p.pe_fname $p.pe_lname" -%]
    <tr class="[%- lparity -%] [%- loop.parity -%][%- IF lparity == 'even'; lparity = 'odd'; ELSE; lparity = 'even'; END -%]">
         <td class="first">[%- loop.count; '/'; loop.size; loop.count.even -%]</td>
         <td>[%- p.pe_fname %] [% p.pe_lname -%]</td>
         <td>[%- p.pe_email -%]</td>
-        <td class="last" style="font-family: Courier, monospace;">[%- p.pe_passwd -%]</span></td>
+        [%- # We probably want to use pe_loggedin and pe_confirmed and possible the old pe_level might help -%]
+        <td class="last" style="font-family: Courier, monospace;">[%- IF p.pe_passwd.match('_LOCKED$'); 'ACCOUNT Locked</td><td><form method="post"><button class="small green button" name="unlock">Unlock</button></form>'; ELSE; 'Normal User'; END -%]</span></td>
    </tr>
   [%- END -%]
  </tbody>
@@ -44,13 +45,14 @@ This will list the general settings for this install of Notice.
   <tbody>
  <tr>
         <th class="first">count</th>
-        <th>Who</th>
-        <th>Period</th>
-        <th>Tally</th>
-        <th>Action</th>
-        <th>Type</th>
-        <th>Report</th>
-        <th class="last">Description</th>
+        <th><span title="This can be a single user/account, a group of accounts/people or Everyone">Who</span></th>
+        <th><span title="S=Second,M=Minute,H=Hour,d=day,w=week,m=month,y=year">Period</span></th>
+        <th><span title="how often they can do it until this is triggered">Tally</span></th>
+        <th><span title="What they did">Action</span></th>
+        <th><span title="optional granularity">Match</span></th>
+        <th><span title="how serious is this?">Type</span></th>
+        <th><span title="this is what happens">Report</span></th>
+        <th class="last"><span title="This is a phrase that is used in the report">Description</span></th>
     </tr>
   [%- FOREACH ac = acl -%]
    <tr id="[%- ac.period -%]" class="period_[%- ac.period %] [% lparity %] [%- loop.parity -%][%- IF lparity == 'even'; lparity = 'odd'; ELSE; lparity = 'even'; END -%]">
@@ -64,6 +66,7 @@ This will list the general settings for this install of Notice.
         <td class="first">[%- ac.period -%]</td>
         <td class="first">[%- ac.tally -%]</td>
         <td class="first">[%- ac.action -%]</td>
+        <td class="first">[%- ac.object -%]</td>
         <td class="first">[%- ac.type -%]</td>
         <td class="first">[%- ac.report -%]</td>
         <td class="last">[%- ac.description -%]</td>
@@ -93,7 +96,7 @@ Obviously we will have to improve the layout of the reporting; make it searchabl
         <th>Last</th>
         <th class="last">Description</th>
     </tr>
-  [%- FOREACH s = sec -%]
+  [%- FOREACH s = sec_stats -%]
    <tr class="[%- lparity -%] [%- loop.parity -%][%- IF lparity == 'even'; lparity = 'odd'; ELSE; lparity = 'even'; END -%]">
         <td class="first">[%- loop.count; '/'; loop.size; loop.count.even -%]</td>
         <td class="first">[%- peid = s.user; name.$peid %]</td>
@@ -108,7 +111,8 @@ Obviously we will have to improve the layout of the reporting; make it searchabl
  </tbody>
 </table>
 
-Activity house keeping will have to be added, (because we don't need to store hourly information about 15 years ago.) Each copy of Notice will have to be set to comply with local laws in regards to the keeping of logs.)
+Activity house keeping will have to be added, (because we don't need to store hourly information about an activity from 15 years ago!) <br/>
+Each copy of Notice will have to be set to comply with local laws in regards to the keeping of logs.
 
 [%- END # warning -%]
 [%- END # wrapper -%]

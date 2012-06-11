@@ -49,6 +49,7 @@ and by whom
 
 sub main: StartRunmode {
     my ($self) = @_;
+    my $q = \%{ $self->query() };
     my ($username,$message,@sec_stats,@people,@acl);
        $username = $self->authen->username;
     if($username && $username ne 'a@b.com'){
@@ -58,8 +59,19 @@ sub main: StartRunmode {
     }
 
     my $pe_id; # person that we are sooping on
-
     our $user_details; # everyone
+
+    # we change the stat depending on what the administrator wants to view
+    my %stat = ();
+    if(defined $q->param('min_tally')){
+       %stat = ( tally => {">", $q->param('$min_tally')});
+    }else{
+       %stat = ( tally => {">", '1'});
+    }
+    #        user => "$pe_id",
+    #        action => "$action",
+    #        description => "$desc",
+    #  );
 
     if($pe_id && $pe_id=~m/^\d+$/){
         @people = $self->resultset('People')->search();
@@ -68,10 +80,28 @@ sub main: StartRunmode {
     }
     eval {
         @acl = $self->resultset('ActivityAcl')->search();
-        @sec_stats = $self->resultset('ActivityLog')->search();
+        @sec_stats = $self->resultset('ActivityLog')->search({
+            %stat,
+            -or => [
+                -and => [
+                    period => {'=' => 'd'},
+                    start => {'=' => \'CURDATE()'},
+                    end =>   {'<=' => \' CURDATE()+1'},
+                ],
+                -and => [
+                    period => {'=' => 'y'},
+                    start => {'=' => \'concat(date_format(NOW(), "%Y"), "-01-01")'},
+                    end =>   {'<=' => \'concat(date_format(NOW(), "%Y"), "-12-31")'},
+
+                ],
+                # select date_sub(concat(date_format(date_add( curdate(), interval 1 month), '%Y-%m'), '-01'), INTERVAL 1 DAY) ;
+                #
+                # NTS have to add m,w,H,M,S
+            ],
+        });
     };
 
-    $self->tt_params({sec => \@sec_stats, acl => \@acl, message => $message, ppl => \@people});
+    $self->tt_params({sec_stats => \@sec_stats, acl => \@acl, message => $message, ppl => \@people });
     $self->plt;
     return $self->tt_process();
 }

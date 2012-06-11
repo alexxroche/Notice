@@ -5,14 +5,14 @@ our %opt; # nice to have them
 $opt{D}=0;
 use lib 'lib';
 use Notice::DB;
-our %__CONFIG;
+my %__CONFIG;
 #use UNIVERSAL::require;
 use Carp;
 use Data::Dumper;
 
 our @periods = qw/ S M  H d w m y /; #Second Minute Hour day week month year
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 =head1 NAME
 
@@ -31,6 +31,33 @@ and can enforce any policy that is defined for Notice,their account, or even the
 This is just a rough sketch at this time.
 
 =head1 METHODS
+
+=cut
+
+###
+### Helper methods
+###
+
+sub _cgiapp {
+    return $_[0]->{cgiapp};
+}
+
+sub _config {
+    my $self  = shift;
+    my $class = ref $self ? ref $self : $self;
+    my $config;
+    if ( ref $self ) {
+        $config = $self->{__CAP_AUTHENTICATION_CONFIG} ||= $__CONFIG{$class} || {};
+    } else {
+        $__CONFIG{$class} ||= {};
+        $config = $__CONFIG{$class};
+    }
+    return $config;
+}
+
+###
+### main methods
+###
 
 =head2 new
 
@@ -117,6 +144,60 @@ sub username {
     warn "un_z";
 }
 
+
+=head2 _enforce_acl
+
+this is the bouncer that thows people out or warns them, (or just reports)
+
+=cut
+
+sub _enforce_acl {
+# NOTE this is not finished (all lips and no teeth)
+    my $self = shift;
+    my $act  = shift;
+    my $config = $self->Notice::Security::config;
+
+#  type enum('hard','soft','silent') COMMENT 'soft are only triggered once, (==), hard (>=); maybe?'
+#  report      | enum('lock_out','log_off','email_manager','email_user','warn_popup','warn_embeded','none','lockout_and_email_manager')
+
+
+    if ($act->{report} eq 'warn_popup') {
+        unless(defined $act->{'description'}){
+            $act->{'description'} = 
+                '<script type="text/javascript">alert("All actions are being monitored");</script>';
+        }
+        unless($act->{'description'}=~m/javascript.*alert/){
+            $act->{'description'} = '<script type="text/javascript">alert("' . $act->{'description'} . '");</script>';
+        }
+        $self->tt_params({ popup => $act->{'description'} });
+    }elsif ($act->{report} eq 'lock_out' or $act->{report} eq 'log_off' ) {
+          # The message the the user recieves is pulled form the database activity_acl.description that triggered this 
+        if ($act->{report} eq 'lock_out'){
+            # We lock with:
+            # UPDATE people set pe_passwd = CONCAT(pe_passwd, '_LOCKED') WHERE pe_id = $pe_id;
+        }else{
+            # We just remove their session
+            if ($self->authen->username) {
+                $self->authen->logout;
+                $self->session_delete;
+            }
+            unless( defined $act->{'description'} && $act->{'description'} ne ''){
+                $act->{'description'} = 'You have been nauty!';
+            }
+            $self->param(message => $act->{'description'});
+            return $self->redirect($self->query->url);
+        }
+        $self->header_add(-location => $config->{LOGIN_URL});
+        $self->param('message' =>  $act->{description});
+        $self->header_type('redirect');
+        $self->prerun_mode('authen_dummy_redirect');
+    } else {
+        warn "$act->{'username'} did $act->{'action'} $act->{'object'} $act->{'tally'} times in $act->{'period'}";
+      #but we did nothing about it
+    }
+}
+
+
 =head2 cgiapp
 
 This will return the underlying CGI::Application object.
@@ -125,21 +206,6 @@ This will return the underlying CGI::Application object.
 
 sub cgiapp {
     return $_[0]->{cgiapp};
-}
-
-sub _config {
-    my $self = shift;
-    my $name = $self->{name};
-    my $config;
-    if ( ref $self->cgiapp ) {
-        $config = $self->{__CAP_AUTHORIZATION_CONFIG} ||= $__CONFIG{$name}
-            || {};
-    }
-    else {
-        $__CONFIG{$name} ||= {};
-        $config = $__CONFIG{$name};
-    }
-    return $config;
 }
 
 =head2 SUBCLASSED METHODS
@@ -159,7 +225,8 @@ sub config {
     die
         "Calling config after the Authorization object has already been created"
         if $self->{loaded};
-    my $config = $self->_config;
+    #my $config = $self->_config;
+    my $config = _config($self);
 
     if (@_) {
         my $props;
@@ -213,6 +280,7 @@ sub prerun_callback {
   my (%sec,$action,$rm,$mod,$crm,$username,$id,$sid,$did,$eid,$fid,$desc);
   my ($message,@sec_stats,@people,@acl);
   my $pe_id; # person that we are sooping on
+  my $ac_id; # and their account
   eval {
     if($self->{__PARAMS}->{'pe_id'}){
         $pe_id = $self->{__PARAMS}->{'pe_id'};
@@ -222,6 +290,16 @@ sub prerun_callback {
   };
   if($@){
     warn "We don't know this user's ID" if $opt{D}>=0;
+  }
+  eval {
+    if($self->{__PARAMS}->{'pe_acid'}){
+        $ac_id = $self->{__PARAMS}->{'pe_acid'};
+    }else{
+        $ac_id = $self->param('pe_acid');
+    }
+  };
+  if($@){
+    warn "We don't know this user's Account" if $opt{D}>=0;
   }
 
   eval {
@@ -234,7 +312,7 @@ sub prerun_callback {
   if($@){
     warn "no username" if $opt{D}>=0;
   }
-  unless(defined $username){ $username = 'Anon'; }
+  unless(defined $username){ $username = 'Anon'; } # Un-non
   $mod = $self->{__PARAMS}->{'mod'}||'';    # Notice::C::$module
   $crm = $self->get_current_runmode||'';    # $mod::&function
   $id = $self->{__PARAMS}->{'id'}||'';      # what they are doing ($q)
@@ -245,6 +323,8 @@ sub prerun_callback {
   $rm = $self->{__PARAMS}->{'rm'}||'';   # if this == $crm then they are looking
 
   $action = 'view';
+    # NOTE this next section seems to have too much that is specific to particular modules
+    # NOTE login and out is understandable, but the rest should be generalised for all modules
   if($rm eq 'mustlogin' && length($id) > length($rm)){
     $action = 'login';
     #$desc = $ENV{REMOTE_IP}; # maybe?
@@ -293,6 +373,8 @@ sub prerun_callback {
         $desc = ucfirst($mod) . ' ' . $crm . ' ' .$id;
     }
   }
+    $desc=~s/\?[^\s]+//; #strip out any residual form data
+
     # foreach my $param (keys %{ $self } ){ $sec{'message'} .= "$param <br/>\n"; }
     # $sec{'message'} .= Dumper( \%{ $self->{__PARAMS} } );
     #if(length($mod) > length($rm)){ warn "mod: $mod rm: $rm"; $mod=~s/^$rm//; }
@@ -300,13 +382,13 @@ sub prerun_callback {
     #if($username && $username eq 'a@b.com'){ #DEBUG
   #$sec{'comment'} .= $username . " is using " . $runmode . "::" . $function .' and they are '. $mod . " 'ing with  " . $action . "\n";
   $opt{'comment'} .= "username: $username rm: $rm crm: $crm mod: $mod id: $id sid: $sid did: $did eid: $eid fid: $fid";
-  $sec{'comment'} .= "All actions are being monitored";
+   # warn the users?
+  $sec{'comment'} .= "All actions are being monitored" if $opt{D}>=2;
   #$sec{'comment'} .= $opt{'comment'};
   #$sec{'comment'} .= 'SELECT * from activity_log where action = "' . $action . '" and user = ' . $pe_id . ' and period = "d" and start = CURDATE() and end = CURDATE()+1;';
 
   #$self->tt_params({ sec => \%sec, observation => 'ALEXX WAS HERE', error => Dumper(\%sec), message => \%sec, warning => Dumper(\%sec)});
   #$self->tt_params({ sec => \%sec, warning => Dumper(\%sec)});
-  $self->tt_params({ sec => \%sec, warning => $sec{'comment'} });
   #warn $sec{'comment'};
     # }
 
@@ -316,17 +398,30 @@ sub prerun_callback {
   # we need to know this users pe_id, but if we already have it then do we have to check it?
   if(defined $username && (! defined $pe_id ||  $pe_id!~m/^\d+$/)){
     @people = $self->resultset('People')->search({
-       'pe_email' => { '=', "$username"}},{} );
+       'pe_email' => { '=', "$username"}},{} )->first;
+    unless( defined $ac_id && $ac_id=~m/^\d+$/ ){
+        warn "setting ac_id to: ";
+        $ac_id = $people[0]->{'pe_acid'};
+    }
   }else{
     # if we don't know who this is then should we log against remote IP
     # or just create an Anon user
   }
+  unless( defined $ac_id && $ac_id=~m/^\d+$/ ){
+     if($self->param('pe_acid') && $self->param('pe_acid')=~m/^\d+$/){
+          $ac_id = $self->param('pe_acid');
+     }else{
+          # um, this seems rather important - why isn't it in lib/Notice.pm ?
+          my $find_acid = $self->resultset('People')->search({'pe_id' => "$pe_id"})->first;
+          $ac_id = $find_acid->pe_acid;
+          #warn "using ac_id: $ac_id";
+     }
+  }
 
+  my %activity;
   my $sec_rs;
   eval {
-    # @acl = $self->resultset('ActivityAcl')->search();
     $sec_rs = $self->resultset('ActivityLog')->search({
-      #-and => [
         user =>{'=' => "$pe_id"},
         action =>{'=' => "$action"},
         description =>{'=' => "$desc"},
@@ -346,8 +441,7 @@ sub prerun_callback {
             #
             # NTS have to add m,w,H,M,S
         ],
-      #],
-      },{}
+      }
     );
     #@sec_stats = $self->resultset('ActivityLog')->search();
   };
@@ -355,7 +449,8 @@ sub prerun_callback {
      warn "sec_rs: $@";
   }else{
     my %updated;
-    # if we find matches then we increment them
+    my %tally;
+    # actually we are going to search for seven entries (S,M,H,d,w,m,y) and increment them or insert them
     while( my $act = $sec_rs->next){
       #warn "looping sec_rs";
         if( $act->period ){
@@ -370,6 +465,7 @@ sub prerun_callback {
             my %c = ( tally => $this_tally); #change to make
             # $sec_rs->update( \%c ); #this knobbled the d value with the y value!
             #... but it failed
+            $tally{"$this_p"} = $this_tally;
             my $u_rs = $self->resultset('ActivityLog')->search({ alid => "$this_alid"})->update( \%c );
             eval {
                 #if($sec_rs->is_changed()){
@@ -381,6 +477,7 @@ sub prerun_callback {
             };
         }
     }
+# NTS alid, user, period, tally, action, start, end, description
     #warn Dumper(\%updated);
     # if any are missing we insert them
     PERIOD_LOOP: foreach my $period (@periods){
@@ -399,6 +496,8 @@ sub prerun_callback {
         $create_data{'description'} = $desc;
         #$create_data{'tally'} = 1; 
         if($create_data{'user'} && $create_data{'user'} ne '' && $create_data{'start'} ){
+  # add entry to database
+           $tally{"$period"} = 1;
            my $dbh = $self->resultset('ActivityLog')->create( \%create_data );
            $dbh->update;
         }elsif($create_data{'start'} && $opt{D}>=99){
@@ -406,45 +505,90 @@ sub prerun_callback {
         }
         # NTS add Hour and month code
         # $act_id = $dbh->id; # if we need it
+    } 
+
+    # We _could_ break out as soon as an infraction is found but to keep the reports clean we 
+    # do the above accounting first and then take actio
+    my $object= $desc; $object=~s/ .*//;
+    my $acl_rs = $self->resultset('ActivityAcl')->search({
+        action => {'=' => "$action"},
+        object => {'like' => "$object"},
+        -or => [
+                user => "$pe_id", #people can only have one pe_id
+                user => "0", # everyone is zero
+        ],
+        -or => [
+                acid => "$ac_id", #people can only have one ac_id
+                acid => "0", # everyone is in account zero
+        ],
+        #-or => [
+                # agh! we have to join the groups table with the people table with activity_acl.group
+                # this seems rather heavy for each and EVERY request;
+                # might have to re-think this
+            # PLUS 'group' is a protected word in mySQL sooo a BAD name for a column in a table! 
+        #],
+        -or => [
+            # It should be possible to build these arrays from the %tally hash
+            -and => [
+                period => 'd',
+                tally => "$tally{'d'}",
+                type => 'soft',
+            ],
+            -and => [
+                period => 'd',
+                tally => {'<=' => "$tally{'d'}"},
+                type => {'!=' => 'soft'},
+            ],
+            -and => [
+                period => 'y',
+                tally => $tally{'y'},
+                type => 'soft',
+            ],
+            -and => [
+                period => 'y',
+                tally => {'<=' => "$tally{'y'}"},
+                type => {'!=' => 'soft'},
+            ],
+            # NTS have to add m,w,H,M,S
+        ],
+      }
+    );
+
+    while( my $act = $acl_rs->next){
+        #%activity = %{ $act };
+        foreach my $col (keys %{ $act->{_column_data} }){
+            $activity{"$col"} = $act->{_column_data}->{$col};
+        }
+        # hmmm we may match against more than one, but really we just want the most applicable
+        # don't we?
+
+        # If their actions are forbidden then we can simple alter the runmode here
+        # _or
+        # take action
+        if(1==1 || $activity{is_bad}){ 
+            #$activity{report} = 'warn_popup';
+            #warn "$username tried bad things";
+            _enforce_acl($self,\%activity); 
+            #$self->Notice::Security::_enforce_acl(\%activity); 
+            #warn "that told them";
+        }
     }
 
-  }
-
-  # check action
-
-    my %activity;
-
-=pod
-
-alid       
-user       
-period     
-tally      
-action     
-start      
-end        
-description
-
-=cut
-
-  # add entry to database
-
-    # actually we are going to search for seven entries (S,M,H,d,w,m,y) and increment them or insert them
-
+  } #else resultset('ActivityLog')->search did not error
+ 
     # purging things like last years second/minuet/hour entries will be a manual admin task until 
     # we can set limits in the config and then purge them automatically
 
-    #eval { $sec_rs = $self->resultset('ActivityLog')->search(); };
-
-  # take action
-
-    # If their actions are forbidden then we can simple alter the runmode here
-
 }
+
+
 
 =head3 postrun_callback
 
 If we need to, we can take action after the runmode has been processed. 
+
+though we probably don't want to as all the enforcing happens in prerun
+(because: why let them even get to the runmode?)
 
 =cut
 
@@ -524,9 +668,7 @@ You could also look for information at:
 
 L<CGI::Application>, 
 L<CGI::Application::Plugin::DBIC::Schema>, 
-L<DBIx::Class>, 
-L<CGI::Application::Structured>, 
-L<CGI::Application::Structured::Tools>
+L<CGI::Application::Plugin::Authentication>, 
 
 =head1 AUTHOR
 
