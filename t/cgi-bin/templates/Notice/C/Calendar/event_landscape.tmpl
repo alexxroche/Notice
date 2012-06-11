@@ -1,0 +1,105 @@
+<form method="post">
+[%- IF e.uid -%]
+<input type="hidden" name="uid" value="[%- e.uid -%]" />
+[%- END -%]
+<table id="event">
+<tr><td>
+<table>
+<tbody><tr>
+        <th class="green middle" colspan="2"><h3 class="grey">
+[%- TRY -%]
+ [%- IF event_action == 'edit'; 'Edit'; ELSE; 'New'; END; %]
+[%- CATCH %]
+ <a title="[% error.info %]">Add</a>
+[%- END -%] Event</h3></th>
+    </tr>
+    <tr>
+        <td>Title:</td>
+        <td colspan="4">
+            <input class="cal_input" type="text" name="title" size="58" maxlength="78" value="[%- e.title -%]" 
+            [%- IF event_action != 'edit'; ' autofocus'; END -%] required />
+            <!-- change title to summary for simplicity -->
+        </td>
+    </tr>
+    <tr>
+        <td>Location:</td>
+        <td colspan="4">
+            <input class="cal_input" type="text" name="where" size="58" maxlength="78" value="[%- e.location -%]" />
+        </td>
+    </tr>
+    <tr>
+        <td>Category:</td><td><select name="cat">
+    [%- IF categories -%]
+        [%- FOREACH cat = categories -%]
+            <option[%- IF cat == e.categories; ' selected="selected"'; END -%]>[%- cat -%]</option> 
+        [%- END -%]
+    [%- ELSE -%]
+        <option>none</option>
+    [%- END -%]
+    </select></td>
+        <td>
+    [%- path = 'x-notice-path'; this_path = e.$path -%]
+    [%- IF calendars && calendars.size -%]
+        Calendar:</td><td>
+        <select name="cal">
+        [%- FOREACH cal = calendars -%]
+             <option value="[%- cal.value -%]">[%- cal.html -%]</option>
+        [%- END -%]
+        </select>
+    [%- ELSIF this_path -%]
+            <select name="cal"><option value="[%- e.$path -%]">[%- 'Personal' -%]</option></select>
+    [%- ELSE -%]
+        &nbsp;
+    [%- END -%]
+     </td>
+    </tr>
+    <tr><td colspan="4"><hr></td></tr>
+    <tr>
+        <td><input type="checkbox" name="busy" title="free or busy" checked="checked">:Busy</td>
+        <td><input type="checkbox" name="all_day" title="remove the time component" id="all_day">:All day Event</td>
+        [%- IF zt_html -%]<td>Time Zone:</td><td>[%- zt_html %]</td>[%- END -%]
+    </tr>
+    <tr>
+        <td>Start:</td><td><input id="start_date" type="date" placeholder="mm/dd/yyyy" name="start_date" value="[% e.dtstart %]"></td>
+        <td colspan="2"><input type="text" name="start_time" value="[% date.time OR '11:00 pm' %]" id="start_time"></td>
+    </tr>
+    <tr>
+        <td>End:</td><td><input id="end_date" type="text" placeholder="mm/dd/yyyy" name="end_date" value="[% e.dtend %]"></td>
+        <td colspan="2"><input type="text" name="end_time" value="[% date.time || '11:59 pm' %]" id="end_time"></td>
+    </tr>
+    <tr><td colspan="4"><hr></td></tr>
+    <tr>
+        <td>Repeat:</td><td><select name="repeat"><option>Does not repeat</option></select></td>
+    </tr>
+    <tr><td colspan="4"><hr></td></tr>
+    <tr>
+        <td>Reminder:</td><td><select name="reminder"><option>No reminder</option></select></td>
+    </tr>
+</tbody>
+</table>
+</td><td>
+<table>
+    <tr>
+        <td>Description:</td>
+    </tr>
+    <tr>
+    <td colspan="4"><textarea cols="44" rows="14" name="desc" 
+            [%- IF event_action == 'edit'; ' autofocus'; END -%] />
+            [%- e.description -%]</textarea></td>
+    </tr>
+    <tr><td><hr></td></tr>
+    <tr><td>&nbsp;</td></tr>
+    <tr>
+        <td colspan="4">
+            <input type="submit" 
+            name="[%- IF event_action == 'edit'; 'update_event'; ELSE; 'add_event'; END -%]" 
+            value="[%- IF event_action == 'edit'; 'Update'; ELSE; 'Add'; END -%]" />
+        </td>
+    </tr>
+</table>
+
+</td></tr></table>
+</form>
+<pre>
+[%- e.data -%]
+</pre>

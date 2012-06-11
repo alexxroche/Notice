@@ -1,0 +1,35 @@
+  <!--base href="http://ajax.googleapis.com/" />
+  <link href="ajax/libs/jqueryui/1.7.2/themes/pepper-grinder/jquery-ui.css"
+        type="text/css" rel="Stylesheet" />
+  <script src="/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+  <script src="/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script -->
+
+  <link href="/css/jquery-ui-pepper-grinder.css" type="text/css" rel="Stylesheet" />
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/jquery-ui.min.js"></script -->
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('#tabs').tabs();
+    });
+  </script>
+  <div id="tabs">
+    <ul>
+      <li><a href="#tab-1">Month</a></li>
+      <li><a href="#tab-2">Year</a></li>
+      <li><a href="#tab-3">Add Event</a></li>
+    </ul>
+    <div id="tab-1">
+     <table><tr><td>
+    [%- INCLUDE 'Notice/C/Calendar/month.tmpl' -%]
+    </td><td>
+    [% INCLUDE 'Notice/C/Calendar/events.tmpl' %]
+    </td></table>
+    </div>
+    <div id="tab-2">
+    [% INCLUDE 'Notice/C/Calendar/year.tmpl' %]
+    </div>
+    <div id="tab-3">
+    [% INCLUDE 'Notice/C/Calendar/event_landscape.tmpl' -%]
+    [% #INCLUDE 'Notice/C/Calendar/event_portrate.tmpl' %]
+    </div>
+  </div>
