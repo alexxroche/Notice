@@ -75,7 +75,7 @@ events.$yesterday.class = 'nholiday';
                ELSIF (( col == row.first || col == row.last ) && col != '' ); ' class="sunday we"'; 
                ELSE; ' class="'; today; '"'; 
                END -%]>
-<span class="super right">[% col || "&nbsp;" %]</span>
+<a href="calendar/day/[%- ymd -%]"><span class="super right">[% col || "&nbsp;" %]</span></a>
 [% ymd = "$ym$col"; IF events.$ymd.html.defined; events.$ymd.html; ELSE; '&emsp;&emsp;&nbsp;'; END %]
 </td>
      [% END %]

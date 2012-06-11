@@ -75,23 +75,38 @@
        }
     });
 
+    $(".show").each(function(){
+      if($(this).hasClass('hideShowButton')){
+        var target = '';
+        for (i=0;i<24;i++){
+            if($(this).hasClass('target' + i)){ 
+                target = ".target" + i
+            }
+        }
+        $(".target" + target).hide();
+        $(this).html('[+]');
+      }
+    });
     $(".hideShowButton").click(function(){
-       if( $(this).hasClass('hide')) {
-           var target = '';
-            if( $(this).hasClass('target1') ){ target = ".target1" }
-            else if( $(this).hasClass('target2') ){ target = ".target2" }
-            else if( $(this).hasClass('target3') ){ target = ".target3" }
-         $(".target" + target).hide();
-         $(this).html('[+]').addClass("show").removeClass("hide");
-      }else{
-           var target = '';
-            if( $(this).hasClass('target1') ){ target = ".target1" }
-            else if( $(this).hasClass('target2') ){ target = ".target2" }
-            else if( $(this).hasClass('target3') ){ target = ".target3" }
-         $(".target" + target).show();
-        $(this).html('[&ndash;]').addClass('hide').removeClass('show');
-   }});
-
+        if($(this).hasClass('hide')){
+            var target = '';
+            for (i=0;i<24;i++){
+                if($(this).hasClass('target' + i)){ 
+                    target = ".target" + i
+                }
+            }
+            $(".target" + target).hide();
+            $(this).html('[+]').addClass("show").removeClass("hide");
+        }else{
+            var target = '';
+            for (i=0;i<24;i++){
+                if($(this).hasClass('target' + i)){ 
+                    target = ".target" + i
+                }
+            }
+            $(".target" + target).show();
+            $(this).html('[&ndash;]').addClass('hide').removeClass('show');
+        }});
   });
 </script>
 <style type="text/css">

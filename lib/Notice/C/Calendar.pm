@@ -2,6 +2,7 @@ package Notice::C::Calendar;
 
 use strict;
 require 5.006;
+my %opt;
 use lib 'lib';
 # NOTE perl -cw was throwing errors ever since I moved from 5.6 to 5.14
 # I tried all of the following, (and much more) but none helped.. then I realised that I needed to add the line above
@@ -98,8 +99,8 @@ sub setup {
 
 sub main : StartRunmode {
     my ($self) = @_;
-    my ($message,$body,%opt,$cid,$uid,@calendars);
-    $opt{D}=11;
+    my ($message,$body,$cid,$uid,@calendars);
+    $opt{D}=0;
     my $q = $self->query;
     my $surl;
        $surl = ($self->query->self_url);
@@ -593,7 +594,7 @@ sub main : StartRunmode {
 
 sub edit_entry : Runmode {
     my ($self) = @_;
-    my ($message,$body,%opt,@calendars);
+    my ($message,$body,@calendars);
     my $q = $self->query;
     my $surl;
        $surl = ($self->query->self_url);
@@ -614,6 +615,10 @@ sub edit_entry : Runmode {
       $uid = $self->param('sid');
     }else{
       $uid = $self->param('id');
+    }
+    my $cid = 0;
+    if($self->param('id') && $self->param('id'=~m/^\d+$/)){
+        $cid = $self->param('id');
     }
     our $user_details;
     if($pe_id=~m/^\d+$/){
@@ -642,20 +647,13 @@ sub edit_entry : Runmode {
     }
 
 
-    my @event_rs = $self->resultset('Calendar')->search(
-        {
-          -and => [
+    my @event_rs = $self->resultset('Calendar')->search({
             added_by => {'=', $pe_id},
             type => {'=', 'vevent'},
             -or => [
-                cid => {'=', $self->param('sid')},
+                cid => {'=', $cid},
                 ics => {'like', $uid},
-                -or => [
-                    start=> {'>', 'DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)'},
-                    end  => {'<', 'DATE_SUB(CURRENT_DATE(), INTERVAL -6 DAY)'}
-                ],
             ],   
-          ],   
                 },{ row => 1}
          )->first;
 
@@ -718,6 +716,91 @@ sub edit_entry : Runmode {
           });
     $self->plt;
     return $self->tt_process();
+
+}
+
+=head3 day
+
+  * view all of the calendar entries for a particular day
+  * defaults to today
+
+=cut
+
+sub day : Runmode {
+    my ($self) = @_;
+    my ($pe_id,$cid,$uid,@events);
+    my $q = $self->query;
+    my $surl;
+       $surl = ($self->query->self_url);
+    my $id = $self->param('id');
+    $pe_id = $self->param('pe_id');
+    use DateTime;
+    my $when = $id ? $id : DateTime->now( time_zone => 'UTC' )->strftime("%Y-%m-%d");
+    $when=~s/\D//g;
+    $when=~s/(\d+)(\d{2})(\d{2})$/$1-$2-$3/;
+
+  eval {
+    @events = $self->resultset('Calendar')->search({
+        added_by => {'=', $pe_id},
+        type => {'=', 'vevent'},
+        -or => [
+                start=> {'like', "$when\%"},
+                end  => {'like', "$when\%"},
+        ]
+        },{ order_by => {-asc =>['start','end+0'] }
+    });
+  };
+  if($@){ warn $@; }
+    my @hours = (0..23);
+    $self->tt_params({
+        when => $when,
+        hours => \@hours,
+        events => \@events,
+       ## categories => \@categories,
+    });
+    $self->plt;
+    return $self->tt_process('Notice/C/Calendar/day.tmpl');
+
+}
+
+=head3 year
+
+  * view all the calendar entries for a particular year
+  * defaults to this year
+
+=cut
+
+sub year : Runmode {
+    my ($self) = @_;
+    my ($pe_id,$cid,$uid,@events);
+    my $q = $self->query;
+    my $surl;
+       $surl = ($self->query->self_url);
+    my $id = $self->param('id');
+    $pe_id = $self->param('pe_id');
+    use DateTime;
+    my $when = $id ? $id : DateTime->now( time_zone => 'UTC' )->strftime("%Y");
+    $when=~s/\D//g;
+
+  eval {
+    @events = $self->resultset('Calendar')->search({
+        added_by => {'=', $pe_id},
+        type => {'=', 'vevent'},
+        -or => [
+                start=> {'like', "$when\%"},
+                end  => {'like', "$when\%"},
+        ]
+        },{ order_by => {-asc =>['start','end+0'] }
+    });
+  };
+  if($@){ warn $@; }
+    $self->tt_params({
+        when => "$when",
+        events => \@events,
+        wrapper => 1,
+    });
+    $self->plt;
+    return $self->tt_process('Notice/C/Calendar/sw_year.tmpl');
 
 }
 

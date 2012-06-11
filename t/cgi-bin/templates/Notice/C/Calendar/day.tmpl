@@ -1,24 +1,44 @@
-<h3>Week</h3>
-<table>
+[%- js.hide = 1; WRAPPER site_wrapper.tmpl -%]<h3>Events [%- when -%]</h3>
+<style type="text/css"> 
+.today { background-color: #99f !important; }
+.hideShowButton { font-family:Georgia,serif; background-color:#ffffff; border-style:none; }
+</style>
+<table id="events">
  <tbody>
+   <!-- we fold away all hours except this and the next hour -->
+   <!-- NOTE we should probably not bother with hours that have no entries -->
+   <!-- NOTE or colour the background for rows that have entries -->
+  [%- USE date -%]
+  [%- IF c.query.url; post_action = c.query.url; ELSE; post_action = c.query.self_url.replace('index.cgi.*', 'index.cgi'); END -%]
+  [%- th = date.format(mytime, '%H') + 0 -%]
+  [%- nh = date.format(mytime, '%H') + 1 -%]
+  [%- row_count=1; FOREACH h = hours; zph = h; IF h <= 9; zph = "0$h"; END -%]
     <tr>
-     <th>Sunday</th>
-     <th>Monday</th>
-     <th>Tuesday</th>
-     <th>Wednesday</th>
-     <th>Thursday</th>
-     <th>Friday </th>
-     <th>Saturday</th>
-    </tr>
-    <tr>
-        <td><span class="super right">29</span></td>
-        <td><span class="super right">30 Apr</span></td>
-        <td><span class="super right">1 May</span></td>
-        <td><span class="super right">2</span></td>
-        <td><span class="super right">3</span></td>
-        <td><span class="super right">4</span></td>
-        <td><span class="super right">5</span></td>
-    </tr>
-    <tr>
+        <td[%- IF h == th; ' class="today"'; END -%]><button id=button class="[%- IF h == th OR h == nd; 'hide today'; ELSE; 'show'; END -%] hideShowButton target[%- row_count -%]">[&ndash;]</button></td>
+        <td[%- IF h == th; ' class="today"'; END -%]><h4>[%- zph -%]:00 until [%- zph -%]:59</h4></td></tr>
+    <tr class="target target[%- row_count -%]"><td></td><td>
+        <table class=event_show>
+            [%- USE Dumper -%]
+            [%- FOREACH  e = events; start = e.start -%]
+                [%- IF start.search(" ${zph}:") -%]
+                [%- 
+                 desc = e.data.remove("\n").remove(".*DESCRIPTION:").remove("DTEND.*"); 
+                 desc = desc.replace('\\\\\\\n', '|%|NEW_LINE|%|'); 
+                 #desc = desc.replace('\\\\n', '<br/>'); #a.HTML
+                 desc = desc.replace('\\\\n', "\n").replace('"','&#34;');     #a.title
+                 desc = desc.replace('\|\%\|NEW_LINE\|\%\|', '\\\n') 
+                 summary = e.data.remove("\n").remove(".*SUMMARY:").remove("TRANSP:.*").replace("UID:.*");
+                -%]
+            <tr class=event_show>
+                <td>[%- e.start -%]</td>
+                <td>[%- e.end -%]</td>
+                <td><a class=black href="[%- post_action -%]/calendar/edit_entry/[%- e.id -%]" title="[%- desc -%]">[%- summary -%]</a></td>
+            </tr>
+                [%- END -%]
+            [%- END -%]
+        </table>
+     </td></tr>
+   [%- row_count = row_count + 1; END -%]
  </tbody>
 </table>
+[%- END -%]

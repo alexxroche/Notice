@@ -61,12 +61,12 @@ table.cal td {
   [% FOREACH row = cal.rows %]
      <tr>
       <td class="sub">[% woty;%]</td>
-     [% FOREACH col = row; ymd = "$ym$col" zp_col = "0$col" %]
+     [% FOREACH col = row; ymd = "$ym$col" zp_col = "0$col"; zp_m = month; IF month <=9; zp_m = "0$month"; END -%]
         <td[%- IF ( col == d || zp_col == d ) && month == m; ' class="today cv'; month; m; '"'; 
                ELSIF ( events.$ymd.class ); ' class="'; events.$ymd.class; '"'; 
                ELSIF (( col == row.first || col == row.last ) && col != '' ); ' class="sunday we"'; 
-               END -%]>
-        [%- col; yotw = yotw + 1 || '&nbsp;' -%]</td>
+               END -%]><a href="calendar/day/[%- y;zp_m;col -%]">
+        [%- col; yotw = yotw + 1 || '&nbsp;' -%]</a></td>
      [% END %]
      </tr>
         [%- woty = woty + 1 # this fails on 201208 > 201209 -%]
