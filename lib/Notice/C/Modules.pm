@@ -383,7 +383,6 @@ sub main: StartRunmode {
 	page => $opt{debug},
 
 		  });
-    $self->plt;
     return $self->tt_process();
     
 }
@@ -459,7 +458,6 @@ LOCK TABLES `modules` WRITE;
     message => $message,
     page => $page,
           });
-    $self->plt;
     return $self->tt_process();
 
 }

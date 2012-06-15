@@ -2,6 +2,7 @@ package Notice::C::Sales;
 
 use warnings;
 use strict;
+use lib 'lib';
 use base 'Notice';
 use Data::Dumper;
 
@@ -88,29 +89,6 @@ sub setup {
     }
     $runmode=~s/.*\///;
 
-    my $page_loaded = 0;
-    eval {
-        use Time::HiRes qw ( time );
-        $page_loaded = time;
-    };
-    if($@){
-        $page_loaded = time;
-    }
-
-    # we /could/ put this in Notice.pm but then it would be less accurate
-    if($self->param('cgi_start_time')){
-        $self->tt_params({page_load_time => sprintf("Page built in: %.2f seconds", ($page_loaded - $self->param('cgi_start_time')))});
-    }elsif($self->param('page_load_time')){
-        $self->tt_params({page_load_time => sprintf("Page loaded %.2f seconds", ($page_loaded - $self->param('page_load_time')))});
-    }
-
-
-    my $known_as;
-    $known_as = $self->param('known_as')||'';
-    # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/blah/1/ has a $runmode of '1'
-    #     https://localhost/cgi-bin/index.cgi/email/edit_alias/564 is fine
-    # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/ibm_developer@alexx.net rm is the email address
-    $self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $known_as at ". $ENV{REMOTE_ADDR}});
 }
 
 =head2 RUN MODES

@@ -2,6 +2,7 @@ package Notice::C::Prefs;
 
 use warnings;
 use strict;
+use lib 'lib';
 use base 'Notice';
 use Data::Dumper;
 
@@ -40,6 +41,7 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(':all');
+    $self->tt_params({ submenu => \%submenu });
     my $runmode;
     $runmode = ($self->query->self_url);
     $runmode =~s/\/$//;
@@ -66,12 +68,6 @@ sub setup {
     }
     $runmode=~s/.*\///;
 
-    my $known_as;
-    $known_as = $self->param('known_as')||'';
-    # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/blah/1/ has a $runmode of '1'
-    #     https://localhost/cgi-bin/index.cgi/email/edit_alias/564 is fine
-    # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/ibm_developer@alexx.net rm is the email address
-    $self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $known_as at ". $ENV{REMOTE_ADDR}});
 }
 
 =head2 RUN MODES
@@ -113,11 +109,9 @@ sub main: StartRunmode {
     $self->tt_params({
     action  => "$surl/aliases",
     domains => \@domains,
-    submenu => \%submenu,
 	message => $message,
     body    => $body
 		  });
-    $self->plt;
     return $self->tt_process();
 }
 

@@ -81,13 +81,6 @@ sub setup {
         $runmode=~s/.*\///;
     }
     $runmode=~s/.*\///;
-
-    my $known_as;
-    $known_as = $self->param('known_as')||'';
-    # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/blah/1/ has a $runmode of '1'
-    #     https://localhost/cgi-bin/index.cgi/email/edit_alias/564 is fine
-    # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/ibm_developer@alexx.net rm is the email address
-    $self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $known_as at ". $ENV{REMOTE_ADDR}});
 }
 
 =head2 RUN MODES
@@ -579,7 +572,6 @@ sub main : StartRunmode {
     calendars => \@calendars,
     body    => $body
 		  });
-    $self->plt;
     return $self->tt_process();
 }
 
@@ -919,7 +911,6 @@ sub edit_entry : Runmode {
     categories => \@categories,
     body    => $body
           });
-    $self->plt;
     return $self->tt_process();
 
 }
@@ -963,7 +954,6 @@ sub day : Runmode {
         events => \@events,
        ## categories => \@categories,
     });
-    $self->plt;
     return $self->tt_process('Notice/C/Calendar/day.tmpl');
 
 }
@@ -1004,7 +994,6 @@ sub year : Runmode {
         events => \@events,
         wrapper => 1,
     });
-    $self->plt;
     return $self->tt_process('Notice/C/Calendar/sw_year.tmpl');
 
 }
@@ -1044,7 +1033,6 @@ sub new_event : Runmode {
         events => \@events,
         wrapper => 1,
     });
-    $self->plt;
     return $self->tt_process();
 
 }
@@ -1085,7 +1073,6 @@ sub add_todo : Runmode {
         events => \@events,
         wrapper => 1,
     });
-    $self->plt;
     return $self->tt_process();
 
 }

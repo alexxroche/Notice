@@ -2,6 +2,7 @@ package Notice::C::Config;
 
 use warnings;
 use strict;
+use lib 'lib';
 use base 'Notice';
 use Data::Dumper;
 
@@ -66,12 +67,6 @@ sub setup {
     }
     $runmode=~s/.*\///;
 
-    my $known_as;
-    $known_as = $self->param('known_as')||'';
-    # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/blah/1/ has a $runmode of '1'
-    #     https://localhost/cgi-bin/index.cgi/email/edit_alias/564 is fine
-    # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/ibm_developer@alexx.net rm is the email address
-    $self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $known_as at ". $ENV{REMOTE_ADDR}});
 }
 
 =head2 RUN MODES

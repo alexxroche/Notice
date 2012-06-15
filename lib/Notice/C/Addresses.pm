@@ -2,6 +2,7 @@ package Notice::C::Addresses;
 
 use warnings;
 use strict;
+use lib 'lib';
 use base 'Notice';
 
 our $VERSION = 0.01;
@@ -51,22 +52,6 @@ sub setup {
     }
     $runmode=~s/.*\///;
 
-    my $page_loaded = 0;
-    eval {
-        use Time::HiRes qw ( time );
-        $page_loaded = time;
-    };
-    if($@){
-        $page_loaded = time;
-    }
-
-    # we /could/ put this in Notice.pm but then it would be less accurate
-    if($self->param('cgi_start_time')){
-        $self->tt_params({page_load_time => sprintf("Page built in: %.2f seconds", ($page_loaded - $self->param('cgi_start_time')))});
-    }elsif($self->param('page_load_time')){
-        $self->tt_params({page_load_time => sprintf("Page loaded %.2f seconds", ($page_loaded - $self->param('page_load_time')))});
-    }  
-    $self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $self->param('known_as') at ". $ENV{REMOTE_ADDR}});
 }
 
 =head2 RUN MODES

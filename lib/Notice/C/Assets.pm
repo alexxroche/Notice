@@ -30,6 +30,7 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(':all');
+    #$self->tt_params({ submenu => \%submenu });
     my $runmode;
     $runmode = ($self->query->self_url);
     $runmode =~s/\/$//;
@@ -50,9 +51,6 @@ sub setup {
     }
     $runmode=~s/.*\///;
 
-    my $known_as;
-    #$known_as = $self->param('known_as');
-    #$self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $known_as at ". $ENV{REMOTE_ADDR}});
 }
 
 =head2 RUN MODES
@@ -173,7 +171,6 @@ sub main: StartRunmode {
     ac      => \@ac,
     page => $page,
           });
-    $self->plt;
     return $self->tt_process();
     
 }
@@ -365,7 +362,6 @@ sub details: Runmode{
                 title => 'Error - unknown asset',
                 error => $error,
                 message => $message);
-        $self->plt;
         return $self->tt_process();
     }
 
@@ -376,7 +372,6 @@ sub details: Runmode{
          message => $message,
          warning => $warning
     );
-    $self->plt;
     return $self->tt_process();
     
 }
@@ -436,7 +431,6 @@ function goHome(url)
 <input type="button" value="Maybe try going back" onclick="goBack()" />
 <input type="button" value="or searching" onclick="goHome(\'/cgi-bin/index.cgi/assets\')" />'
                 );
-            $self->plt;
             return $self->tt_process();
         }
         # we should only have one entry!
@@ -467,7 +461,6 @@ function goHome(url)
             title => 'Error - unknown asset type',
             error => $error,
             message => $message);
-        $self->plt;
         return $self->tt_process();
     }
 
@@ -599,12 +592,10 @@ function goHome(url)
                         title => 'Error - unknown asset type',                                       
                         error => $error,                       
                         message => $message); 
-                $self->plt;
                 return $self->tt_process();
     }
     #$message='';
     $self->tt_params( submit => $submit, title => 'Asset Data', asid => $as_id, asc => \@asc, message => $message, asd => \%asd);
-    $self->plt;
     return $self->tt_process();
 
 }
@@ -681,7 +672,6 @@ sub list: Runmode{
 
     unless(@assets){
         $self->tt_params( title => 'Error - no such asset', message => "Can't seem to see that asset", error => '1');
-        $self->plt;
         return $self->tt_process();
     }
     
@@ -733,7 +723,6 @@ sub list: Runmode{
         }
     $self->tt_params( assets =>\@assets, asd => \%asd, message => $message, ac => \%ac);
     #if($as_id!~m/^\d+$/){ $self->tt_params( heading => 'Asset List'); }
-    $self->plt;
     return $self->tt_process();
 
 }
@@ -860,7 +849,7 @@ sub define: Runmode {
                     }
 ##### debug to check that we have the data in the right order
 #$self->tt_params({heading=>"Changed/updated the '".$ac->asc_name."' category", ac=>$ac,acd=>\@acd,message=>$message,page=>$page});
-#$self->plt; return $self->tt_process(); exit;
+#return $self->tt_process(); exit;
 ##### end of debug
 
                 }
@@ -878,7 +867,6 @@ sub define: Runmode {
             message => $message,
             page => $page,
                   });
-            $self->plt;
             return $self->tt_process();
 
         }
@@ -891,7 +879,6 @@ sub define: Runmode {
             message => $message,
             page => $page,
                   });
-            $self->plt;
             return $self->tt_process();
         }
     }elsif(defined $q->param){
@@ -918,7 +905,6 @@ sub define: Runmode {
     message => $message,
     page => $page,
           });
-    $self->plt;
     return $self->tt_process();
 }
 

@@ -76,7 +76,6 @@ sub main: StartRunmode {
             no_wrapper => $no_wrapper,
             message => $message,
         });
-        $self->plt;
         return $self->tt_process();
     }
     if($q->param('debug')){
@@ -93,7 +92,6 @@ sub main: StartRunmode {
         unless(-d "$fullpath"){ 
             $message = "Can't find $fullpath\n";
             $self->tt_params({ message => $message });
-            $self->plt;
             return $self->tt_process();
         }
         my @files;
@@ -123,7 +121,6 @@ sub main: StartRunmode {
         no_wrapper => $no_wrapper,
         page => $message,
               });
-        $self->plt;
         return $self->tt_process();
     }
     my $ef_acid = '0';
@@ -163,7 +160,6 @@ $message .= "<br />We have no bananas today<br />";
     no_wrapper => $no_wrapper,
 	message => $message,
 		  });
-    $self->plt;
     return $self->tt_process();
     
 }

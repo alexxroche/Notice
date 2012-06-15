@@ -63,7 +63,6 @@ sub main: StartRunmode {
             no_wrapper => $no_wrapper,
             message => $message,
         });
-        $self->plt;
         return $self->tt_process();
     }
     if($q->param('debug')){
@@ -107,7 +106,6 @@ sub main: StartRunmode {
     no_wrapper => $no_wrapper,
 	message => $message,
 		  });
-    $self->plt;
     return $self->tt_process();
     
 }

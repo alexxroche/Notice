@@ -2,6 +2,7 @@ package Notice::C::Security;
 
 use warnings;
 use strict;
+use lib 'lib';
 use base 'Notice';
 my %submenu = (
    '1.0' => [
@@ -54,7 +55,6 @@ sub main: StartRunmode {
        $username = $self->authen->username;
     if($username && $username ne 'a@b.com'){
         $self->tt_params({ warning => 'I will not warn you again! You are not meant to be in here.' });
-        $self->plt;
         return $self->tt_process('sec_error.tmpl');
     }
 
@@ -102,7 +102,6 @@ sub main: StartRunmode {
     };
 
     $self->tt_params({sec_stats => \@sec_stats, acl => \@acl, message => $message, ppl => \@people });
-    $self->plt;
     return $self->tt_process();
 }
 

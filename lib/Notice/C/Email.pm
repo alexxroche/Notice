@@ -39,6 +39,7 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(':all');
+    $self->tt_params({ submenu => \%submenu });
     my $runmode;
     $runmode = ($self->query->self_url);
     $runmode =~s/\/$//;
@@ -65,12 +66,6 @@ sub setup {
     }
     $runmode=~s/.*\///;
 
-    my $known_as;
-    $known_as = $self->param('known_as')||'';
-    # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/blah/1/ has a $runmode of '1'
-    #     https://localhost/cgi-bin/index.cgi/email/edit_alias/564 is fine
-    # BUG https://localhost/cgi-bin/index.cgi/email/edit_alias/ibm_developer@alexx.net rm is the email address
-    $self->tt_params({title => 'Notice CRaAM ' . $runmode ." - $known_as at ". $ENV{REMOTE_ADDR}});
 }
 
 =head2 RUN MODES
@@ -122,11 +117,9 @@ sub main: StartRunmode {
     $self->tt_params({
     action  => "$surl/aliases",
     domains => \@domains,
-    submenu => \%submenu,
 	message => $message,
     body    => $body
 		  });
-    $self->plt;
     return $self->tt_process();
 }
 
@@ -143,7 +136,6 @@ sub aliases: Runmode{
     # NTS need to an add_alias table
     my ($self) = @_;
     my ($message,$body,%opt);
-    $self->tt_params({submenu => \%submenu});
     
     my $surl;
        $surl = ($self->query->self_url);
@@ -189,7 +181,6 @@ sub aliases: Runmode{
                     # we could do a foreach but for now
                     $opt{error} .= "Just one destination address for now";
                     $self->tt_params({ error => $opt{error} });
-                    $self->plt;
                     return $self->tt_process();
                 }elsif($to=~m/^|/){ #we have a pipe
                     $create_data{'ea_touser'} = $to;
@@ -210,7 +201,6 @@ sub aliases: Runmode{
                  #if($this_domain[0]->{_column_data}{do_id} == $create_data{'doid'}){
                  if($create_data{'doid'} && int($this_doid) == int($create_data{'doid'})){
                     $self->tt_params({ error => 'I think we will skip the email loop today'});
-                    $self->plt;
                     return $self->tt_process();
                  }else{
                     $opt{'from_domain'} = $this_domain[0]->{_column_data}{do_name};
@@ -262,7 +252,6 @@ sub aliases: Runmode{
 
     unless($opt{do_name} && $opt{do_name} ne ''){
         $self->tt_params({ error => $error });
-        $self->plt;
         return $self->tt_process();
     }
 
@@ -285,7 +274,6 @@ sub aliases: Runmode{
     body    => $body,
     alias   => \@alias,
           });
-    $self->plt;
     return $self->tt_process();
 
 }
@@ -299,7 +287,6 @@ this lets you update the aliases additional data
 sub edit_alias: Runmode{
     my ($self) = @_;
     my ($message,$body,%opt,%ref);
-    $self->tt_params({submenu => \%submenu});
 
     my $q = $self->query;
     if($q->param('id')){
@@ -348,7 +335,6 @@ sub edit_alias: Runmode{
     # If we don't have any data then this is an error
     unless($ref[0]->{_column_data}{ea_touser}){
         $self->tt_params({error => 'Unknown Email Alias'});
-        $self->plt;
         return $self->tt_process('site_wrapper.tmpl');
     }        
 
@@ -358,7 +344,6 @@ sub edit_alias: Runmode{
     message => $message,
     body    => $body,
           });
-    $self->plt;
     return $self->tt_process();
 
 }
@@ -386,11 +371,9 @@ sub imap: Runmode{
 
     $self->tt_params({
     error   => $opt{error},
-    submenu => \%submenu,
     message => $message,
     body    => $body,
           });
-    $self->plt;
     return $self->tt_process();
 }
 

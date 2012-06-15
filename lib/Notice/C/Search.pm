@@ -2,6 +2,7 @@ package Notice::C::Search;
 
 use warnings;
 use strict;
+use lib 'lib';
 use base 'Notice';
 my %submenu = (
    '1.1' => [
@@ -12,8 +13,7 @@ my %submenu = (
 );
 
 
-
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 =head1 NAME
 
@@ -41,6 +41,7 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(':all');
+    $self->tt_params({ submenu => \%submenu });
     my $runmode;
     $runmode = ($self->query->self_url);
     $runmode =~s/\/$//;
@@ -60,10 +61,6 @@ sub setup {
         $runmode =~s/\/$id[^\/]*$//;
     }
     $runmode=~s/.*\///;
-
-    my $known_as;
-    $known_as = $self->param('known_as');
-    $self->tt_params({title => 'Notice CRaAM ' . $runmode ." ". $known_as ." at ". $ENV{REMOTE_ADDR}});
 }
 
 =head2 RUN MODES
@@ -90,7 +87,6 @@ sub index: StartRunmode {
     $self->tt_params({
 	message => 'Welcome to the Search page!',
 		  });
-    $self->plt;
     return $self->tt_process();
     
 }
@@ -123,7 +119,6 @@ sub ppl: Runmode {
     $self->tt_params({
     message => "I'm getting on a bit and can't remember that person. Sorry sir.",
           });
-    $self->plt;
     return $self->tt_process();
 }
     
