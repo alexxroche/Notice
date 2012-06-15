@@ -446,22 +446,24 @@ sub cgiapp_prerun {
     # we /could/ look up https://$ENV{hostname}/css but I think that I want 
     #  if( -f "$css_path/file.css")
     my $css_location_modifier='./';
-    my $css_path = $CFG{www_path} . "/css";
-    my $user_css = 'main.css';
-    # NOTE !important: (not always ) ef_acid == ac_id and for CSS we should use the ef_acid
-    # unless $self->param('acid_css') is set to over-ride this
-    {
-       no warnings; # about "Use of uninitialized value" WHO CARES!
-       if(-f "$css_path/${page}_${pe_id}_${acid}.css"){ $user_css = $page.'_'.${pe_id}.'_'.${acid}.'.css';}
-    elsif(-f "$css_path/${pe_id}_${acid}.css"){ $user_css = ${pe_id}.'_'.${acid}.'.css';}
-    elsif(-f "$css_path/css/${acid}.css"){ $user_css = "${acid}.css";}
-    elsif(-f "$css_path/${page}_${pe_id}_${acid}.css"){$user_css = $page.'_'.${pe_id}.'_'.${acid}.'.css';}
-    elsif(-f "$css_path/${pe_id}_${acid}.css"){ $user_css = ${pe_id}.'_'.${acid}.'.css';}
-    elsif(-f "$css_path/${acid}.css"){ $user_css = "${acid}.css";}
-    }
+    if(defined $CFG{www_path}){
+        my $css_path = $CFG{www_path} . "/css";
+        my $user_css = 'main.css';
+        # NOTE !important: (not always ) ef_acid == ac_id and for CSS we should use the ef_acid
+        # unless $self->param('acid_css') is set to over-ride this
+        {
+           no warnings; # about "Use of uninitialized value" WHO CARES!
+           if(-f "$css_path/${page}_${pe_id}_${acid}.css"){ $user_css = $page.'_'.${pe_id}.'_'.${acid}.'.css';}
+        elsif(-f "$css_path/${pe_id}_${acid}.css"){ $user_css = ${pe_id}.'_'.${acid}.'.css';}
+        elsif(-f "$css_path/css/${acid}.css"){ $user_css = "${acid}.css";}
+        elsif(-f "$css_path/${page}_${pe_id}_${acid}.css"){$user_css = $page.'_'.${pe_id}.'_'.${acid}.'.css';}
+        elsif(-f "$css_path/${pe_id}_${acid}.css"){ $user_css = ${pe_id}.'_'.${acid}.'.css';}
+        elsif(-f "$css_path/${acid}.css"){ $user_css = "${acid}.css";}
+        }
 
-    $self->param('css' => $user_css);
-    $self->tt_params({'css' => $user_css});
+        $self->param('css' => $user_css);
+        $self->tt_params({'css' => $user_css});
+    }
 }
 
 =head3 cgiapp_postrun
@@ -482,6 +484,17 @@ sub cgiapp_postrun {
         #Notice::Security->import();
         $self->Notice::Security::postrun_callback();
     };
+}
+
+=head3 tt_pre_process
+
+Globally tinkering with the templates just before they are processed
+
+=cut
+
+sub tt_pre_process {
+  my $self = shift;
+     $self->plt;
 }
 
 =head3 tt_post_process
