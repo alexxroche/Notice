@@ -368,6 +368,8 @@ sub prerun_callback {
             my $cal = $1;
             $cal=~s/\%2F/\//g;
             $desc = 'cal event add ' . $cal;
+    }elsif($mod=~m/^([^?]+)\?.*(add|edit|update)=(\w+)/i){
+            $desc = "$1 $crm $2 $id";
     }else{
         warn "mod: $mod crm: $crm id: $id";
         $desc = ucfirst($mod) . ' ' . $crm . ' ' .$id;
