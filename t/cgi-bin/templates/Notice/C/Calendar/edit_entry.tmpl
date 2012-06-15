@@ -1,4 +1,6 @@
-[% WRAPPER 'site_wrapper.tmpl' %]
-[% event_action = 'edit' %]
+[%- js.hide = 1; WRAPPER 'site_wrapper.tmpl' %]
+[%- IF headmsg -%]
+ <span class="mention then hide">[%- headmsg -%]</span>
+[%- END -%]
 [% INCLUDE 'Notice/C/Calendar/event_landscape.tmpl' %]
 [% END %]

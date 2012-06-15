@@ -6,7 +6,7 @@
 
   <link href="/css/jquery-ui-pepper-grinder.css" type="text/css" rel="Stylesheet" />
   <script src="/js/jquery.min.js"></script>
-  <script src="/js/jquery-ui.min.js"></script -->
+  <script src="/js/jquery-ui.min.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
       $('#tabs').tabs();
@@ -17,19 +17,23 @@
       <li><a href="#tab-1">Month</a></li>
       <li><a href="#tab-2">Year</a></li>
       <li><a href="#tab-3">Add Event</a></li>
+      <li><a href="#tab-4">Todo</a></li>
     </ul>
     <div id="tab-1">
      <table><tr><td>
     [%- INCLUDE 'Notice/C/Calendar/month.tmpl' -%]
     </td><td>
-    [% INCLUDE 'Notice/C/Calendar/events.tmpl' %]
+    [%- INCLUDE 'Notice/C/Calendar/events.tmpl' -%]
     </td></table>
     </div>
     <div id="tab-2">
     [% INCLUDE 'Notice/C/Calendar/year.tmpl' %]
     </div>
     <div id="tab-3">
-    [% INCLUDE 'Notice/C/Calendar/event_landscape.tmpl' -%]
-    [% #INCLUDE 'Notice/C/Calendar/event_portrate.tmpl' %]
+    [%- INCLUDE 'Notice/C/Calendar/event_landscape.tmpl' -%]
+    [%- #INCLUDE 'Notice/C/Calendar/event_portrate.tmpl' %]
+    </div>
+    <div id="tab-4">
+    [%- INCLUDE 'Notice/C/Calendar/todo.tmpl' -%]
     </div>
   </div>

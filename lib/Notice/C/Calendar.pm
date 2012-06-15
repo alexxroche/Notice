@@ -3,6 +3,7 @@ package Notice::C::Calendar;
 use strict;
 require 5.006;
 my %opt;
+$opt{D}=0;
 use lib 'lib';
 # NOTE perl -cw was throwing errors ever since I moved from 5.6 to 5.14
 # I tried all of the following, (and much more) but none helped.. then I realised that I needed to add the line above
@@ -119,13 +120,9 @@ sub main : StartRunmode {
     }
     our $user_details;
     if($pe_id=~m/^\d+$/){
-        $user_details = $self->resultset('People')->search(
-                {pe_id => {'=', $pe_id}},{}
-         );
+        $user_details = $self->resultset('People')->search({pe_id => $pe_id});
     }else{
-        $user_details = $self->resultset('People')->search(
-                {pe_email => {'=', $username}},{}
-         );
+        $user_details = $self->resultset('People')->search({pe_email => $username});
     }
     if($self->param('sid') && $self->param('sid')=~m/^([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/i){
         $uid = $1; # we are using a UUID for each ics
@@ -235,11 +232,12 @@ sub main : StartRunmode {
         my $c = Data::ICal->new();
         my $vevent = Data::ICal::Entry::Event->new();
             
-        my $title='';
+        my $summary='';
         my $desc='';
         my $cal='work';
-        if($q->param('cal')){ $cal = $q->param('cal'); }
-        my $path ='/cal/' . $ac_id . '/' . $pe_id . '/' . $cal;
+        my $path='';
+        if($q->param('cal')){ $cal = $q->param('cal'); $path = $cal;}
+        else{ $path ='/cal/' . $ac_id . '/' . $pe_id . '/' . $cal; }
         unless($uid && $uid=~m/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i){
             my $ug = new Data::UUID;
             $uid = $ug->create_str();
@@ -256,11 +254,9 @@ sub main : StartRunmode {
         my ($ey,$em,$ed);
         my $description = $q->param('desc'); # because Data::ICal and mysql don't play well together
         $description =~s/\n/=0D=0A/g;
-        if($q->param('title')){ $vevent->add_properties(summary => $q->param('title')); }
+        if($q->param('summary')){ $vevent->add_properties(summary => $q->param('summary')); }
+        else{ warn "we have NO summary, which is BAD!"; }
         if($q->param('where')){ $vevent->add_properties(location => $q->param('where')); }
-        # NTS we may have to fix carridge returns in desc to protect against SQL interpolation
-        #if($q->param('desc')){  $vevent->add_properties(description => $description ); }
-       # if($q->param('desc')){  $vevent->add_property( description => [ $description, { 'ENCODING' => 'QUOTED-PRINTABLE' } ] ); }
         if($q->param('desc')){  $vevent->add_properties(description => $q->param('desc')); }
         my $dtstart = '';
         if($q->param('start_date')){
@@ -304,7 +300,6 @@ sub main : StartRunmode {
                     );
                }
             }
-
             # $vevent->add_properties(dtenart => sprintf( '%04d%02d%02d', Decode_Date_US2($q->param('start_date'))));
         }
         $create_data{'end'} = $end;         # ?
@@ -448,7 +443,7 @@ sub main : StartRunmode {
                 type => {'=', 'vevent'},
                 cid => {'=', $cid},
                 }, {})->first;
-        if(defined($rs) && $q->param('cid') && $rs->cid == $q->parap('cid')){
+        if(defined($rs) && $q->param('cid') && $rs->cid == $q->param('cid')){
                  $create_data{cid} = $rs->cid;
                  # probably just need an update here
                  $rs = $self->resultset('Calendar')->update_or_create( \%create_data );
@@ -485,6 +480,7 @@ sub main : StartRunmode {
     $events{soon} .= '<table class="event_show">';
     $opt{row_count}{max} = 10; # again pull from config in the DB
 
+    my %count; #N.B. do not use %opt to store these values!
     while(my $entry = $cal_entries->next){
         #$events{yesterday} = '<tr class="event_show"><th>Start</th><th>End</th><th>Summary</th></tr>';
         if(my $begin = $entry->start){
@@ -509,12 +505,12 @@ sub main : StartRunmode {
               if( DateTime->compare( $DateTime_today, DateTime->new(year => $fy, month => $fm, day => ($fd+1), time_zone => "$tzid") ) >= 1 &&
                   DateTime->compare( $DateTime_today, DateTime->new(year => $by, month => $bm, day => $bd, time_zone => "$tzid") ) >= 1 
                 ){
-                    $opt{row_count}{yesterday}++;
-                    if( $opt{row_count}{yesterday} >  $opt{row_count}{max} || ( $opt{row_count_yesterday} && ( 
-                            $opt{row_count}{yesterday} > $opt{row_count_yesterday} )
+                    $count{row_count}{yesterday}++;
+                    if( $count{row_count}{yesterday} >  $opt{row_count}{max} || ( $opt{row_count_yesterday} && ( 
+                            $count{row_count}{yesterday} > $opt{row_count_yesterday} )
                     ))
                     {   
-                        $opt{yesterday_additional}++;
+                        $count{yesterday_additional}++;
                     }else{
                         $events{yesterday} .= '<tr class="event_show"><td>' .$begin . "</td><td>" . $finish . "</td>";
                         $events{yesterday} .= '<td><a class="black" href="calendar/edit_entry/';
@@ -524,9 +520,9 @@ sub main : StartRunmode {
                     }
               #} elsif( DateTime->compare(DateTime->today(), DateTime->new($begin) ) ){
               }elsif( DateTime->compare($DateTime_today, DateTime->new(year => $by, month => $bm, day => $bd, time_zone => "$tzid") ) == -1 ){
-                $opt{row_count}{soon}++;
-                if($opt{row_count}{soon} > $opt{row_count}{max} || ( $opt{row_count_soon} && ( $opt{row_count}{soon} > $opt{row_count_soon} ) )){
-                    $opt{soon_additional}++;
+                $count{row_count}{soon}++;
+                if($count{row_count}{soon} > $opt{row_count}{max} || ( $opt{row_count_soon} && ( $count{row_count}{soon} > $opt{row_count_soon} ) )){
+                    $count{soon_additional}++;
                 }else{
                     $events{soon} .= '<tr class="event_show"><td>' . $begin . "</td><td>" . $finish . "</td>";
                     $events{soon} .= '<td><a class="black" href="calendar/edit_entry/';
@@ -535,33 +531,37 @@ sub main : StartRunmode {
                     $events{soon} .= @{$this_cal->entries}[0]->property('summary')->[0]->value ."</a></td></tr>";
                 }
               }else{
-                $opt{row_count}{today}++;
-                if($opt{row_count}{today} > $opt{row_count}{max} || ( $opt{row_count_today} && ( $opt{row_count}{today} > $opt{row_count_today} ) )){
-                    $opt{today_additional}++;
+                $count{row_count}{today}++;
+                if($count{row_count}{today} > $opt{row_count}{max} || ( $opt{row_count_today} && ( $count{row_count}{today} > $opt{row_count_today} ) )){
+                    $count{today_additional}++;
                 }else{   
                   $events{today} .= '<tr class="event_show"><td>' . $begin . "</td><td>" . $finish . "</td>";
                   $events{today} .= '<td><a class="black" href="calendar/edit_entry/';
                   $events{today} .= $entry->cid . '" title="';
                   $events{today} .= @{$this_cal->entries}[0]->property('description')->[0]->value .'">';
-                  $events{today} .= @{$this_cal->entries}[0]->property('summary')->[0]->value ."</a></td></tr>";
+                  if(@{$this_cal->entries}[0]->property('summary')){
+                    $events{today} .= @{$this_cal->entries}[0]->property('summary')->[0]->value ."</a></td></tr>";
+                  }else{
+                    $events{today} .= 'EVENT </a></td></tr>';
+                  }
                 }
               }
             }
         }
     }
-    if($opt{yesterday_additional}){ 
-        $events{yesterday} .= '<tr class="event_show"><td colspan="3">and ' . $opt{yesterday_additional} . ' additional event';
-        if($opt{yesterday_additional} >= 2){ $events{yesterday} .= 's'; }
+    if($count{yesterday_additional}){ 
+        $events{yesterday} .= '<tr class="event_show"><td colspan="3">and ' . $count{yesterday_additional} . ' additional event';
+        if($count{yesterday_additional} >= 2){ $events{yesterday} .= 's'; }
         $events{yesterday} .= '</td></tr>';
     }
-    if($opt{today_additional}){ 
-        $events{today} .= '<tr class="event_show"><td colspan="3">and ' . $opt{today_additional} . ' additional event';
-        if($opt{today_additional} >= 2){ $events{today} .= 's'; }
+    if($count{today_additional}){ 
+        $events{today} .= '<tr class="event_show"><td colspan="3">and ' . $count{today_additional} . ' additional event';
+        if($count{today_additional} >= 2){ $events{today} .= 's'; }
         $events{today} .= '</td></tr>';
     }
-    if($opt{soon_additional}){ 
-        $events{soon} .= '<tr class="event_show"><td colspan="3">and ' . $opt{soon_additional} . ' additional event';
-        if($opt{soon_additional} >= 2){ $events{soon} .= 's'; }
+    if($count{soon_additional}){ 
+        $events{soon} .= '<tr class="event_show"><td colspan="3">and ' . $count{soon_additional} . ' additional event';
+        if($count{soon_additional} >= 2){ $events{soon} .= 's'; }
         $events{soon} .= '</td></tr>';
     }
     $events{yesterday} .= '</table>';
@@ -594,7 +594,8 @@ sub main : StartRunmode {
 
 sub edit_entry : Runmode {
     my ($self) = @_;
-    my ($message,$body,@calendars);
+    my ($message,$body,@calendars,$action_type);
+    $action_type = 'New';
     my $q = $self->query;
     my $surl;
        $surl = ($self->query->self_url);
@@ -611,24 +612,24 @@ sub edit_entry : Runmode {
     }elsif($self->session->param('pe_id')=~m/^\d+$/){
       $pe_id = $self->session->param('pe_id');
     }
-    if($self->param('sid') && $self->param('sid')=~m/\w+-\w+-\w+/){
-      $uid = $self->param('sid');
-    }else{
-      $uid = $self->param('id');
+    # N.B. iCalendar has UID, Notice calls it ics for clarity
+    if($q->param('ics') && $q->param('ics')=~m/\w+-\w+-\w+/){
+        $uid = $q->param('ics');
     }
     my $cid = 0;
-    if($self->param('id') && $self->param('id'=~m/^\d+$/)){
-        $cid = $self->param('id');
+    if($q->param('cid') && $q->param('cid')=~m/^\d+$/){
+        $cid = $q->param('cid');
+    }elsif($self->param('id') && $self->param('id')=~m/^(\d+)$/){
+        $cid = $1; # calender id, i.e. sql auto_increment value
+    }elsif($self->param('sid') && $self->param('sid')=~m/^(\d+)$/){
+        $cid = $1; # calender id, i.e. sql auto_increment value
     }
+
     our $user_details;
     if($pe_id=~m/^\d+$/){
-        $user_details = $self->resultset('People')->search(
-                {pe_id => {'=', $pe_id}},{}
-         );
+        $user_details = $self->resultset('People')->search({pe_id => $pe_id});
     }else{
-        $user_details = $self->resultset('People')->search(
-                {pe_email => {'=', $username}},{}
-         );
+        $user_details = $self->resultset('People')->search({pe_email => $username});
     }
     if($user_details && defined($opt{'pe_acid'}) && $opt{pe_acid}=~m/\d+/){
          while( my $ud = $user_details->next){
@@ -641,18 +642,211 @@ sub edit_entry : Runmode {
     if($self->param('ef_acid')){ $ac_id = $self->param('ef_acid'); }
     elsif($self->param('ac_id')){ $ac_id = $self->param('ac_id'); }
 
-
-    if ( $q->param('update_event') && $q->param('update_event') eq "Update" ) {
-        # NTS you are here adding the "update" function
+    use Data::ICal;
+    use Data::ICal::Entry::Event;
+    use Date::Calc qw/Add_Delta_Days Decode_Date_US2/;
+    use Data::UUID;
+    use DateTime::TimeZone;
+    use DateTime;
+    my $zulu = DateTime->now( time_zone => 'UTC' )->strftime("%Y%m%dT%H%M%SZ");
+    
+    my $tzid='Europe/London'; # again this default should be from the DB
+    my $tz_is_set =0; #i.e. we are using the default
+    if($q->param('tz')){
+        $tzid = $q->param('tz');
+        my $tz_is_set =1;
+        #warn "652:TZ set from form $tzid";
+    }elsif($q->param('auto_tz')){
+        $tzid = $q->param('auto_tz');
+        warn "655:auto TZ $tzid";
     }
 
+    if ( $q->param('update_event') && $q->param('update_event') eq "Update" ) {
+        # NTS we should let them know that this has been updated with a fading warning message, or something
+
+        my $c = Data::ICal->new();
+        my $vevent = Data::ICal::Entry::Event->new();
+            
+        my $summary='';
+        $summary= $q->param('summary');
+        my $desc='';
+        $desc= $q->param('desc');
+        my $cal='work';
+        if($q->param('cal')){ $cal = $q->param('cal'); }
+        $cal=~s#//#/#g;
+        $vevent->add_properties( 
+            uid => $uid,
+            'last-modified' => $zulu,
+            dtstamp => $zulu,
+            'x-notice-path' => $cal
+        );
+        my %create_data = ( modified => \'NOW()' );   #this works
+        my $end = $q->param('end_date');
+        my ($ey,$em,$ed);
+        my $description = $q->param('desc'); # because Data::ICal and mysql don't play well together
+        $description =~s/\n/=0D=0A/g;
+        if($q->param('summary')){ $vevent->add_properties(summary => $q->param('summary')); }
+        if($q->param('where')){ $vevent->add_properties(location => $q->param('where')); }
+        if($q->param('desc')){  $vevent->add_properties(description => $q->param('desc')); }
+        my $dtstart = '';
+        if($q->param('start_date')){
+            $dtstart = sprintf( '%04d%02d%02d', Decode_Date_US2($q->param('start_date')));
+            $create_data{'start'} = sprintf( '%04d-%02d-%02d', Decode_Date_US2($q->param('start_date')));
+            if(defined($q->param('all_day'))){
+                        # DTSTART;VALUE=DATE:20120524        ; local date (all day)
+                $vevent->add_property( dtstart => [ $dtstart, { VALUE => 'DATE' } ] );
+            }else{
+               my $dtstart_time = '';
+                # there has got to be a my $hh_mm_ss = parse_time($q->param('start_time'));
+               if(defined($q->param('start_time')) && $q->param('start_time')=~m/\d{1,2}.?\d{1,2}/){
+                  $dtstart_time = $q->param('start_time');
+                  chomp($dtstart_time);
+                  $dtstart_time =~s/h/:/i; # some write times as 16h15
+                  # must be a better way to get hhmmss from '7:35 PM'
+                  my $is_pm = $dtstart_time; $is_pm=~s/.* //;
+                  if($is_pm && $is_pm ne $dtstart_time){ $dtstart_time=~s/$is_pm$//; }
+                  my ($st_h,$st_m,$st_s) = split(/:/, $dtstart_time);
+                  if( (defined $st_s && $st_s=~m/\d/ ) && (!defined($st_m) || $st_m eq '') ){
+                        $st_m = $st_s; $st_s = '00';
+                  }
+                  $st_m=~s/\s*$//;
+                  if($is_pm=~m/pm/i){ $st_h+=12; }              # really?
+                  if($st_h > 23 || $st_h <= 0){ $st_h= '00'; } # this might go wrong
+                  elsif($st_h <= 9 ){ $st_h= '0' . $st_h; }
+                  unless(defined($st_s) && $st_s=~m/^\d{2}$/){ $st_s = '00'; }
+                  $create_data{'start'} .= " $st_h:$st_m:$st_s";
+                  $dtstart_time = $st_h . $st_m . $st_s;
+                  $dtstart_time =~s/\s*$//;
+               }
+               if(defined($tzid)){
+                   if($tzid eq 'UTC' || $tzid eq 'Europe/London'){ # we should check if $tzid == UTC+0000
+                        # DTSTART:19970714T173000Z           ;UTC datetime
+                        $vevent->add_property( dtstart => "${dtstart}T${dtstart_time}Z");
+                    }else{
+                        # DTSTART;TZID=US-Eastern:19970714T133000    ;Local time and time zone reference
+                        $dtstart_time=~s/^(\d)/T$1/;
+                        $vevent->add_property( dtstart => [ "$dtstart$dtstart_time", { TZID => "$tzid" } ] );
+                    }
+               }else{
+                    warn "CHANGING $tzid to UTC!!";
+                    $tzid = 'Europe/London'; #UTC
+                    $vevent->add_property(
+                         # DTSTART:19970714T133000            ;Local datetime
+                            dtstart => "${dtstart}T$dtstart_time"
+                    );
+               }
+            }
+            # $vevent->add_properties(dtenart => sprintf( '%04d%02d%02d', Decode_Date_US2($q->param('start_date'))));
+        }
+        $create_data{'end'} = $end;         # ?
+        if($q->param('busy')){ $vevent->add_properties(TRANSP => 'OPAQUE');}
+        else{ $vevent->add_properties(TRANSP => 'TRANSPARENT');}
+        if($q->param('cat')){ $vevent->add_properties(CATEGORIES => $q->param('cat'));} #why is this not working?
+
+        my $dtend = sprintf( '%04d%02d%02d', Decode_Date_US2($q->param('end_date')));
+        $create_data{'end'} = sprintf( '%04d-%02d-%02d', Decode_Date_US2($q->param('end_date')));
+            if(defined($q->param('all_day'))){
+                        # DTSTART;VALUE=DATE:20120524        ; local date (all day)
+                if($dtend eq $dtstart){ $dtend+=1; } # which makes some sense
+                $vevent->add_property( dtend => [ $dtend, { VALUE => 'DATE' } ] );
+            }else{  
+               my $dtend_time = '';
+               if(defined($q->param('end_time')) && $q->param('end_time')=~m/\d{1,2}.?\d{1,2}/){
+                  $dtend_time = $q->param('end_time');
+                  chomp($dtend_time);
+                  $dtend_time =~s/h/:/i; # some write times as 16h15
+                  # must be a better way to get hhmmss from '7:35 PM'
+                  my $is_pm = $dtend_time; $is_pm=~s/.* //;
+                  if($is_pm && $is_pm ne $dtend_time){ $dtend_time=~s/$is_pm$//; }
+                  my ($en_h,$en_m,$en_s) = split(/:/, $dtend_time);
+                  if( (defined $en_s && $en_s=~m/\d/ ) && (!defined($en_m) || $en_m eq '') ){
+                        $en_m = $en_s; $en_s = '00';
+                  }
+                  $en_m=~s/\s*$//;
+                  if($is_pm=~m/pm/i){ $en_h+=12; }              # really?
+                  if($en_h > 23 || $en_h <= 0){ $en_h= '00'; } # this might go wrong
+                  elsif($en_h <= 9 ){ $en_h= '0' . $en_h; }
+                  unless($en_s && $en_s=~m/^\d{2}$/){ $en_s = '00'; }
+                  $create_data{'end'} .= " $en_h:$en_m:$en_s";
+                  $dtend_time = $en_h . $en_m . $en_s;
+                  $dtend_time =~s/\s*$//;
+               }
+               if(defined($tzid)){
+                   if($tzid eq 'UTC' || $tzid eq 'Europe/London'){ # we should check if $tzid == UTC+0000
+                        # DTSTART:19970714T173000Z           ;UTC datetime
+                        $vevent->add_property( dtend => "${dtend}T${dtend_time}Z");
+                    }else{
+                        # DTSTART;TZID=US-Eastern:19970714T133000    ;Local time and time zone reference
+                        $dtend_time=~s/^(\d)/T$1/;
+                        $vevent->add_property( dtend => [ "$dtend$dtend_time", { TZID => $tzid } ] );
+                    }
+               }else{
+                    $vevent->add_property(
+                         # DTSTART:19970714T133000            ;Local datetime
+                            dtend => "{$dtend}T$dtend_time"
+                    );  
+               }
+            }
+        my $rs = $self->resultset('Calendar')->search({ type => 'vevent', cid => $cid })->first;
+        if(defined($rs) && $q->param('cid') && $rs->ics eq $q->param('ics')){
+
+        our $created_datetime = $zulu;
+        eval {
+            $created_datetime = $rs->data;
+            $created_datetime =~s/.*CREATED:(\d+T\d|).*/$1/s;
+            unless($created_datetime=~m/^\d+T\d+Z$/){ $created_datetime = $zulu; }
+            # we could create a new calendat object and extract the datetime 
+            # from it using $vevent... or just use a regexp, (and this _is_perl)
+            #
+            # update: that IS what we should do, so that we can compare each of the data lines and if none have changed it reduces the update
+            # If they have then we add the new data AND add all of the data that has NOT changed, (or we lose it!)
+            my $this_data = $rs->data; #the old data from the database
+            use Data::ICal;
+            my $this_cal = Data::ICal->new(data => $this_data); #old data
+            if($this_cal){ #as long as it parses we still get an entry, so the user can edit blank entries
+                # should be a foreach in here
+                foreach my $erow (keys %{ @{$this_cal->entries}[0]->properties }){
+                    unless($q->param($erow)){
+                        warn $erow . " was " . @{$this_cal->entries}[0]->property("$erow")->[0]->value if $opt{D}>=5;
+                    }
+                }
+                 #warn "setting categories to:" . @{$this_cal->entries}[0]->property('categories')->[0]->value;
+                 my $this_cat = @{$this_cal->entries}[0]->property('categories')->[0]->value;
+                 unless($q->param('cat')){ $vevent->add_properties(CATEGORIES => $this_cat);}
+            }
+        };
+        if($@){ warn $@; }
+        
+        $vevent->add_property( created => $created_datetime ); 
+        $c->add_entry($vevent);
+
+        $create_data{'cid'} = $cid;
+        $create_data{'path'} = $cal;
+        $create_data{'ics'} = $uid;
+        $create_data{'version'} = '2.0';
+        $create_data{'data'} = $c->as_string;
+        $create_data{'added_by'} = $pe_id;
+
+            $create_data{cid} = $rs->cid;
+            $rs = $self->resultset('Calendar')->update_or_create( \%create_data );
+            my $new_cid = $rs->id;
+            $self->tt_params( headmsg => qq |Event updated! <a href='/cgi-bin/index.cgi/calendar/edit_event/$new_cid/'>Event updated!</a>|);
+        }else{
+            $self->tt_params({ warning => qq |Event failed to update!|});
+        }
+    } # end of "if update"
+
+    $message = '';
+    $body .=qq ||;
+
+    #my $cal_entries = $self->resultset('Calendar')->search(
 
     my @event_rs = $self->resultset('Calendar')->search({
-            added_by => {'=', $pe_id},
-            type => {'=', 'vevent'},
+            added_by => $pe_id,
+            type => 'vevent',
             -or => [
-                cid => {'=', $cid},
-                ics => {'like', $uid},
+                cid => $cid,
+                ics => $uid,
             ],   
                 },{ row => 1}
          )->first;
@@ -660,46 +854,56 @@ sub edit_entry : Runmode {
     use Data::ICal;
     use Data::Dumper;
     my $this_data = $event_rs[0]->{_column_data}{data};
-    $events{data} = $this_data;
+    $events{data} = $this_data if $opt{D}>=1;
     
     #$message = Dumper(\$event_rs);
     my $c = Data::ICal->new(data => $this_data);
     if($this_data && $c->entries){ #as long as it parses we still get an entry, so the user can edit blank entries
+        $events{ics} = $event_rs[0]->{_column_data}{ics};
+        $events{cid} = $event_rs[0]->{_column_data}{cid};
         foreach my $entry ( @{$c->entries} ){
-            $events{title} = $entry->property('summary')->[0]->value;
+            #$events{title} = $entry->property('summary')->[0]->value;
             my @data =  keys %{ $entry->properties };
             foreach my $thing ( @data ){
                 $events{$thing} = $entry->property("$thing")->[0]->value;
+                # extract the Time Zone
+                if($thing eq 'dtstart' || $thing eq 'dtend'){
+                    unless($tzid && $tzid=~m/\w+\/?\w*/ && $tz_is_set){ 
+                        #my $test_tz = Dumper($entry->property("$thing")->[0]->parameters );
+                        if( defined $entry->property("$thing")->[0]->parameters) {
+                            $tzid = $entry->property("$thing")->[0]->parameters->{'TZID'};
+                            $tz_is_set =1; #rather than the default;
+                        }
+                    }
+                }
+                #warn "$thing = $events{$thing}";
             }
         }
-        $events{data} = Dumper(\%events);
+        $events{data} = Dumper(\%events) if $opt{D}>=1;
         $body .=  @{$c->entries}[0]->property('description')->[0]->value; # this can't be the right way.
+        $action_type = 'edit';
+    }elsif($cid > 0 || ($uid && $uid=~m/.*/) ){
+        # probably someone fishing 
+        $action_type = 'New';
+        $self->tt_params({ warning => 'You do know that we are watching you - this has been reported'});
     }
 
     use DateTime::TimeZone;
     my @tzs = DateTime::TimeZone->all_names();
     my $zt_html = '<select name="tz">';
-    my $zt_is_set=0;
-    my $tzid='Europe/London'; # again this default should be from the DB
-    unless($q->param('tz')){
-        # oooh this is painful - we should probably pull this from config or DB::config::timezone
-        our $LocalTZ = DateTime::TimeZone->new( name => 'local' );
-        our $timezone = $LocalTZ->name;
-        unless($timezone){ $timezone = $tzid; }
-        $q->param('auto_tz' => $timezone);
-        if($timezone ne $tzid){ $tzid = $timezone; }
-    }
     TIMEZONE: foreach my $t (@tzs){
         next TIMEZONE unless $t=~m/\w+\/\w+/; # because that is what we need
         $zt_html .= '<option';
         # so if the user has a timezone we use it, if not they can set one and if they have not then we set it
-        if( ( defined($self->param('pe_timezone')) && $t eq $self->param('pe_timezone') ) ||
-            (!defined($self->param('pe_timezone')) && defined($q->param('tz')) && $t eq $q->param('tz')) ||
-            (!defined($self->param('pe_timezone')) && !defined($q->param('tz')) && $t eq $q->param('auto_tz'))
+        {
+        no warnings;
+        if( ( defined($tzid) && "$t" eq "$tzid" ) ||
+            ( defined($self->param('pe_timezone')) && $t eq $self->param('pe_timezone') ) ||
+            ( defined($q->param('tz')) && $t eq $q->param('tz')) ||
+            ( defined($q->param('auto_tz')) && $t eq $q->param('auto_tz'))
           ){
-            $tzid=$t;
             $zt_html .= ' selected="selected"';
-            $zt_is_set=1;
+          }
         }
         $zt_html .='>';
         $zt_html .="$t</option>\n";
@@ -709,6 +913,7 @@ sub edit_entry : Runmode {
 
     $self->tt_params({
     e => \%events,
+    event_action => $action_type,
     message => $message,
     zt_html => $zt_html,
     categories => \@categories,
@@ -803,6 +1008,88 @@ sub year : Runmode {
     return $self->tt_process('Notice/C/Calendar/sw_year.tmpl');
 
 }
+
+=head3 new_event
+
+  * a new event
+
+=cut
+
+sub new_event : Runmode {
+    my ($self) = @_;
+    my ($pe_id,$cid,$uid,@events);
+    my $q = $self->query;
+    my $surl;
+       $surl = ($self->query->self_url);
+    my $id = $self->param('id');
+    $pe_id = $self->param('pe_id');
+    use DateTime;
+    my $when = $id ? $id : DateTime->now( time_zone => 'UTC' )->strftime("%Y");
+    $when=~s/\D//g;
+
+  eval {
+    @events = $self->resultset('Calendar')->search({
+        added_by => {'=', $pe_id},
+        type => {'=', 'vevent'},
+        -or => [
+                start=> {'like', "$when\%"},
+                end  => {'like', "$when\%"},
+        ]
+        },{ order_by => {-asc =>['start','end+0'] }
+    });
+  };
+  if($@){ warn $@; }
+    $self->tt_params({
+        when => "$when",
+        events => \@events,
+        wrapper => 1,
+    });
+    $self->plt;
+    return $self->tt_process();
+
+}
+
+
+=head3 add_todo
+
+  * a new To-do
+
+=cut
+
+sub add_todo : Runmode {
+    my ($self) = @_;
+    my ($pe_id,$cid,$uid,@events);
+    my $q = $self->query;
+    my $surl;
+       $surl = ($self->query->self_url);
+    my $id = $self->param('id');
+    $pe_id = $self->param('pe_id');
+    use DateTime;
+    my $when = $id ? $id : DateTime->now( time_zone => 'UTC' )->strftime("%Y");
+    $when=~s/\D//g;
+
+  eval {
+    @events = $self->resultset('Calendar')->search({
+        added_by => {'=', $pe_id},
+        type => {'=', 'vevent'},
+        -or => [
+                start=> {'like', "$when\%"},
+                end  => {'like', "$when\%"},
+        ]
+        },{ order_by => {-asc =>['start','end+0'] }
+    });
+  };
+  if($@){ warn $@; }
+    $self->tt_params({
+        when => "$when",
+        events => \@events,
+        wrapper => 1,
+    });
+    $self->plt;
+    return $self->tt_process();
+
+}
+
 
 1;
 

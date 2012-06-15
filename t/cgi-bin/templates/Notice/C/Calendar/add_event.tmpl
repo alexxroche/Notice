@@ -1,14 +1,7 @@
 <form method="post">
-<table id="event">
-<tr><td>
 <table>
 <tbody><tr>
-        <th class="green middle" colspan="2"><h3 class="grey">
-[%- TRY -%]
- [%- IF event_action == 'edit'; 'Edit'; ELSE; 'New'; END; %]
-[%- CATCH %]
- <a title="[% error.info %]">Add</a>
-[%- END -%] Event</h3></th>
+        <th class="green middle" colspan="2"><h3 class="grey">New Event</h3></th>
     </tr>
     <tr>
         <td>Title:</td><td colspan="4"><input class="cal_input" type="text" name="summary" size="58" maxlength="78" autofocus required /></td>
@@ -26,23 +19,32 @@
         <option>none</option>
     [%- END -%]
     </select></td>
-        <td>Calendar:</td><td><select name="cal">
-        <!-- NTS this is going to be populated with an array from Notice -->
-<option value="[% ac_id; '/'; pe_id; '/personal' %]">Mine</option><option value="3/3/customer">Mr. Customers</option></select></td>
+        <td>Calendar:</td><td>
+    [%- IF calendars && calendars.size -%]
+        <select name="cal">
+        [%- FOREACH cal = calendars -%]
+             <option>cal</option>
+        [%- END -%]
+        </select>
+    [%- ELSE -%]
+        &nbsp;
+    [%- END -%]
+    </td>
+    
     </tr>
     <tr><td colspan="4"><hr></td></tr>
     <tr>
         <td><input type="checkbox" name="busy" title="free or busy" checked="checked">:Busy</td>
-        <td><input type="checkbox" name="all_day" title="remove the time component" id="all_day">:All day Event</td>
+        <td><input type="checkbox" name="all_day" title="remove the time component" >:All day Event</td>
         [%- IF zt_html -%]<td>Time Zone:</td><td>[%- zt_html %]</td>[%- END -%]
     </tr>
     <tr>
         <td>Start:</td><td><input id="start_date" type="text" placeholder="mm/dd/yyyy" name="start_date" value="[% date.today %]"></td>
-        <td colspan="2"><input type="text" name="start_time" value="[% date.time OR '11:00 pm' %]" id="start_time"></td>
+        <td colspan="2"><input type="text" name="start_time" value="[% date.time OR '11:00 am' %]"></td>
     </tr>
     <tr>
         <td>End:</td><td><input id="end_date" type="text" placeholder="mm/dd/yyyy" name="end_date" value="[% date.today %]"></td>
-        <td colspan="2"><input type="text" name="end_time" value="[% date.time || '11:59 pm' %]" id="end_time"></td>
+        <td colspan="2"><input type="text" name="end_time" value="[% date.time || '02:00 pm' %]"></td>
     </tr>
     <tr><td colspan="4"><hr></td></tr>
     <tr>
@@ -52,22 +54,13 @@
     <tr>
         <td>Reminder:</td><td><select name="reminder"><option>No reminder</option></select></td>
     </tr>
-</tbody>
-</table>
-</td><td>
-<table>
+    <tr><td colspan="4"><hr></td></tr>
     <tr>
-        <td>Description:</td>
+        <td>Description:</td><td colspan="4"><textarea cols="50" rows="12" name="desc"></textarea></td>
     </tr>
-    <tr>
-    <td colspan="4"><textarea cols="44" rows="14" name="desc"></textarea></td>
-    </tr>
-    <tr><td><hr></td></tr>
-    <tr><td>&nbsp;</td></tr>
     <tr>
         <td colspan="4"><input type="submit" name="add_event" value="Add" /></td>
     </tr>
+</tbody>
 </table>
-
-</td></tr></table>
 </form>

@@ -1,7 +1,7 @@
+[%- IF event_action == 'edit'; js.hide = 1; js.jquery.1.3.2.min = 1;  '<link href="/css/jquery-ui-pepper-grinder.css" type="text/css" rel="Stylesheet" /><script src="/js/jquery.min.js"></script><script src="/js/jquery-ui.min.js"></script>'; END -%]
 <form method="post">
-[%- IF e.uid -%]
-<input type="hidden" name="uid" value="[%- e.uid -%]" />
-[%- END -%]
+[%- IF e.ics -%] <input type="hidden" name="ics" value="[%- e.ics -%]" /> [%- END -%]
+[%- IF e.cid -%] <input type="hidden" name="cid" value="[%- e.cid -%]" /> [%- END -%]
 <table id="event">
 <tr><td>
 <table>
@@ -16,9 +16,8 @@
     <tr>
         <td>Title:</td>
         <td colspan="4">
-            <input class="cal_input" type="text" name="title" size="58" maxlength="78" value="[%- e.title -%]" 
+            <input class="cal_input" type="text" name="summary" size="58" maxlength="78" value="[%- e.summary -%]" 
             [%- IF event_action != 'edit'; ' autofocus'; END -%] required />
-            <!-- change title to summary for simplicity -->
         </td>
     </tr>
     <tr>
@@ -56,16 +55,28 @@
     <tr><td colspan="4"><hr></td></tr>
     <tr>
         <td><input type="checkbox" name="busy" title="free or busy" checked="checked">:Busy</td>
-        <td><input type="checkbox" name="all_day" title="remove the time component" id="all_day">:All day Event</td>
+        <td><input type="checkbox" name="all_day" title="remove the time component" id="all_day" [%-
+        UNLESS e.dtstart.match('T'); ' checked="checked"'; END -%]>:All day Event</td>
         [%- IF zt_html -%]<td>Time Zone:</td><td>[%- zt_html %]</td>[%- END -%]
     </tr>
+[% # this is rather crude and does not factor in the Time Zone %]
+[% # also we have to check that we have a full zulu or just a data before we look for a time %]
+[% IF e.dtstart %]
+ [% dstart  = e.dtstart.remove('T.*'); dstart_y = dstart.substr(0,4); dstart_m = dstart.substr(4,2); dstart_d = dstart.substr(-2); dstart = "$dstart_m\/$dstart_d\/$dstart_y" %]
+ [% dend  = e.dtend.remove('T.*'); dend_y = dend.substr(0,4); dend_m = dend.substr(4,2); dend_d = dend.substr(-2); dend = "$dend_m\/$dend_d\/$dend_y" %]
+ [% IF e.dtstart.match('T') %]
+ [% tstart  = e.dtstart.remove('.*T'); tstart_H = tstart.substr(0,2); tstart_M = tstart.substr(2,2); tstart_S = tstart.substr(-2); tstart = "$tstart_H:$tstart_M:$tstart_S" %]
+ [% tend  = e.dtend.remove('.*T'); tend_H = tend.substr(0,2); tend_M = tend.substr(2,2); tend_S = tend.substr(-2); tend = "$tend_H:$tend_M:$tend_S" %]
+ [% ELSE; tstart = '00:01 am'; tend = '23:59 pm'; END %]
+[%- END -%]
+
     <tr>
-        <td>Start:</td><td><input id="start_date" type="date" placeholder="mm/dd/yyyy" name="start_date" value="[% e.dtstart %]"></td>
-        <td colspan="2"><input type="text" name="start_time" value="[% date.time OR '11:00 pm' %]" id="start_time"></td>
+        <td>Start:</td><td><input id="start_date" type="date" placeholder="mm/dd/yyyy" name="start_date" value="[% dstart %]"></td>
+        <td colspan="2"><input [%- UNLESS e.dtstart.match('T'); 'style="display: none;"'; END -%] type="text" name="start_time" value="[% tstart OR '11:00 am' %]" id="start_time"></td>
     </tr>
     <tr>
-        <td>End:</td><td><input id="end_date" type="text" placeholder="mm/dd/yyyy" name="end_date" value="[% e.dtend %]"></td>
-        <td colspan="2"><input type="text" name="end_time" value="[% date.time || '11:59 pm' %]" id="end_time"></td>
+        <td>End:</td><td><input id="end_date" type="text" placeholder="mm/dd/yyyy" name="end_date" value="[% dend %]"></td>
+        <td colspan="2"><input [%- UNLESS e.dtstart.match('T'); 'style="display: none;"'; END -%] type="text" name="end_time" value="[% tend || '1:59 pm' %]" id="end_time"></td>
     </tr>
     <tr><td colspan="4"><hr></td></tr>
     <tr>

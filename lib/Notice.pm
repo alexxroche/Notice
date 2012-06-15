@@ -37,6 +37,8 @@ use CGI::Application::Plugin::TT;
 use Data::Dumper;
 
 my %CFG;
+# This is fun: we should have this in global scope, b ut %CFG isn't populated yet...
+#__PACKAGE__->tt_config( TEMPLATE_OPTIONS => $CFG{TEMPLATE_OPTIONS} );
 
 =head1 NAME
 
@@ -99,6 +101,10 @@ sub cgiapp_init {
     $CFG{tt2_dir} = "templates";
   }
 
+#http://template-toolkit.org/docs/manual/Config.html#section_TAG_STYLE
+  if(defined $CFG{TEMPLATE_OPTIONS} && keys %{ $CFG{TEMPLATE_OPTIONS} }){
+    $self->tt_config( TEMPLATE_OPTIONS => $CFG{TEMPLATE_OPTIONS} );
+  }
   #my @template_paths = ($self->cfg("tt2_dir") );
   my @template_paths = ($CFG{'tt2_dir'});
   $self->tt_include_path( \@template_paths, './templates' );
