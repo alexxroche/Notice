@@ -25,6 +25,7 @@ See http://www.opensource.org/licenses/ for more information.
         'CGI::Application'  => 0,
         'String::Clean::XSS' => 0,
         'DBIx::Class::Schema' => 0,
+        'Template::Multilingual' => 0,
         'CGI::Application::Server' => 0.01,
         'CGI::Application::Dispatch' => 0,
         'DBIx::Class::Schema::Loader' => 0.04006,

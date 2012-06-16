@@ -279,8 +279,8 @@ sub prerun_callback {
   my $self = shift;
   my (%sec,$action,$rm,$mod,$crm,$username,$id,$sid,$did,$eid,$fid,$desc);
   my ($message,@sec_stats,@people,@acl);
-  my $pe_id; # person that we are sooping on
-  my $ac_id; # and their account
+  my $pe_id='0'; # person that we are sooping on
+  my $ac_id='0'; # and their account
   eval {
     if($self->{__PARAMS}->{'pe_id'}){
         $pe_id = $self->{__PARAMS}->{'pe_id'};
@@ -402,7 +402,7 @@ sub prerun_callback {
     @people = $self->resultset('People')->search({
        'pe_email' => { '=', "$username"}},{} )->first;
     unless( defined $ac_id && $ac_id=~m/^\d+$/ ){
-        warn "setting ac_id to: ";
+        warn "setting ac_id to: " if $opt{D}>=1;
         $ac_id = $people[0]->{'pe_acid'};
     }
   }else{
@@ -414,27 +414,32 @@ sub prerun_callback {
           $ac_id = $self->param('pe_acid');
      }else{
           # um, this seems rather important - why isn't it in lib/Notice.pm ?
-          my $find_acid = $self->resultset('People')->search({'pe_id' => "$pe_id"})->first;
-          $ac_id = $find_acid->pe_acid;
-          #warn "using ac_id: $ac_id";
+          if(defined $pe_id){ 
+            my $find_acid = $self->resultset('People')->search({'pe_id' => "$pe_id"})->first;
+            $ac_id = $find_acid->pe_acid;
+          }else{
+            # This is perfectly possible: e.g. Beekeeping.pm has an unprotected main runmode
+            warn "We have neither pe_id nore ac_id " if $opt{D}>=1;
+          }
      }
   }
 
   my %activity;
   my $sec_rs;
   eval {
+    if(defined $pe_id){
     $sec_rs = $self->resultset('ActivityLog')->search({
-        user =>{'=' => "$pe_id"},
-        action =>{'=' => "$action"},
-        description =>{'=' => "$desc"},
+        user => "$pe_id",
+        action => "$action",
+        description => "$desc",
         -or => [
             -and => [
-                period => {'=' => 'd'},
+                period => 'd',
                 start => {'=' => \'CURDATE()'},
                 end =>   {'<=' => \' CURDATE()+1'},
             ],
             -and => [
-                period => {'=' => 'y'},
+                period => 'y',
                 start => {'=' => \'concat(date_format(NOW(), "%Y"), "-01-01")'},
                 end =>   {'<=' => \'concat(date_format(NOW(), "%Y"), "-12-31")'},
 
@@ -446,6 +451,7 @@ sub prerun_callback {
       }
     );
     #@sec_stats = $self->resultset('ActivityLog')->search();
+    }
   };
   if($@){
      warn "sec_rs: $@";
@@ -453,6 +459,10 @@ sub prerun_callback {
     my %updated;
     my %tally;
     # actually we are going to search for seven entries (S,M,H,d,w,m,y) and increment them or insert them
+    unless(defined $sec_rs){  # If we don't have a pe_id we don't know who to hang this on.
+        warn "Who goes there?";
+        return;
+    }
     while( my $act = $sec_rs->next){
       #warn "looping sec_rs";
         if( $act->period ){
@@ -513,7 +523,7 @@ sub prerun_callback {
     # do the above accounting first and then take actio
     my $object= $desc; $object=~s/ .*//;
     my $acl_rs = $self->resultset('ActivityAcl')->search({
-        action => {'=' => "$action"},
+        action => "$action",
         object => {'like' => "$object"},
         -or => [
                 user => "$pe_id", #people can only have one pe_id

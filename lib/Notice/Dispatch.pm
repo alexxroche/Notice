@@ -43,7 +43,7 @@ sub dispatch_args {
         #args_to_new => {PARAMS =>{cfg_file => ['config.ini'], format => 'equal'}}, #if you prefer
 		table       => [
 			''                   => {app => 'Notice', },
-			'en_GB/:app/:id?/:sid?' => {i18n => 'en_GB'}, # for i18n
+			'en_GB/:app/:rm?/:id?/:sid?' => {i18n => 'en_GB'}, # for i18n
 			'en/:app/:rm?/:id?/:sid?' => {i18n => 'en'}, # for i18n
 			'fr/:app/:rm?/:id?/:sid?'=> {i18n => 'fr'},
 			':app'               => {},

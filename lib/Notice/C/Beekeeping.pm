@@ -2,7 +2,19 @@ package Notice::C::Beekeeping;
 
 use warnings;
 use strict;
+use lib 'lib';
 use base 'Notice';
+
+my %submenu = (
+   53 => [
+        '1' => { name=> 'New Apiary', rm => 'add_apiary', class=> 'navigation'},
+        '2' => { name=> 'Add Hive', rm => 'add_hive', class=> 'navigation'},
+        '3' => { name=> 'List Bees', rm => 'list_bees', class=> 'navigation'},
+        '70' => { name=> 'Nantional News', rm => 'national_news', class=> 'navigation'},
+        '99' => { name=> 'Front Page', rm => 'walk_in', class=> 'navigation'},
+    ],
+);
+
 
 =head1 NAME
 
@@ -10,11 +22,11 @@ Template controller subclass for Notice
 
 =head1 ABSTRACT
 
-Template for consistent controller creation.
+This creates a Beekeeping corner in Notice
 
 =head1 DESCRIPTION
 
-To keep track of hives and hive-records.
+To keep track of hives and hive-records. Lets people slide in through a side-door, (rather than the main sign-up).
 
 =head1 METHODS
 
@@ -28,7 +40,8 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 
 sub setup {
     my ($self) = @_;
-    $self->authen->protected_runmodes(qr/!main/);
+    $self->authen->protected_runmodes(qr/!main|!swarm/);
+    $self->tt_params({ submenu => \%submenu });
 }
 
 =head2 RUN MODES
@@ -42,31 +55,19 @@ sub setup {
 
 sub main: StartRunmode {
     my ($self) = @_;
-	my $heading =qq 'Welcome to the GB.com Beekeeping Site';
-	my $body =qq ' <br />
-
-Here we take the "What _ever_ works" attitude, and for us
-that includes a database where anyone can store the important data that they collect about
-the bees that they work with.
-
-For example, you can create a list of all of the locations where you keep beehives, (apiary)
-and then make a note of each hive/colony that you have in each apiary. Then the fun part:
-you can store hive records for each hive and we will graph the data for you so that you can
-watch for patterns.<br />
-<br />
-So to start off with you should <a class="black" href="beekeeping/add">enter some locations</a>.<br />
-<br />
-<br />If this is your first time you will have to create an account and log in
-<br />then you can <a class="black" href="beekeeping/list">list</a> your apiraies
-<br />or add a <a class="black" href="beekeeping/add">new record entry</a> for an existing <a class="black" href="beekeeping/hive">hive</a>
-        
-    ';
-    unless($self->authen->username){ $self->tt_params({show_login=>1}); }
+    my $username = '';
+    if($self->authen->username){ 
+        $username = $self->authen->username;
+        $self->tt_params({ username => $username});
+    }else{
+        $self->tt_params({
+	        title   => 'BKBK - BeeKeeping BookKeeping',
+            show_login=>1, 
+            no_home => 1,
+            dest=>'beekeeping',
+        }); 
+    }
     $self->tt_params({
-    no_home => 1,
-	heading => $heading,
-	body => $body,
-	title   => 'Beekeeping'
 		  });
     return $self->tt_process();
     
@@ -84,6 +85,41 @@ sub list: Runmode{
  	return $self->tt_process('Notice/C/Beekeeping/main.tmpl');
 }
 
+=head3 walk_in
+
+show what the public can see
+
+=cut
+
+sub walk_in: Runmode{
+    my $self = shift;
+    $self->tt_params({ hide_login=>1});
+    return $self->tt_process();
+}
+
+=head3 local_news
+
+show the news for your region/area
+
+=cut
+
+sub local_news: Runmode{
+    my $self = shift;
+    return $self->tt_process();
+}
+
+
+=head3 national_news
+
+show the news for a nation
+
+=cut
+
+sub national_news: Runmode{
+    my $self = shift;
+    return $self->tt_process('Notice/C/Beekeeping/national_news.tmpl');
+}
+
 =head3 add
 
 add the apiaries/hives
@@ -95,6 +131,20 @@ sub add: Runmode{
     $self->tt_params({ message => 'Add a hive, hive-record or apiry here'});
     return $self->tt_process('Notice/C/Beekeeping/main.tmpl');
 }
+
+=head3 swarm
+
+How to identify the type of swarm (including zergling)
+and a list of your local bee keeper
+
+=cut
+
+sub swarm: Runmode{
+    my $self = shift;
+    $self->tt_params({ message => 'Sounds like fun, but is it a honey bee swarm?'});
+    return $self->tt_process();
+}
+
 
 =head3 hive
 

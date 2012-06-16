@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>[% title || 'Welcome to BKBK - Bee keeping Book Keeping' %]</title>
+    <link rel="stylesheet" media="all" type="text/css" href="/css/notice.css" />
+</head>
+<body>
+<div id="outer">
+ <div id="body">
+    <h1 class="h2">[% message || c.param('known_as'); ' Welcome!' %]</h1>
+If you are here because you are looking for the <b>help</b> of a local  bee keeper or th<b>i</b>nk that you <b>have a swarm</b>,
+then you want <a href="[%- c.query.url || '/cgi-bin/index.cgi' -%]/beekeeping/swarm" title="help help, I'm covered in bees" ><b>this section</b>.</a><br>
+<br>
+If you ARE a bee keeper, or are interested in bees...
+
+[%- IF c.param('username') -%]<a href="[%- c.query.url || '/cgi-bin/index.cgi' -%]/beekeeping">(which you are)</a> [%- ELSE -%]
+<br>
+<a href="beekeeping/join">Once you create an account (click here), you can:</a>
+[%- END -%]
+<table>
+<tr>
+<td>
+<ul>
+    <li> Add a hive</li>
+    <li> Group them by Apiary</li>
+    <li> Create digital record cards for your hive <-- really rather helpful!</li>
+    <li> Join your local association</li>
+    <li> Form a real or virtual association</li>
+    <li> Read your local and <a href="[%- c.query.url || '/cgi-bin/index.cgi' -%]/beekeeping/national_news/">national news</a></li>
+    <li> Ask questions</li>
+    <li> Get random opinions that are based on illogical and chaotic human experience ;-)</li>
+    <li> Add yourself to the list of keepers who will collect, (or take yourself off the list when you are on holiday.)</li>
+    <li> Read our F.A.Q.</li>
+    <li> Read the _very_ Helpful Dyer guides</li>
+</ul>
+</td>
+<td>
+[%- UNLESS hide_login || show_login == 0; INCLUDE login_form.tmpl; END -%]
+</td>
+</tr>
+</table>
+
+Here we take the "Bee nice" and "What _ever_ works" attitude, and for us
+that includes a database where anyone can store the important data that they collect about
+the bees that they work with. (You can download your part of the database to backup or read off-line.)<br>
+<br>
+For example, you can create a list of all of the locations where you keep beehives, (apiary)
+and then make a note of each hive/colony that you have in each apiary. Then the fun part:
+you can store hive records for each hive and this site will display your own To-do list based on your own cards,<strike> and we will graph the data for you so that you can
+watch for patterns.</strike> <br>
+<br>
+You do <u>NOT</u> have to use a real email address to create your account but remember:
+<ul>
+<li> Email address is the <b>only</b> free account recovery system, (you don't want to think about the substantial charge for everything else.)</li>
+<li> Abuse will be met with a draconian response! (You have been warned, but you already underestimate this hive!)</li>
+</ul>
+Why such a simple page? We didn't want to get 'stung' with site development costs ;-)
+</div>
+<br>
+<br>
+<div id="footer">Copyright (c) 2007-2012 Alexx Roche [% IF page_load_time %]<span class="pageLoadTime">([% page_load_time %])</span>[% END #IF %]</div>
+<!-- Template last modified [%- date.format(template.modtime) -%] -->
+</div><!-- end outer -->
+</body>
+</html>

@@ -1,9 +1,41 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-    <head>
-        <title>[% title %]</title>
-    </head>
-    <body>
-        <h1>[% message %]</h1>
-    </body>
-</html>
+[%- IF username -%]
+ [% WRAPPER 'site_wrapper.tmpl' -%]
+<link rel=stylesheet href="/css/notice.css" />
+  [% IF ! hives AND  ! todo AND ! apiaries -%]
+ So to start off with you should <a class="black" href="assets/details/24/">add your hive(s)</a><br>
+ or <a class="black" href="group/add/apiary">enter some locations/apiary</a>.<br>
+ <br>
+ <t><en>All the functions are available in the sub-menu on the side</en>
+    <fr>Tout les funcsiones est disponible dans le menyew akotay</fr>
+  </t>
+  [%- ELSE -%]
+<br>
+<br> You can
+<ul>
+<li> <a class="black" href="beekeeping/list/apiary">list</a> your apiaries</li>
+<li> <a class="black" href="beekeeping/list/hive">list</a> your hives</li>
+<li> <a class="black" href="assets/details/24/">Add</a> a hive</li>
+<li> <a class="black" href="beekeeping/search/hive/">Search</a> for a hive</li>
+</ul>
+<br>or add a <a class="black" href="beekeeping/new_card/[%- hives.0.id -%]">new record entry</a> for an existing <a class="black" href="beekeeping/hive/[%- hives.0.id -%]">hive</a>
+
+  <table border="1">
+    <tr><td>
+        [%- INCLUDE 'Notice/C/Beekeeping/todo.tmpl' -%]
+    </td><td>
+        [%- INCLUDE 'Notice/C/Beekeeping/list_hives.tmpl' -%]
+    </td>
+    </tr>
+    <tr>
+     <td>
+        [%- INCLUDE 'Notice/C/Beekeeping/local_news.tmpl' -%]
+     </td> 
+     <td>
+        [%- INCLUDE 'Notice/C/Beekeeping/national_news.tmpl' -%]
+     </td> 
+  </table>
+  [% END # IF -%]
+ [% END # wrapper -%]
+[% ELSE %]
+ [%- INCLUDE 'Notice/C/Beekeeping/walk_in.tmpl' -%]
+[% END %]

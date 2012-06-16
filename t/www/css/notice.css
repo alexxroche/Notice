@@ -1036,4 +1036,28 @@ table td.button {
         color: #333;
 }
 
+.sub {
+    vertical-align: sub;
+    font-size: 7px;
+    font-weight: normal;
+    text-align: center;
+    width: 5px;
+    height: 5px;
+}
+
+
+.pageLoadTime {
+    position: absolute;
+    margin: auto 0 ;
+    top: 7px;
+    padding-left: 65%;
+    text-align: right; 
+    color: #60c; 
+    font-family: monospace; 
+    font-size: 65%; 
+    text-shadow:0 1px 1px #000000; 
+    vertical-align: sub;
+}
+
+.footer, #footer { width: 100%; position: absolute; bottom: 4px; }
 

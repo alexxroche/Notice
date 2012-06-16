@@ -376,7 +376,45 @@ sub cgiapp_init {
         my($module,$id) = ($self->query->self_url=~m/index.cgi\/([^\/]*)\/?([^\/]*)/);
         unless($self->param('id')){ $self->param('id' => $id ); }
         unless($self->param('mod')){ $self->param('mod' => $module ); }
-        if($CFG{'default_lang'} && !$self->param('i18n')){ $self->param('i18n' => $CFG{'default_lang'}); }
+        if(!$self->param('i18n')){
+            # The default language comes from the URI first and then 
+            # the users config and if both are missing we pull it from the browser    
+            #my $http_headers = \%{ $self->query() };
+
+            # NTS check session
+            # else
+            # NTS pull from database
+            # else
+            # we try to extract the language from the browser
+
+            # my @lang_list = split(/;/, $ENV{HTTP_ACCEPT_LANGUAGE}); 
+            # my @lang_region = split(/,/, $lang_list[0]); 
+            # $self->param('i18n' => $lang_region[@lang_region - 1]);
+            #my @lang_list = split(/;/, $self->param('ALL_HTTP'));
+            #warn $self->param('ALL_HTTP');
+            if($ENV{HTTP_ACCEPT_LANGUAGE}=~m/^([^,]+)/){
+                my $HTTP_ACCEPT_LANGUAGE = $1;
+                $HTTP_ACCEPT_LANGUAGE =~s/-/_/;
+                $self->param('i18n' => $HTTP_ACCEPT_LANGUAGE);
+                #warn "HTTP_ACCEPT_LANGUAGE = " .$self->param('i18n');
+            }elsif($ENV{LANGUAGE}=~m/^([^,:]+)/){
+                $self->param('i18n' => $1);
+                #warn "LANGUAGE = " .$self->param('i18n');
+            }elsif($ENV{LANG}=~m/^([^\.]+)/){
+                $self->param('i18n' => $1);
+                #warn "LANG= " . $self->param('i18n');
+            }elsif($ENV{GDM_LANG}=~m/^([^\.]+)/){
+                $self->param('i18n' => $1);
+                #warn "GDM_LANG= " .$self->param('i18n');
+            }elsif($CFG{'default_lang'}){ 
+                $self->param('i18n' => $CFG{'default_lang'}); 
+                #warn "default_lang = " .$self->param('i18n');
+            }
+            #    HTTP_USER_AGENT
+            #    GDM_KEYBOARD_LAYOUT = gb
+        }
+          # $self->param('i18n' => 'fr-fr'); #debug
+          #  foreach my $env (keys %ENV){ my $line = "$env = $ENV{$env}"; if($line=~m/lang/i){ warn $line; }} 
         $self->tt_params({caller  => $self->param('caller')});
         $self->tt_params({REMOTE_ADDR  => $ENV{REMOTE_ADDR}});
         $self->tt_params({title => 'Notice CRaAM  ' . $runmode ." - $known_as AT ". $ENV{REMOTE_ADDR}});
@@ -526,6 +564,16 @@ sub tt_post_process {
     $$htmlref = ${$h->data};
     #my $newref=$h->data;$$htmlref=$$newref;
   }
+  # This is just one of the many ways that i18n/i10n can be achieved
+  eval {
+    use Template::Multilingual;
+    my $template = Template::Multilingual->new();
+    $template->language($self->param('i18n'));
+    my $i18n;
+    $template->process(\$$htmlref,'',\$i18n);
+    $$htmlref = $i18n;
+  };
+  if($@){ warn $@; }
   return;
 }
 
