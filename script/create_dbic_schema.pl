@@ -6,35 +6,31 @@ use DBIx::Class::Schema::Loader qw/ make_schema_at /;
 use Config::Auto;
 use FindBin qw/$Bin/;
 use lib "$Bin/../lib";
-
 $| = 1;
 
-my $config = Config::Auto::parse( 
-	File::Spec->catfile("..","config","config.pl"), format => "perl" 
-	);
-
+my $config = Config::Auto::parse( File::Spec->catfile("..","config","config.pl"), format => "perl" );
 
 make_schema_at(
         'Notice::DB',
-        { debug => 1,relationships => 1, use_namespaces => 1, 
+        { debug => 1,relationships => 1, 
+        # use_namespaces => 1, # this is now the default
+        # moniker_map => { people => 'People' }, #we probably want this
           dump_directory => File::Spec->catdir("$Bin","..","lib" )
         },
         [ $config->{db_dsn}, $config->{db_user}, $config->{db_pw} ],
 );
 
+__END__
+
 =head1 NAME
 
-Template DBIC schema generator for CGI::Application::Structured apps.
-
-=cut 
-
+create_dbic_schema.pl - Template DBIC schema generator for Notice
 
 =head1 SYNOPSIS
 
-	~/dev/My-App1$ perl script/create_dbic_schema.pl 
-	Dumping manual schema for DB to directory /home/gordon/dev/MyApp1/lib/MyApp1/DB ...
+	~/dev/MyApp1$ perl script/create_dbic_schema.pl 
+	Dumping manual schema for DB to directory ~/dev/MyApp1/lib/MyApp1/DB ...
 	Schema dump completed.
-
 
 The generated files, using the example database would look like this:
 
@@ -46,11 +42,9 @@ The generated files, using the example database would look like this:
     lib/MyApp1/DB.pm
 
 
-=cut
-
-
 =head1 AUTHOR
 
+Gordon Van Amburg of CGI::Application::Structured
 
 =head1 COPYRIGHT
 
@@ -60,3 +54,4 @@ it and/or modify it under the same terms as Perl itself.
 The full text of the license can be found in the
 LICENSE file included with this module.
 
+=cut

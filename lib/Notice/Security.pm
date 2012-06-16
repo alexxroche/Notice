@@ -370,6 +370,9 @@ sub prerun_callback {
             $desc = 'cal event add ' . $cal;
     }elsif($mod=~m/^([^?]+)\?.*(add|edit|update)=(\w+)/i){
             $desc = "$1 $crm $2 $id";
+    }elsif($mod=~m/^([^?]+)\?.*authen_username=([^;]+).*submit=\w+/i){
+            $desc = "$1 $crm Login $id";
+            unless(defined $username && $username ne ''){ $username = $2; }
     }else{
         warn "mod: $mod crm: $crm id: $id";
         $desc = ucfirst($mod) . ' ' . $crm . ' ' .$id;
@@ -460,7 +463,7 @@ sub prerun_callback {
     my %tally;
     # actually we are going to search for seven entries (S,M,H,d,w,m,y) and increment them or insert them
     unless(defined $sec_rs){  # If we don't have a pe_id we don't know who to hang this on.
-        warn "Who goes there?";
+        # warn "Who goes there?";
         return;
     }
     while( my $act = $sec_rs->next){
