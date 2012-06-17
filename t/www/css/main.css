@@ -66,7 +66,39 @@ div.warn {display: block; margin: 1em auto; border: 1px solid; border-color: #dd
     padding:12px 17px 17px;
 }
 
-.footer { position: absolute; bottom: 0px; }
+/*
+.pageLoadTime {
+    position: absolute;
+    top: 7px;
+    margin: auto 0 ;
+    padding-left: 60%;
+    text-align: right;
+    color: #60c;
+    font-family: monospace;
+    font-size: 65%;
+    text-shadow:0 1px 1px #000000;
+    vertical-align: sub;
+}
+
+*/
+
+
+* { margin:0; }
+html, body, #outer { height: 100%; }
+.bodyblock, #bodyblock, .wrapper, #outer {
+min-height: 100%;
+/*
+height: auto !important;
+height: 100%;
+*/
+margin: 0 auto -2em;
+}
+/*
+.footer, #footer { width: 99%; height: 2em; margin: 0 auto 42%;}
+*/
+
+.footer, #footer { width: 99%; position:absolute !important; bottom: 4px; }
+
 
 a img, iframe { border: none; }
 	
@@ -91,6 +123,12 @@ ul, ol, dl, li, dt, dd {
 	margin: 0;
 	padding: 0;
 }
+
+ul.indent {
+    padding-left: 12px;
+    margin-left: 12px;
+}
+
 	
 /* Links
 ------------------------------*/

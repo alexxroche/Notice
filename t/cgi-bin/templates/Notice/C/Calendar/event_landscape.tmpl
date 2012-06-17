@@ -52,11 +52,11 @@
     [%- END -%]
      </td>
     </tr>
-    <tr><td colspan="4"><hr></td></tr>
+    <tr><td colspan="4"><hr/></td></tr>
     <tr>
-        <td><input type="checkbox" name="busy" title="free or busy" checked="checked">:Busy</td>
+        <td><input type="checkbox" name="busy" title="free or busy" checked="checked" />:Busy</td>
         <td><input type="checkbox" name="all_day" title="remove the time component" id="all_day" [%-
-        UNLESS e.dtstart.match('T'); ' checked="checked"'; END -%]>:All day Event</td>
+        UNLESS e.dtstart.match('T'); ' checked="checked"'; END -%] />:All day Event</td>
         [%- IF zt_html -%]<td>Time Zone:</td><td>[%- zt_html %]</td>[%- END -%]
     </tr>
 [% # this is rather crude and does not factor in the Time Zone %]
@@ -71,18 +71,18 @@
 [%- END -%]
 
     <tr>
-        <td>Start:</td><td><input id="start_date" type="date" placeholder="mm/dd/yyyy" name="start_date" value="[% dstart %]"></td>
-        <td colspan="2"><input [%- UNLESS e.dtstart.match('T'); 'style="display: none;"'; END -%] type="text" name="start_time" value="[% tstart OR '11:00 am' %]" id="start_time"></td>
+        <td>Start:</td><td><input id="start_date" type="date" placeholder="mm/dd/yyyy" name="start_date" value="[% dstart %]" /></td>
+        <td colspan="2"><input [%- UNLESS e.dtstart.match('T'); 'style="display: none;"'; END -%] type="text" name="start_time" value="[% tstart OR '11:00 am' %]" id="start_time"/></td>
     </tr>
     <tr>
-        <td>End:</td><td><input id="end_date" type="text" placeholder="mm/dd/yyyy" name="end_date" value="[% dend %]"></td>
-        <td colspan="2"><input [%- UNLESS e.dtstart.match('T'); 'style="display: none;"'; END -%] type="text" name="end_time" value="[% tend || '1:59 pm' %]" id="end_time"></td>
+        <td>End:</td><td><input id="end_date" type="text" placeholder="mm/dd/yyyy" name="end_date" value="[% dend %]" /></td>
+        <td colspan="2"><input [%- UNLESS e.dtstart.match('T'); 'style="display: none;"'; END -%] type="text" name="end_time" value="[% tend || '1:59 pm' %]" id="end_time" /></td>
     </tr>
-    <tr><td colspan="4"><hr></td></tr>
+    <tr><td colspan="4"><hr/></td></tr>
     <tr>
         <td>Repeat:</td><td><select name="repeat"><option>Does not repeat</option></select></td>
     </tr>
-    <tr><td colspan="4"><hr></td></tr>
+    <tr><td colspan="4"><hr/></td></tr>
     <tr>
         <td>Reminder:</td><td><select name="reminder"><option>No reminder</option></select></td>
     </tr>
@@ -95,10 +95,10 @@
     </tr>
     <tr>
     <td colspan="4"><textarea cols="44" rows="14" name="desc" 
-            [%- IF event_action == 'edit'; ' autofocus'; END -%] />
+            [%- IF event_action == 'edit'; ' autofocus'; END -%]>
             [%- e.description -%]</textarea></td>
     </tr>
-    <tr><td><hr></td></tr>
+    <tr><td><hr/></td></tr>
     <tr><td>&nbsp;</td></tr>
     <tr>
         <td colspan="4">

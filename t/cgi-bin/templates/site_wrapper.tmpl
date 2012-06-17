@@ -41,7 +41,6 @@
   <link href="/css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 <script type="text/javascript" language="javascript">   
   $(document).ready(function() {
-
     $(function() {
          var dates = $( "#start_date, #end_date" ).datepicker({
             defaultDate: "+1d",
@@ -78,11 +77,13 @@
     $(".show").each(function(){
       if($(this).hasClass('hideShowButton')){
         var target = '';
-        for (i=0;i<24;i++){
+            <!-- #hiding from HTML lint
+        for (i=0;i<=24;i++){
             if($(this).hasClass('target' + i)){ 
                 target = ".target" + i
             }
         }
+        -->
         $(".target" + target).hide();
         $(this).html('[+]');
       }
@@ -90,20 +91,24 @@
     $(".hideShowButton").click(function(){
         if($(this).hasClass('hide')){
             var target = '';
+            <!-- #hiding from HTML lint
             for (i=0;i<24;i++){
                 if($(this).hasClass('target' + i)){ 
                     target = ".target" + i
                 }
             }
+            -->
             $(".target" + target).hide();
             $(this).html('[+]').addClass("show").removeClass("hide");
         }else{
             var target = '';
+            <!-- #hiding from HTML lint
             for (i=0;i<24;i++){
                 if($(this).hasClass('target' + i)){ 
                     target = ".target" + i
                 }
             }
+            -->
             $(".target" + target).show();
             $(this).html('[&ndash;]').addClass('hide').removeClass('show');
         }});
@@ -231,17 +236,17 @@
 
         <table border="0">
 	<tr><th colspan="2" style="text-align:right;">Options/Type</th><th style="text-align:center;">Message</th></tr>
-        <tr><td>Bug:</td><td><input name="help_type" id="bug" value="bug" type="radio"></td>
+        <tr><td>Bug:</td><td><input name="help_type" id="bug" value="bug" type="radio"/></td>
         <td rowspan="5"><textarea name="help" rows="6" colls="17"></textarea><br /></td>
         </tr>
-        <tr><td>Feature request:</td><td><input name="help_type" id="feature" value="feature" type="radio"></td></tr>
+        <tr><td>Feature request:</td><td><input name="help_type" id="feature" value="feature" type="radio"/></td></tr>
 
-        <tr><td>Help:</td><td><input name="help_type" id="help" value="help" type="radio"></td></tr>
-        <tr><td>Praise:</td><td><input name="help_type" id="hi5" value="hi5" type="radio"></td></tr>
-        <tr><td>Other:</td><td><input name="help_type" id="other" value="other" type="radio"></td></tr>
+        <tr><td>Help:</td><td><input name="help_type" id="help" value="help" type="radio"/></td></tr>
+        <tr><td>Praise:</td><td><input name="help_type" id="hi5" value="hi5" type="radio"/></td></tr>
+        <tr><td>Other:</td><td><input name="help_type" id="other" value="other" type="radio"/></td></tr>
         <tr><td colspan="2">
-        <input type="submit" value="Send for help" onclick="javascript: alert(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Help is on the way... &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; once we read your message.. \n\n\n &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (probably tomorrow.. I would get on with something else for now)'); submitform(); clearForms(); return false;">
-        <!--input type="submit" value="Send for help" onclick="javascript: alert(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Help is on the way... &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; once we read your message.. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;'); alert('(probably tomorrow..)'); alert('I would get on with something else for now'); submitform(); document.help.reset(); this.reset(); reset(); return false;"--> 
+        <input type="submit" value="Send for help" onclick="javascript: alert(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Help is on the way... &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; once we read your message.. \n\n\n &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (probably tomorrow.. I would get on with something else for now)'); submitform(); clearForms(); return false;"/>
+        <!--input type="submit" value="Send for help" onclick="javascript: alert(' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Help is on the way... &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; once we read your message.. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;'); alert('(probably tomorrow..)'); alert('I would get on with something else for now'); submitform(); document.help.reset(); this.reset(); reset(); return false;"/--> 
 
         <input type="hidden" name="URI" value="[% c.query.self_url OR c.query.url OR self_url %]" />
         <input type="hidden" name="ud" value="[% c.param('username') OR username %]" />
@@ -275,13 +280,13 @@
 	-%]" href="/cgi-bin/index.cgi/[% c.param('menu').$item.value('rm') OR c.param('menu').$item.rm 
 	-%]"> [% c.param('menu').$item.value('name') || c.param('menu').$item.name  %]</a> [%-
 	    IF submenu.$item -%]
-	        [%- "<ul>\n" #IF loop.first %]
+	        [%- "<ul class=\"submenu\">\n" #IF loop.first %]
 		[% FOREACH smi IN submenu.$item; IF smi.name;  -%]
 		<!-- Just for comparison, for those that wonder; Is it faster to escape TT or HTML -->
 	        <!--li>[%# loop.count -%]/[%-loop.size-%][% '<a class="'; smi.class; '" href="/cgi-bin/index.cgi/'; 
 			c.param('menu').$item.value('rm') OR c.param('menu').$item.rm; '/'; smi.rm; '">'; smi.name -%]</a></li -->
           [%- IF smi.indent.size -%]
-            <ul>
+            <ul class="indent">
           [%- END # IF smi.indent -%]
 		   <li type="[%- smi.typei -%]">[%# loop.count;'/';loop.size;%]<a class="[%- smi.class;
 	IF c.param('id') == smi.rm; ' selected'; END #IF selected -%]" href="/cgi-bin/index.cgi/
@@ -289,9 +294,10 @@
           [%- IF smi.indent.size -%]
             </ul>
           [%- END # IF smi.indent -%]
-		[% END; END %]
-		[%- "</ul>\n"# IF loop.last %]
-	    [% END #submenu IF %]
+		[%- END; END -%]
+		[%- "</ul>\n"# IF loop.last -%]
+	    [%- END #submenu IF -%]
+        </li>
 [%- END; END #FOREACH -%]
 
 [%- IF c.param('debug') -%]
@@ -333,11 +339,9 @@
 </tr>
 </table>
 </div><!-- end bodyblock -->
-
-<div id="footer">Copyright (c) 2007-2012 Alexx Roche [% IF page_load_time %]<span class="pageLoadTime">([% page_load_time %])</span>[% END #IF %]</div>
+<div id="footer">Copyright (c) 2007-2012 Alexx Roche [% IF page_load_time %]<span class="pageLoadTime">([%- page_load_time -%])</span>[% END #IF %]</div>
 <!-- Template last modified [%- date.format(template.modtime) -%] -->
 </div><!-- end outer -->
-
 </body>
 </html>
-[% END %]
+[%- END -%]

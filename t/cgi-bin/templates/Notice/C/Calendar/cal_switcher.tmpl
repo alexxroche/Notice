@@ -12,7 +12,7 @@
       $('#tabs').tabs();
     });
   </script>
-  <div id="tabs">
+  <div id="tabs" style="position:relative; z-index:5;">
     <ul>
       <li><a href="#tab-1">Month</a></li>
       <li><a href="#tab-2">Year</a></li>
@@ -20,20 +20,20 @@
       <li><a href="#tab-4">Todo</a></li>
     </ul>
     <div id="tab-1">
-     <table><tr><td>
-    [%- INCLUDE 'Notice/C/Calendar/month.tmpl' -%]
-    </td><td>
-    [%- INCLUDE 'Notice/C/Calendar/events.tmpl' -%]
-    </td></table>
-    </div>
+         <table><tr><td>
+        [%- INCLUDE 'Notice/C/Calendar/month.tmpl' -%]
+        </td><td>
+        [%- INCLUDE 'Notice/C/Calendar/events.tmpl' -%]
+        </td></tr></table>
+    </div><!-- tab-1 -->
     <div id="tab-2">
-    [% INCLUDE 'Notice/C/Calendar/year.tmpl' %]
-    </div>
+        [% INCLUDE 'Notice/C/Calendar/year.tmpl' %]
+    </div> <!-- tab-2 -->
     <div id="tab-3">
-    [%- INCLUDE 'Notice/C/Calendar/event_landscape.tmpl' -%]
-    [%- #INCLUDE 'Notice/C/Calendar/event_portrate.tmpl' %]
-    </div>
+        [%- INCLUDE 'Notice/C/Calendar/event_landscape.tmpl' -%]
+        [%- #INCLUDE 'Notice/C/Calendar/event_portrate.tmpl' %]
+    </div> <!-- tab-3 -->
     <div id="tab-4">
-    [%- INCLUDE 'Notice/C/Calendar/todo.tmpl' -%]
-    </div>
-  </div>
+        [%- INCLUDE 'Notice/C/Calendar/todo.tmpl' -%]
+    </div> <!-- tab-4 -->
+  </div> <!-- tabs -->

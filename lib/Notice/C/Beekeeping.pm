@@ -56,6 +56,7 @@ sub setup {
 sub main: StartRunmode {
     my ($self) = @_;
     my $username = '';
+    my $q = \%{ $self->query() };
     if($self->authen->username){ 
         $username = $self->authen->username;
         $self->tt_params({ username => $username});
@@ -67,8 +68,9 @@ sub main: StartRunmode {
             dest=>'beekeeping',
         }); 
     }
-    $self->tt_params({
-		  });
+    if($q->param('debug')){
+        $self->tt_params({ hives => '1' });
+    }
     return $self->tt_process();
     
 }

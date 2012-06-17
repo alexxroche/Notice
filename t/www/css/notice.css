@@ -330,7 +330,11 @@ P {
         font-family: sans-serif;
 }
 
+/* what was this for? */
+/*
 ul {
+*/
+ul.indent {
         padding-left: 20px;
         margin-left: 20px;
 }
@@ -1038,13 +1042,7 @@ table td.button {
 
 .sub {
     vertical-align: sub;
-    font-size: 7px;
-    font-weight: normal;
-    text-align: center;
-    width: 5px;
-    height: 5px;
 }
-
 
 .pageLoadTime {
     position: absolute;
