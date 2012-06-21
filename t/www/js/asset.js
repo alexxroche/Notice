@@ -135,7 +135,9 @@ $(document).ready(function() {
     };
 
   var last_id = $("#acd_table tr:last #order").attr('name');
-  var next_id = last_id.replace('d_order_', '');
+  if (last_id){
+    var next_id = last_id.replace('d_order_', '');
+  }
 
 // prevent the clicking of the add button from adding another row
 // NOTE this does not work (we need an .unless($("#addbutton").click()).on("change",... )

@@ -1,0 +1,23 @@
+[% js.asset=1; WRAPPER site_wrapper.tmpl %]
+[% USE Dumper %]
+ [%- IF types and types.size -%]
+ <h1>[% heading %]</h1>
+ <div class="warning">Here you can select an asset category to inspect, and even update.</div>
+Remember! These are not the assets but rather the archetypes.
+  <table>
+  [%- rcount=0; FOREACH t = types -%]
+  <tr>
+   <td><form method="post" action="define/[%- t.asc_id -%]">
+       Update ALL assets in the: <button class="small blue button" name="[%- t.asc_name -%]" value="Update [%- t.asc_name -%]">[%- t.asc_name -%]</button> category; ([%- t.asc_description -%])
+        </form>
+   </td>
+  </tr>
+  [%- END -%]
+  <tr>
+    <td><form method="post" action="define">or you can <button class="green button">define a new one</button></form></td>
+  </tr>
+ </table>
+ [% ELSE %]
+    You get to define the first asset category! \0/ yay <a class="black" href="[%- c.query.url -%]/assets/define">Click here</a>
+ [% END %]
+[% END %]

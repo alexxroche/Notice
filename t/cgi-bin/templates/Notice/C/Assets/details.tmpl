@@ -1,5 +1,6 @@
-[% WRAPPER 'site_wrapper.tmpl' %] 
+[% js.asset=1; USE Dumper; WRAPPER 'site_wrapper.tmpl' %] 
     <style type="text/css">
+    .* { color: black; }
    /* table {border-collapse:collapse;} */
     tr th.under { border-bottom-style:dotted; }
     tr.asset th { border-bottom-style:solid; }
@@ -10,43 +11,112 @@
     tr.as_data_odd td.bg { background-color: #cc9; }
     .error { color: orange; size:20px; }
     </style>
-[% UNLESS error; %]
- <h1>[% submit or 'submit' %] [% ning; ' '; type or asc.assetcategory.asc_name or asc.type or asc.asc_name %] to the Asset Database</h1>
+ [% IF error; %]
+  [% IF ac AND ac.size -%]
+  <table class="asset">
+     [%- IF ac.size >= 10 -%]
+       <tr><td>Add a </td><td><form method="post" action="/cgi-bin/index.cgi/assets/details"><select name="id">
+     [%- END -%]
+   [%- rcount=0; FOREACH t = ac -%]
+     [%- IF ac.size >= 10 -%]
+        <option value="[%- t.asc_id -%]">[%- t.asc_name -%] - [%- t.asc_description -%]</option>
+     [%- ELSE -%]
+   <tr>
+     <td><form method="post" action="details/[%- t.asc_id -%]">
+     Add a new: <button class="small blue button" name="[%- t.asc_name -%]" value="Update [%- t.asc_name -%]">[%- t.asc_name -%]</button> ([%- t.asc_description -%])
+        </form>
+     </td>
+   </tr>
+    [%- END -%]
+   [%- END #FOREACH -%]
+     [%- IF ac.size >= 10 -%]
+       </select><input class="small green button" type="submit" value="Add" name=""></form></td></tr>
+     [%- END -%]
+   <tr>
+    <td colspan="2">&nbsp;</td>
+   </tr><tr>
+    <td colspan="2"><form method="post" action="define">or you can <button class="green button">define a new one</button></form></td>
+   </tr>
+  </table>
+  [%- ELSE -%]
+     [%- panic -%]
+        It seems that we do not have any asset categories defined in the database yet, (or the database has gone away or been wiped.)
+    <br> <table><tr><td>Prehaps you would like to</td><td><form method="post" action="[%- c.query.url -%]/assets/define"><button class="green button">define a new one</button>?</form></td></tr></table>
+  [%- END -%]
+[% ELSE; as = asset.0 %]
+ <h1>[% submit or 'submit' %] [% ning; ' '; type or asc.assetcategory.asc_name or asc.type or asc.asc_name %] [% IF submit == 'Update'; 'in'; ELSE; 'to'; END -%] the Asset Database</h1>
     [% headmsg %][%# IF warning; '&lt;WARNING&gt;'; warning; '&lt;/WARNING&gt;'; END %]<form method="POST" action="[% action %]">
-    <table>
-      <tr class="asset">
-    <th>Asset Keys</th>
-    <th>Data Values</th>
-    <th>Data Restrictions</th>
-     </tr>
-      [% FOREACH ac = asc %]
-         <tr class="as_data as_data_[% loop.parity %]">
-           <td class="bg">[% ac.ac_name  or '' %]</td>
-           <td class="bg">[% IF ac.ac_type=='text';
-            '<input type="text" name="'; ac.ac_id; '" value="'; ac.ac_value; '" />';
-        ELSIF ac.ac_type=='textarea';
-            '<textarea name="'; ac.ac_id; '">'; ac.ac_value; '</textarea>';
-        ELSIF ac.ac_type=='checkbox';
-            '<input type="checkbox" name="'; ac.ac_id; '" />';
-        END %]
-        </td>
-        <td class="bg_white">
-        [% IF ac.ac_regexp; %] ( [% ac.ac_regexp %] ) [% END %]
-       </td>
-         </tr>
-      [% END %]
-    </table>
-    [% IF create == 'new' %]
-    <input type="hidden" name="create" value="new" />
-    [% END %]
-    [% IF update == 'update' %]
-    <input type="hidden" name="update" value="update" />
-    [% END %]
-    [% FOREACH ach = ach %]
-    <input type="hidden" name="[% ach.name %]" value="[% ach.value %]" />
-    [% END %]
-    <input type="submit" name="Add" value="[% submit or 'Add' %] [% type %]" />
-    </form>
-[% END #of UNLESS %]
-[% END #of WRAPPER %]
+        <input type="hidden" name="cid" value="[%- id -%]" />
+        [%- IF as.as_id -%]
+            <input type="hidden" name="update" value="update" />
+        [%- END -%]
+    <table border=1>
+        <tbody><tr class="asset nowrap">
+        [%- IF as.as_id -%]<th>Asset ID</th><th>Category ID</th>[%- END -%]
+        <th>Account</th>
+        <th>Owner</th>
+        <th>User</th>
+        [%- IF as.as_date -%]
+        <th>Date Added</th>
+        [%- END -%]
+        [%- IF containers.size -%]
+            <th>Container</th>
+        [%- END -%]
+        <th>Notes</th><th colspan="3">Action</th></tr>
+    
+        [% # here we are given the opertunity to update the asset data in the assets table %]
+        [% #  as_id     as_cid    as_date   as_acid   as_owner  as_user   as_adid   as_grid   as_in_asid as_notes  -%]
 
+    <tr class="even nowrap">
+        [%- IF as.as_id -%]
+        <td class="as_row">[%- as.as_id -%]</td>
+        <td class="as_row"><select name="cid">
+            [%- FOREACH ac = asc -%]
+                <option value="[%- ac.asc_id -%]"[%- IF ac.asc_id == as_cid; ' selected="selected"'; END -%]>[%- ac.asc_name -%]</option>
+            [%- END -%]
+        </td>
+        [%- END -%]
+        <td class="as_row"><select name="acid">
+            <option value="[%- as.as_acid || c.param('ef_acid') -%]">Your account</option>
+           </select></td>
+        <td class="as_row"><select name="owner">
+                <option value="">&lt;Optional&gt;</option>
+                <option value="[%- as.as_owner || c.param('pe_id') -%]">You</option>
+            </select></td>
+        <td class="as_row"><select name="user">
+                <option value="">&lt;Optional&gt;</option>
+                <option value="[%- as.as_user || c.param('pe_id') -%]">You</option>
+            </select></td>
+        [%- IF as.as_date -%]
+        <td class="as_row">[%- as.as_date -%]</td>
+        [%- END -%]
+        [%- IF containers.size -%]
+            <td class="as_row"><select name="in_asid">
+            [%- FOREACH box = containers -%]
+                <option value="[%- box.as_id -%]">[%- box.as_name; '('; box.as_id; ')' -%]</option>
+            [%- END -%]
+            </select></td>
+        [%- END # IF containers -%]
+        [%- IF as.as_notes.size; 
+                # NOTE split as.as_notes into lines, fine the longest line and set the cols
+                # then use the number of lines to set the rows... not like this
+                as_notes.rows = (  ( as.as_notes.size * 1 ) / ( as.as_notes.length + 1 ) ); 
+                as_notes.cols = ( as.as_notes.length - 4 ); 
+                IF as_notes.cols >= 40; as_notes.cols = 40; END;
+            ELSE; as_notes.rows = 1; as_notes.cols = 8; END -%]
+        <td class="as_row"><textarea name="notes" rows="[%- as_notes.rows -%]" cols="[%- as_notes.cols -%]">[%- as.as_notes -%]</textarea></td>
+            <td class="as_row nowrap">
+        [%- IF as.as_id -%]
+            <input class="edit button blue" name="" value="Update Details" type="submit" />
+        [%- ELSE -%]
+            <input class="edit button blue" name="Add" value="Add Details" type="submit" />
+            <input name="new" value="create" type="hidden" />
+            <input name="create" value="new" type="hidden" />
+        [%- END -%]
+        </td>
+         </tr>
+    </tbody>
+    </table>
+    </form>
+ [% END #of IF-ELSE %]
+[% END #of WRAPPER %]

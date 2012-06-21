@@ -2,8 +2,18 @@ package Notice::C::Assets;
 
 use warnings;
 use strict;
+use lib 'lib';
 use base 'Notice';
 my %opt; #options; nice to have.
+my %submenu = (
+   8 => [
+        '1' => { name=> 'Add', rm => 'details', class=> 'navigation'},
+        '2' => { name=> 'List', rm => 'list', class=> 'navigation'},
+        '3' => { name=> 'Define', rm => 'define', class=> 'navigation'},
+        '99' => { name=> 'Categories', rm => 'defined', class=> 'navigation'},
+    ],
+);
+
 
 =head1 NAME
 
@@ -15,7 +25,8 @@ Template for consistent controller creation.
 
 =head1 DESCRIPTION
 
-To create and manage a list of assets
+To create and manage a list of assets or possetions. 
+It might also be possible to use this to run a stock-room list.
 
 =head1 METHODS
 
@@ -24,34 +35,24 @@ To create and manage a list of assets
 =head3 setup
 
 Override or add to configuration supplied by Notice::cgiapp_init.
+Set which runmodes require authentication, (all of them).
+Set the submenu.
 
 =cut
 
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(':all');
-    #$self->tt_params({ submenu => \%submenu });
-    my $runmode;
-    $runmode = ($self->query->self_url);
-    $runmode =~s/\/$//;
-    if($self->param('rm')){
-        $runmode = $self->param('rm');
+    unless( 
+            $self->param('group.asset_admin') 
+            || ( $self->param('pe_id') && $self->param('pe_id') >= 2) #this is a dirty hack
+    ){
+        delete($submenu{8}[@{ $submenu{8} }-1]);
     }
-    if($self->param('id')){
-        my $id = $self->param('id');
-        if($self->param('extra1')){
-            my $extra = $self->param('extra1');
-            $runmode =~s/\/$extra[^\/]*//;
-        }
-        if($self->param('sid')){
-            my $sid = $self->param('sid');
-            $runmode =~s/\/$sid[^\/]*//;
-        }
-        $runmode =~s/\/$id[^\/]*$//;
-    }
-    $runmode=~s/.*\///;
-
+    $self->tt_params({submenu=>\%submenu});
+   # my $runmode; $runmode = ($self->query->self_url);
 }
+
 
 =head2 RUN MODES
 
@@ -150,16 +151,16 @@ sub main: StartRunmode {
 +--------+---------+---------------------------------+-----------+----------+---------------------+----------+
 | acd_id | acd_cid | acd_name                        | acd_order | acd_type | acd_regexp          | acd_grid |
 +--------+---------+---------------------------------+-----------+----------+---------------------+----------+
-|     27 |      19 | Planting date                   |         2 | text     | \\d{4}.?\\d{2}.?\\d{2} |     NULL | 
-|     29 |      19 | Height                          |         3 | text     | \\w+                 |     NULL | 
-|     30 |      19 | Common Name                     |         1 | select   | \\w+                 |       10 | 
-|     31 |      19 | Planting Ref                    |         4 | text     | \\w+                 |     NULL | 
-|     32 |      19 | Cause of Death                  |        12 | text     | \\w+                 |     NULL | 
-|     33 |      19 | Date of Death                   |        11 | text     | \\w+                 |     NULL | 
-|     37 |      19 | GPS Location                    |         8 | text     | \\w+                 |     NULL | 
-|     35 |      19 | Trunk Circumpherence at Ground  |         6 | text     | \\w+                 |     NULL | 
-|     36 |      19 | Trunk Circumpherence at 1 Meter |         7 | text     | \\w+                 |     NULL | 
-|     54 |      19 | Leaf Colour                     |         5 | text     | \\w*                 |     NULL | 
+|     27 |      19 | Planting date                   |         2 | text     | \\d{4}.?\\d{2}.?\\d{2} |  NULL | 
+|     29 |      19 | Height                          |         3 | text     | \\w+                 |    NULL | 
+|     30 |      19 | Common Name                     |         1 | select   | \\w+                 |      10 | 
+|     31 |      19 | Planting Ref                    |         4 | text     | \\w+                 |    NULL | 
+|     32 |      19 | Cause of Death                  |        12 | text     | \\w+                 |    NULL | 
+|     33 |      19 | Date of Death                   |        11 | text     | \\w+                 |    NULL | 
+|     37 |      19 | GPS Location                    |         8 | text     | \\w+                 |    NULL | 
+|     35 |      19 | Trunk Circumpherence at Ground  |         6 | text     | \\w+                 |    NULL | 
+|     36 |      19 | Trunk Circumpherence at 1 Meter |         7 | text     | \\w+                 |    NULL | 
+|     54 |      19 | Leaf Colour                     |         5 | text     | \\w*                 |    NULL | 
 +--------+---------+---------------------------------+-----------+----------+---------------------+----------+
 </span>
     );
@@ -204,21 +205,45 @@ sub delete: Runmode{
     return $self->tt_process();
 }
 
+=head3 defined
+
+This is a list of the assets that have already been defined
+ (so that you can update their definitions
+
+=cut
+
+sub defined: Runmode{
+    my ($self) = @_;
+    my $q = $self->query();
+    if($q->param('debug')){ 
+        #$self->tt_params({ error => '<pre id="XSS rulez">' . $q->param('debug'). '</pre>' }); 
+        my $debug = $q->param('debug');
+        $debug =~s/\W/ /g;
+        $self->tt_params({ error => $debug });
+    }
+    my @types = $self->resultset('AssetCategory')->search();
+    $self->tt_params({ types => \@types});
+
+    return $self->tt_process();
+}
+
 =head3 details
 
   These are the details of an existing asset (either being shown or added)
     if you want to add a type of asset then you need sub define: Runmode
   
   * Purpose - display/update/add asset details (not to be confused with the asset data)
-  * Expected parameters - data
+  * Expected parameters - an asset id or asset data from the form
   * Function on success - put it in the the asset table
   * Function on failure - a good error message.. one day
+
+  This is really the add/update function for Assets. 
 
 =cut
 
 sub details: Runmode{
 
-    # NTS this is a mess! we have to collec the data and populate @asc with it
+    # NTS this is a mess! we have to collect the data and populate @asc with it
     #    as we create @asc from the database (right now it is hard coded into this Runmode
     #   then again this Runmode is designed for a specific database so why not just
     #   collect the data and create @asc with it?
@@ -228,19 +253,30 @@ sub details: Runmode{
     my $warning;
     use Data::Dumper;
     my ($as_cid,$as_id);
-    my $q = \%{ $self->query() };  # WORKS
-    ##my $q = %{ $self->query() }; # BROKEN
-    #my $q = $self->query();   # WORKS
+    ##my $q = %{ $self->query() }; # can't deref like this
+    #my $q = \%{ $self->query() }; # deref, but why? when...
+    my $q = $self->query();   # WORKS
     #$warning .= Dumper($q->{'param'});
-    if($self->param('id')){
+    if($self->param('id')){ 
+        # yeah, bit of a mix up - but as we go into this we have the id for the category
+        # but then we are entering a new asset so we are starting to talk about id as the id 
+        # for the asset so the id for the category has to transition here, (or you could fix it? maybe)
+                    
         $as_cid = $self->param('id');
-        $as_cid=~s/.*\?id=//;
+        $as_cid=~s/.*\?c?id=//;
+        $as_cid=~s/;.*$//;
+        if($q->param('cid') && $q->param('cid')=~m/^\d+$/ && ( $as_cid != $q->param('cid')) ){
+            $as_cid = $q->param('cid');
+        }
+        #warn "we DO have a cid of $as_cid";
         if($self->param('sid')){ 
             $as_id = $self->param('sid');
         }
     }elsif($q){
-        if($q->param('id')){ $as_cid = $q->param('id'); }
-        elsif($q->param('sid')){ $as_cid = $q->param('sid'); }
+        if($q->param('cid')){ 
+            $as_cid = $q->param('cid'); 
+           # warn "we GOT a CID $as_cid "; 
+        }elsif($q->param('sid')){ $as_id = $q->param('sid'); }
           $message .= "QO = " . Dumper($q);
           $message .= "<br />\n";
           #foreach my $ref (@{ $q->param("id") }){
@@ -252,56 +288,102 @@ sub details: Runmode{
           #$message .= "DUMP = " . ref($self->param('id'));
     }
     unless($as_cid && $as_cid=~m/^\d+$/){
-        use String::Clean::XSS;
-                $as_cid = convert_XSS("$as_cid");
-                my $error = "I need to know what type of asset we are adding<br />\n";
-                $message .=qq |<div><span class="error">$as_cid</span> is not a valid asset type</div>|;
-                #$message .= Dumper($self);
-                $self->tt_params(
-                        title => 'Error - unknown asset type',
-                        error => $error,
-                        message => $message);
-                return $self->tt_process();
+      warn "NOPE!";
+         # we don't know which asset type they want to add!
+         # Either they have not selected a category OR there ARE NONE! ooooooh
+         my $error = "There are no Asset Categories yet, (how sad).<a href=\"define\">Maybe you should define one.</a><br>\n";
+         my @ac_rs = $self->resultset('AssetCategory')->search();
+         #if(@ac_rs && @ac_rs->count >= 1){
+         if(@ac_rs){
+            $error = "What category of Asset would you like to add?<br>\n";
+            #$message .=qq |<div><span class="error">$as_cid</span> is .not. a valid asset type</div>|;
+            $message ='';
+            $self->tt_params({ title => 'Notice CRaMA Assets - please select one', ac => \@ac_rs });
+         }else{
+            $self->tt_params({ title => 'Notice CRaAM Assets - Shiny and new' });
+            $message .=qq |<div>The cupboard is bare, (what is a cupboard? Maybe you could define that!)</div>|;
+         }
+         $self->tt_params({
+             error => $error,
+             message => $message});
+         return $self->tt_process();
     }
     $message='';
-
-    if ( $q->param('create') && $q->param('create') eq "new" ) {
-    #use DateTime;
-    #my $now = DateTime->now();         # these three lines work but why bother?
-    #my %create_data = ( as_date => $now);
-
-    my %create_data = ( as_date => \'NOW()');   #this works
-    # my %create_data = ({ as_date => \'NOW()'});   #or this might
-    foreach my $ak (keys %{ $q->{'param'} } ){
-    # might be better to pull this from an array, but there must be a
-    # better DBIx::Class way to know which collums we are looking for
-      if(
-        $ak eq 'cid' || 
-        $ak eq 'acid' ||
-        $ak eq 'owner' ||
-        $ak eq 'user' ||
-        $ak eq 'adid' ||
-        $ak eq 'grid' ||
-        $ak eq 'in_asid' ||
-        $ak eq 'notes'
-       ){
-        $create_data{"as_$ak"} = $q->param($ak);
-       }
+    my @acd = ();
+    if($as_cid){
+            @acd = $self->resultset('AssetCatData')->search({ 'acd_cid' => "$as_cid"});
+    }else{
+            @acd = $self->resultset('AssetCatData')->search();
     }
-    #$warning = Dumper(%create_data);
-    my $comment = $self->resultset('Asset')->create( \%create_data );
-        $comment->update;
-    $as_id = $comment->id;
-    #$warning = Dumper($comment);
-        $self->tt_params( headmsg => qq |Asset added! <a href='/cgi-bin/index.cgi/assets/data/$as_cid/$as_id/'>Asset added!</a>|);
-    }elsif($q->param('update') && $q->param('update') eq 'update') {
-    $warning .= "This is still to be written...";
-    }
-     my  @asc = ();
+    $self->tt_params({ acd => \@acd });
+    if( ( $q->param('create') && $q->param('create') eq "new" ) ||
+        ( $q->param('update') && $q->param('update') eq 'update') ) {
+        #use DateTime;
+        #my $now = DateTime->now();         # these three lines work but why bother?
+        #my %create_data = ( as_date => $now);
+
+        my %create_data = ( as_date => \'NOW()');   #this works, if the DB has the same time as the web server
+        foreach my $ak (keys %{ $q->{'param'} } ){
+          # might be better to pull this from an array, but there must be a
+          # better DBIx::Class way to know which collums we are looking for
+          if(
+            $ak eq 'cid' || 
+            $ak eq 'acid' ||
+            $ak eq 'owner' ||
+            $ak eq 'user' ||
+            $ak eq 'adid' ||
+            $ak eq 'grid' ||
+            $ak eq 'in_asid' ||
+            $ak eq 'notes'
+           ){
+            if($q->param($ak) ne ''){
+                $create_data{"as_$ak"} = $q->param($ak);
+            }
+           }
+        }
+        #$warning = Dumper(%create_data);
+        # Your mission is to combine the update and create into one simple and safe chunk of code.. go!
+        if($q->param('update') && $q->param('update') eq 'update') {
+            #$warning .= "This is still being written...";
+            #$self->tt_params( headmsg => $warning );
+            #my $rs = $self->resultset('Asset')->search({ as_id => $as_id, as_cid => $as_cid, })->first;
+            #if(defined($rs) && $q->param('cid') && $rs->as_cid == $q->param('cid')){
+            if(defined $as_id  && $as_cid){
+                delete($create_data{as_date}); # this is the "created date" so we never updated it.
+                $create_data{as_id} = $as_id;
+                $create_data{as_cid} = $as_cid;
+                #$create_data{as_id} = $rs->as_id;
+                #$create_data{as_cid} = $rs->as_cid;
+                my $comment = $self->resultset('Asset')->update_or_create( \%create_data );
+                #warn "Asset " . $comment->id . " updated";
+                $self->tt_params( headmsg => qq |<span class="warning">Asset updated.</span>
+                    <a class="black" href='/cgi-bin/index.cgi/assets/data/$as_cid/$as_id/'>
+                    <span class="message">You can add or edit data about this asset here</span></a>|);
+            }else{
+                $warning .= "Update failed... sorry. (Let your sysadmin know.)";
+                $self->tt_params({headmsg => $warning});
+                #warn Dumper($rs->as_id);
+                warn "update of asset $as_id by " . $self->authen->username . " failed";
+            }
+        }else{
+            my $comment = $self->resultset('Asset')->create( \%create_data );
+            $comment->update;
+            $as_id = $comment->id;
+            #$warning = Dumper($comment);
+            $self->tt_params( headmsg => qq |Asset added! <a class="black" 
+                    href='/cgi-bin/index.cgi/assets/data/$as_cid/$as_id/'>
+                    <span class="message">You can now add data about this asset</span></a>|);
+        }
+    } # end of "new" and "update"
+    #else{warn Dumper($q);}
+
+    my  @asc = ();
     if($as_id && $as_id=~m/^\d+$/){
       my $as_rs = $self->resultset('Asset')->search(
         { 'as_id' => { '=', "$as_id"}},
         {});
+
+    # what is this all about? 
       while(my $l=$as_rs->next){
         my $as_acid = $l->as_acid;  
         my $as_owner = $l->as_owner;    
@@ -309,6 +391,9 @@ sub details: Runmode{
         my $as_adid = $l->as_adid;  
         my $as_grid = $l->as_grid;  
         my $as_notes = $l->as_notes;    
+        unless(defined $as_notes){ $as_notes = ''; } 
+        unless(defined $as_owner){ $as_owner = ''; } #pesky 'Use of uninitialized value $as_owner in string'
+        #unless(defined $as_user){ $as_user = ''; }
             push ( @asc, 
          {ac_name => 'Account', ac_id => 'acid', ac_type => 'text', ac_regexp => '\d+(\.\d+)*', ac_value=> "$as_acid" },
              {ac_name => 'Owner',   ac_id => 'owner', ac_type => 'text', ac_regexp => '\d+', ac_value=> "$as_owner" },
@@ -319,10 +404,7 @@ sub details: Runmode{
          {ac_name => 'Notes', ac_id => 'notes', ac_type => 'textarea', ac_regexp => '', ac_value => "$as_notes" }
         );
       }
-      $self->tt_params( title => 'Asset Details',
-             submit => 'Update',
-             update => 'update'
-    );
+      $self->tt_params({ title => 'Asset Details', submit => 'Update', update => 'update'});
     }else{ 
         @asc = (
                  {ac_name => 'Account', ac_id => 'acid', ac_type => 'text', ac_regexp => '\d+(\.\d+)*', ac_value=>'1.5' },
@@ -333,13 +415,8 @@ sub details: Runmode{
                  {ac_name => 'Container',ac_id =>'in_asid', ac_type => 'text', ac_regexp => '\d+' },
          {ac_name => 'Notes', ac_id => 'notes', ac_type => 'textarea', ac_regexp => '', ac_comment => "Keep this short, as we mostly want to add notes into the Asset Data rather than here"},
                 );
-        @asc = $self->resultset('AssetCatData')->search(
-                { 'acd_cid' => { '=', "$as_cid"}},
-                {});
-      $self->tt_params( title => 'Add Asset Details',
-             submit => 'Add',
-             create => 'new'
-    );
+        @acd = $self->resultset('AssetCatData')->search({ 'acd_cid' => "$as_cid"});
+        $self->tt_params( title => 'Add Asset Details', acd => \@acd, submit => 'Add', create => 'new');
     }   
     my $ac_rs = $self->resultset('AssetCategory')->search(
                 { 'asc_id' => { '=', "$as_cid"}},
@@ -348,16 +425,23 @@ sub details: Runmode{
                 #push(@asc, {type => $k->asc_name});
                 my $name = $k->asc_name;
                 $self->tt_params( type => $k->asc_name);
+                $self->tt_params( id => $k->asc_id);
                 if($name=~m/^[aeiouh]/){ $self->tt_params( ning => 'an'); }
     }
     my @ach = (
                 {name=>'cid',value=>"$as_cid"}
                 );
 
-    unless(@asc){
-        my $error = "That isn't a valid asset ID<br />\n";
+    unless(@acd){
+        my $error = "&zwj;<br>";
+        if($as_cid){
+            @acd = $self->resultset('AssetCatData')->search({ 'acd_cid' => "$as_cid"});
+        }else{
+            @acd = $self->resultset('AssetCatData')->search();
+        }
+        if(@asc){ $self->tt_params({ acd => \@acd }); }
         unless(defined $as_id){ $as_id = 'That'; }
-        $message =qq |<div><span class="error">$as_id</span> is not a valid asset</div>|;
+        $message =qq |<div><span class="error">$as_id</span> is /not/ a valid asset</div>|;
         $self->tt_params(
                 title => 'Error - unknown asset',
                 error => $error,
@@ -365,6 +449,15 @@ sub details: Runmode{
         return $self->tt_process();
     }
 
+    # NTS we need to add cat => @asc (things that this asset /could/ fit into)
+    # NTS we need to add box => @containers (things that this asset /could/ fit into)
+    # NTS we need accounts that this pe_id can assign assets to
+    # NTS we need users => @users (array of people that this pe_id can set as users )
+    # NTS we need owners => @owners (array of people that this pe_id can set as owners) 
+    if($as_id){
+        my @as = $self->resultset('Asset')->search({ 'as_id' => "$as_id"})->first;
+        $self->tt_params({ asset => \@as });
+    }
 
     $self->tt_params( 
          asc => \@asc,
@@ -378,10 +471,8 @@ sub details: Runmode{
 
 =head3 data
 
-  * Purpose - display/add data to an asset
-  * Expected parameters
-  * Function on success
-  * Function on failure
+  * Purpose - add/update the data to an asset
+  * This is all about the asset_data table
 
 =cut
 
@@ -404,18 +495,48 @@ sub data: Runmode{
     #}elsif( ref($self->param('id')) eq 'ARRAY'){
     #   $acd_id = $self->param('id')->[0];
     }elsif(! defined $self->param('sid')){
-        $as_id = $self->param('id');
-        my $find_asc =  $self->resultset('Asset')->search(
-                { 'as_id' => { '=', "$as_id"},
-        },{})->first;
-        if($self->resultset('Asset')->search({ 'as_id' => { '=', "$as_id"}, },{})->count == 1){
+        $acd_id = $self->param('id');
+        #warn "$acd_id";
+        if($self->resultset('Asset')->search({ 'as_cid' => "$acd_id" })->count == 1){
+            my $find_asc =  $self->resultset('Asset')->search({ 'as_id' => "$as_id" })->first;
+            # why do we have this?
             $acd_id = $find_asc->as_cid;
         }else{
-            $self->tt_params( 
-                title => 'Error - unknown asset',
-                message => 'That asset has not yet been added to the database',
-                no_data => '1',
-                error => '<script type="text/javascript">
+            #if(my $asc_is = $self->resultset('AssetCategory')->search({ 'asc_id' => "$acd_id"})->first){
+            if($self->resultset('AssetCategory')->search({ 'asc_id' => "$acd_id"})->first){
+                # NTS you are here creating an "Add a new asset via the back door" function.
+                #while(my $fasc=$find_asc->next){ $acd_id = $fasc->ac_cid; }
+                #my $acd_cid = 0;
+                #while(my $this_cid=$asc_is->next){ $acd_cid = $this_cid->ac_cid; }
+                #$acd_cid = $asc_is->asc_id;
+                #my @acd = ();
+                #if($acd_cid && $acd_cid >= 1){
+                    $message .= "New "; #well that seems a lot cleaner
+                    #@acd = $self->resultset('AssetCatData')->search({ 'acd_cid' => "$acd_cid"});
+                    #warn "Looks like we have a good Asset Cat but no asset";
+                    #$self->tt_params({ acd => \@acd, message => 'New ' });
+                #}
+                #if(@acd){ 
+                    #$self->tt_params({ asc => \@asc }); 
+                    #$self->tt_params({ cid => $acd_cid }); 
+                    #my $acd_name =  $acd[0]->acd_name;
+                    #$message .= 'New ' . $acd_name ;
+                    #$self->tt_params({ 
+                    #    message => $message,
+                    #    #no_data => '1',
+                    #    });
+                    #return $self->tt_process();
+                #}else{
+                #    # we had an invalid as_cid or the DB is borked
+                #    $self->tt_params({ no_data => '1', message => "I don't seem to have that Asset Category on the books yet." });
+                #    return $self->tt_process();
+                #}
+            }else{
+                # give them a list of categories
+                # NOTE not written yet
+                $self->tt_params({ 
+                    no_data => '1', 
+                    error => '<script type="text/javascript">
 function goBack()
   {
   window.history.back()
@@ -424,17 +545,17 @@ function goHome(url)
     {
         window.document.location.href=url
     }
-</script>
-</head>
-<body>
+</script>',
+                  page => 'You could 
+<a class="small green button" href="/cgi-bin/index.cgi/assets/define">maybe defined it</a> or
+<input class="small yellow button" type="button" value="try going back" onclick="goBack()" />
+-<input class="small white button" type="button" value="or searching" onclick="goHome(\'/cgi-bin/index.cgi/assets\')" />',
 
-<input type="button" value="Maybe try going back" onclick="goBack()" />
-<input type="button" value="or searching" onclick="goHome(\'/cgi-bin/index.cgi/assets\')" />'
-                );
-            return $self->tt_process();
+                    message => "I don't seem to have that Asset Category on the books yet." });
+                   # message => "What type of asset are you trying to add?" });
+                return $self->tt_process();
+            }
         }
-        # we should only have one entry!
-        #while(my $fasc=$find_asc->next){ $acd_id = $fasc->ac_cid; }
     }else{
         no strict "refs";
         if($q && $q->param('id')){
@@ -452,10 +573,10 @@ function goHome(url)
 
     #my $acd_id = '';
     unless($acd_id && $acd_id=~m/^\d+$/){
-    use String::Clean::XSS;
+        use String::Clean::XSS;
         my $clean_acd_id = convert_XSS("$acd_id");
         my $error = "I need to know what type of asset we are adding<br />\n";
-        $message .=qq |<div><span class="error">$clean_acd_id</span> is not a valid asset type</div>|;
+        $message .=qq |<div><span class="error">$clean_acd_id</span> is _not_ a valid asset type</div>|;
         #$message .= Dumper($self);
         $self->tt_params( 
             title => 'Error - unknown asset type',
@@ -464,19 +585,51 @@ function goHome(url)
         return $self->tt_process();
     }
 
+    if( ( $q->param('do') && $q->param('do') eq "Add to" ) ||
+        ( $q->param('do') && $q->param('do') eq "create" ) ){
+        #$message .= "What's going on here?";
+         my %create_data = ( asd_date => \'NOW()');
 
-    if ( $q->param('do') && $q->param('do') eq "Add to" ) {
-    #$message .= "What's going on here?";
+         # If we don't find an asset then we just create one using the default of pe_id pe_acid
+        
+        if($q->param('sid')){
+            $create_data{'asd_asid'} = $q->param('sid');
+            warn "we know this asset! (suer-wheat) " . $q->param('sid');
+        }else{
+            # we need to quickly shim in a new asset
+            my $ac_id = $self->param('pe_acid');
+            unless(defined $ac_id && $ac_id=~m/^\d+$/){
+                my $pe_id = $self->param('pe_id');
+                # or should we use thier username?
+                # we _really_ need to know their ac_id
+                my $rs = $self->resultset('People')->search({ pe_id => "$pe_id" });
+                my $user_details = $rs->first;
+                $ac_id = $user_details->pe_acid;
+            }
+            my %new_asset = ( as_date => \'NOW()', as_cid => $q->param('id'), as_acid => $ac_id);
+            #my $create = $self->resultset('Asset')->update_or_create( \%new_asset );
+            my $create = $self->resultset('Asset')->create( \%new_asset );
+            $create->update;
+            my $as_id = $create->id;
+            $create_data{'asd_asid'}  = $as_id;
+        }
         ADD: foreach my $ak (keys %{ $q->{'param'} } ){
-      if($q->param($ak) ne '' && $ak=~m/^\d+$/){
-            my %create_data = ( asd_date => \'NOW()');
-        $create_data{'asd_value'} = $q->param($ak);
-        my $comment = $self->resultset('AssetData')->search( { asd_cid => $ak, asd_asid => $q->param('sid') });
-        #$comment->update_or_create( \%create_data );
-        $comment->create( \%create_data );
-       }
-    }
-        $self->tt_params( headmsg => qq |Asset Data added! <a href='?'>&laquo;back</a>|);
+            if( $q->param($ak) ne '' && $ak=~m/^\d+$/){
+                my %uoc = %create_data;
+                $uoc{'asd_value'} = $q->param($ak);
+                $uoc{'asd_cid'} = $ak;
+                my $comment = $self->resultset('AssetData')->search( { asd_cid => $ak, asd_asid => $uoc{'asd_asid'} });
+                #my $comment = $self->resultset('AssetData')->search( \%uoc ); #can't do this because it searches on date!
+                if($comment){
+                    delete($uoc{asd_date});
+                }
+                $comment->update_or_create( \%uoc );
+            }
+        }
+        my $as_cid = $q->param('id'); my $as_id = $create_data{'asd_asid'};
+            # NOTE fix this href using $surl = ($self->query->self_url);
+        $self->tt_params( headmsg => qq |<a href="/cgi-bin/index.cgi/assets/list/$as_id/">
+                <span class="warning">View New Asset</span></a> <a class="black" href='?'>&laquo;back</a>|);
     }elsif ( $q->param('do') && $q->param('do') eq "Update" ) {
       use DateTime;
       my $now = DateTime->now();
@@ -499,10 +652,11 @@ function goHome(url)
             #$key{'asd_cid'} = $id; #asset_data.asd_cid is really asset_cat_data.acd_id not asset_categories.asc_id
             }
             #$warning = Dumper(%create_data);
-            # NTS you are preparing the update (key seems not to work)
+            # you are preparing the update (key seems not to work)
             if(%create_data && %key){
                     # my %create_data = ({ as_date => \'NOW()'});   #NOTE or this
                     # my %create_data = ( as_date => \'NOW()');     #NOTE this might work
+                    # $create_data{ as_date => \'NOW()'};     # this should work, (if your DB is in the same timezone as your webserver)
                     $create_data{'asd_date'} = $now;
                     #my $comment = $self->resultset('AssetData')->update( \%create_data, {asd_cid => $ak, asd_asid => "$q->param('sid')" });
                     my $comment = $self->resultset('AssetData')->search( { asd_cid => $ak, asd_asid => $q->param('sid') });
@@ -730,7 +884,7 @@ sub list: Runmode{
 =head3 define
 
 This lets you define an asset
-# NTS you are here - if we have a cid then pull what we DO know from the DB
+# if we have a cid then pull what we DO know from the DB
 
 =cut
 
@@ -740,7 +894,6 @@ sub define: Runmode {
     my ($surl,$page);
     $surl = ($self->query->self_url);
     my $q = \%{ $self->query() };
-    if(defined($q->param('debug'))){ $opt{debug}= $self->param('debug') if $q->param('debug')=~m/^\d+$/; }else{ $opt{'debug'}=0; }
     my $message='';
     my $user_msg;
     my $cid = '';
@@ -764,7 +917,10 @@ sub define: Runmode {
             my $action = 'update';
             if( $q->param('delete') ){ $action = 'delete'; }
 
+        # preparing the data for update or deleting
+        
             $message .= "Looks like you are " . $action . "ing Asset Category " . $q->param('id') . "\n<br />";
+            #$message .= Dumper($q->param);
             my $this_count=0;
             my %change;
             my %check;
@@ -849,7 +1005,7 @@ sub define: Runmode {
                     }
 ##### debug to check that we have the data in the right order
 #$self->tt_params({heading=>"Changed/updated the '".$ac->asc_name."' category", ac=>$ac,acd=>\@acd,message=>$message,page=>$page});
-#return $self->tt_process(); exit;
+# return $self->tt_process(); exit;
 ##### end of debug
 
                 }
@@ -887,23 +1043,23 @@ sub define: Runmode {
       }else{
         $message .= "So you want to add " ;#. Dumper($q->param);
 
-        # NTS check that we don't already have that 
-        # NTS collect the data
+        # NOTE check that we don't already have that 
+        # NOTE collect the data
         my $qp = $q->param;
         $message .= "\n<br />"; my $this_count=0;
         foreach my $ak (keys %{ $q->{'param'} } ){
                 my $v = $q->param($ak);
                 $this_count++; $message .= "\n<br /> $this_count $ak = " . $q->param($ak);
         }
-        # NTS insert the data
+        # NOTES insert the data
       }
     }
     #else we have a new category
 
     $self->tt_params({
-    heading => 'Add a new type of Assets',
+    heading => 'Define a new type of Asset',
     message => $message,
-    page => $page,
+    page => $page, #what? we are trying to keep the HTML out of the C and in the V!
           });
     return $self->tt_process();
 }
@@ -917,7 +1073,7 @@ __END__
 There are no known problems with this module, but be kind: This was me learning CGI::App 
 for the first time, (hence the mess.)
 
-I am fixing bugs and adding features. I will report them through GitHub or CPAN.
+I am fixing bugs and adding features. I will report them through GitHub.
 
 =head1 SEE ALSO
 
@@ -932,7 +1088,7 @@ You could look for information at:
 
 =head1 AUTHOR
 
-Alexx Roche, C<alexx@cpan.org>
+C<Alexx Roche>, <alexx@cpan.org>
 
 =head1 LICENSE AND COPYRIGHT
 

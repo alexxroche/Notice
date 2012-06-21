@@ -1,5 +1,4 @@
-[% #WRAPPER 'Notice/C/Assets/wrapper.tmpl' %]
-[% WRAPPER 'site_wrapper.tmpl' %]
+[%- WRAPPER 'site_wrapper.tmpl' -%]
     <style type="text/css">
    /* table {border-collapse:collapse;} */
     tr th.under { border-bottom-style:dotted; }
@@ -47,10 +46,16 @@
     <input type="hidden" name="sid" value="[% asid %]" />
     <input type="hidden" name="do" value="[% submit or 'Add' %]" />
     <input type="submit" name="[% submit or 'Add' %]" value="[% submit; ' (this) '; type.replace('^An?', '') %]" class="button [% IF submit.match('Update'); 'blue'; ELSE; 'green'; END; %]"/>
+    [% ELSIF cid %]
+        <input type="hidden" name="id" value="[% cid %]" />
+        <input type="hidden" name="do" value="[% create OR 'create' %]" />
+        <input type="submit" name="[% 'create' -%]" value="[% 'Create this '; type.replace('^An?', '') %]" class="button [% IF submit.match('Update'); 'blue'; ELSE; 'green'; END; %]"/>
+
     [% ELSE %]
     Which asset is this data for?
     [% END %]
     </form>
  [% END %]
+ [%- page -%]
 [% END %]
 
