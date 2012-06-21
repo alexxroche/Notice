@@ -1,0 +1,10 @@
+{
+  "installed":[ '1.4.1',
+  ],
+  "_installed":[
+    "Account","Addresses","Assets","Beekeeping","Config","Details","Docs","Domains","Email","groups.cgiLogin","Logout","Main","Modules","Mustlogin","Myerror","Okay","Prefs","Signup"
+  ]
+  "maturity": {
+    "1.4.1": "outline",
+  }
+}

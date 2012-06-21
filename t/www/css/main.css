@@ -261,15 +261,15 @@ th:hover {
 	background-color: #fc7;
 }
 
-tbody tr.odd {
+tbody tr.odd, tr.stripe {
        background-color: #eaf
 }
 
-tbody tr.even {
+tbody tr.even, tr.strip {
 	background-color: #fea
 }
 
-tr a.even {
+tr a.even, tr.strip {
 	color: rgb(000, 000, 000);
 	text-decoration: none;
 }
@@ -397,7 +397,7 @@ td.keygen-ct {
 }
 
 
-.warning .warn {
+.warning, .warn {
         color: #630; /* dark blue */
         font-weight: normal;
         font-family: monospace;
