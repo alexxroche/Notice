@@ -41,6 +41,16 @@
   <link href="/css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 <script type="text/javascript" language="javascript">   
   $(document).ready(function() {
+    // this works but seems a little large
+   /* $.datepicker.setDefaults({
+        beforeShow: function ( input, inst ) {
+            inst.dpDiv.css({
+                zIndex: function(index, value) {
+                    return $.ui.dialog.maxZ + 7;
+                }
+            });
+        }
+    }); */
     $(function() {
          var dates = $( "#start_date, #end_date" ).datepicker({
             defaultDate: "+1d",
@@ -57,7 +67,16 @@
                         $.datepicker._defaults.dateFormat,
                         selectedDate, instance.settings );
                 dates.not( this ).datepicker( "option", option, date );
-            }
+            },
+            //works
+            //beforeShow: function ( input, inst ) { inst.dpDiv.css({ zIndex: function(index, value) { return $.ui.dialog.maxZ + 5; } }); },
+            //beforeShow: function (input, inst) { inst.dpDiv.css({ zIndex: function() { return 8; } }); },
+            beforeShow: function(){ $(".ui-widget").css("z-index", 9); },
+            // not
+            //beforeShow: function(){ $(this).dialog("widget").css("z-index", 4); },
+            //beforeShow: function(){ $(this).(".ui-widget").css("z-index", 3); },
+            //beforeShow: function(){ $(this).(".datecontrol").css("z-index", 2); },
+           
         });
 
     });

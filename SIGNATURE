@@ -247,7 +247,7 @@ SHA1 63536d036ae6b35273d10cfb0cfc561b236627f1 t/cgi-bin/templates/login_form.tmp
 SHA1 d0e9663e24f43e384b0a440df8025e07c42d6fed t/cgi-bin/templates/main.html
 SHA1 3a348b2bcba5ad74a7b025e12fa40bbf84817371 t/cgi-bin/templates/main.tmpl
 SHA1 df01cdfb504f4ccd4dc8f1339b8ba52933fceb26 t/cgi-bin/templates/sec_error.tmpl
-SHA1 65defce74f0a3b215790a024195658dbdbd70d6b t/cgi-bin/templates/site_wrapper.tmpl
+SHA1 be5f808d9b9b2ad2e297675935622de5175b3b8a t/cgi-bin/templates/site_wrapper.tmpl
 SHA1 b5cfec3d9801dbc806bcee21a4a81d71be0f05ba t/gameplan.info
 SHA1 f5b4834dce5fbb5eda91580491caec0a6a05bf7d t/module_outline.nts
 SHA1 cb3de934b65728bed1268e2da825e071c344a189 t/perl-critic.t
@@ -260,7 +260,7 @@ SHA1 8d8dc70aef7aa1016b58ff3f7e500fc6d48502a1 t/www/css/all.css
 SHA1 7bb0e48ba1a3e80cecce87eea68dc52bf098f312 t/www/css/asset.css
 SHA1 dd37776704c7961914a8b024f041352d76931073 t/www/css/domain_edit.css
 SHA1 59912b08a26e088632505eeb544fb0c976e13869 t/www/css/jquery-ui-pepper-grinder.css
-SHA1 dc8e084c45e096fd8e50740be1fb177b9bcdfadc t/www/css/main.css
+SHA1 dc2603dcff8554c7b3b74ac200e3d19804ec1261 t/www/css/main.css
 SHA1 4a433eb60b7e203082159cf5de995d29cf587831 t/www/css/mobile.css
 SHA1 61eab40e5206defe0df64aad89df21e31ac5ab5f t/www/css/notice.css
 SHA1 b876165081b3a3028fb004f7666c5f9a2949059d t/www/css/print.css
@@ -292,7 +292,7 @@ SHA1 63657cbb7d7086c56b0cd4e5c6999bb683664868 t/www/robots.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk/jc+4ACgkQAR68wSDJd66rDwCfYFK9RnRAQl+ZGlJ51GOx0Wp7
-qsMAnRKSUaTeuZ3Ovnragah07jHaR0Cz
-=Bxle
+iEYEARECAAYFAk/k4uAACgkQAR68wSDJd65J+gCgnKwg0Xc0C80c46PXfimxapRw
+XkcAn3er7SK0HnDkG4vR32e/2yCurazx
+=xRyN
 -----END PGP SIGNATURE-----

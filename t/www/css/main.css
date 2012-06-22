@@ -61,7 +61,7 @@ div.warn {display: block; margin: 1em auto; border: 1px solid; border-color: #dd
 #content {
     margin: 0 auto;
     display: block;
-    z-index: 110;
+    z-index: 1;
     border:2px solid #CCCCCC;
     padding:12px 17px 17px;
 }
