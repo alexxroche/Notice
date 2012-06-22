@@ -62,53 +62,15 @@ function ac_select() {
         }
 }
 
-
-function increment_name() {
-  var last_name = $(this).attr('name');
-  var next_id = last_name.replace(/^.*_/,'');
-  var next_name = last_name.replace(next_id,'');
-  next_id++;
-  $(this).attr({
-    //'id': function(_, id) { return id + i },
-    'name': function(_, name) { return next_name + next_id },
-    'value': ''
-  });
-  i=next_id;
-}
-
-
-var hammering_monkey=0;
-
-function table_addrow () {
-    // don't add a blank line if we already have one
-    if ( $("#acd_table tr:last input:first").val() == "" && hammering_monkey<=1){ 
-        //hammering_monkey++;
-        //alert("Try filling in the boxes you already have"); 
-        return false; 
-    }else if(hammering_monkey==2){
-        hammering_monkey++;
-        alert("OK then, have your boxes");
-    }
+function acd_table_addrow() {
     var last_order = $("#acd_table tr:last #order").val();
     last_order++;
-    $("#acd_table tr:last").clone().find("input").each(increment_name).end().appendTo("#acd_table");
-    $("#acd_table tr:last").find("select").each(increment_name);
+    $("#acd_table > tbody:last").append($("#acd_table tr:last").clone());
     $("#acd_table tr:last #order").val(last_order);
     $("#acd_table tr:last input:first").val('');
     $("#acd_table tr:last #regexp").val('');
-    i++;
 }
 
-function addrow_to_table(event){
-    var last_order = $(event.data.id + "tr:last " + event.data.ref).val();
-    last_order++;
-    $(event.data.id + " tr:last").clone().find("input").each(increment_name).end().appendTo(event.data.id);
-    $(event.data.id + " tr:last").find("select").each(increment_name);
-    $(event.data.id + " tr:last #order").val(last_order);
-    $(event.data.id + " tr:last input:first").val('');
-    $(event.data.id + " tr:last #regexp").val('');
-    i++;
-}
 
 
 // Trying to get focus to work again!
@@ -134,33 +96,10 @@ $(document).ready(function() {
     	$(".message").addClass('opthi');
     };
 
-  var last_id = $("#acd_table tr:last #order").attr('name');
-  if (last_id){
-    var next_id = last_id.replace('d_order_', '');
-  }
+   $("#acd_table tr:last input").live('change', acd_table_addrow );
+   $("#addrow").click( acd_table_addrow );
 
-// prevent the clicking of the add button from adding another row
-// NOTE this does not work (we need an .unless($("#addbutton").click()).on("change",... )
-
-   $("#addbutton").click(function () {
-    $("#acd_table").off("change", "#acd_table tr:last input:first", table_addrow);
-   });
-  
-    $("#acd_table").off("change", "#acd_table tr:last input", table_addrow);
-    // 1.4.4
-    //$("#acd_table tr:last input:first").live('change', table_addrow );
-    // 1.7.0 
-    // $(document).on("change", $("#acd_table tr:last input:first"), table_addrow );
-    // general case 
-    //$(document).on("change", $("#acd_table tr:last input:first"), { id: "#acd_table", ref: "#order" }, addrow_to_table );
-
-    //$(document).on("change", $("#acd_table tr:last input:first"), table_addrow ); //this bugs out and triggers on the top inputs
-    $(document).on("change", $("#acd_table tr:last input:first #d_id").filter(':first'), table_addrow );
-    //$(document).on("change", $("#acd_table tr:last input:first #d_id"), table_addrow );
-
-
-    $("#addrow").click( table_addrow );
-
+    //$("#ac_select").change(function() {
     $("#ac_select").keyup(function(){ ac_select(); });
     $("#ac_select").bind($.browser.msie ? 'propertychange': 'change', function() { ac_select(); });
 

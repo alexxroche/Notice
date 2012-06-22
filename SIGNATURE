@@ -271,7 +271,7 @@ SHA1 3a51ee604cb6e40e7900b22e042bca6dbe149967 t/www/images/NoticePageThrobber.gi
 SHA1 548b27444c7d2576fb824c2e66267acd766b4ae5 t/www/images/orphus.gif
 SHA1 4b772b939292e57eb8b6997206d8f888b57323fb t/www/images/top_logo.png
 SHA1 e98d0d086f790e026f5c8c73f4422282e93d99c8 t/www/index.html
-SHA1 6d98afd41e3a90c8bf466f404c95419b6fedb8d2 t/www/js/asset.js
+SHA1 b3b3c98ef8a40929181cc6e77eeef934ced573fd t/www/js/asset.js
 SHA1 1e7722a842a9ff46f6caa7a62d10ba8add41f1fd t/www/js/create_pw.js
 SHA1 a796b79577bab13be5ccc925819cea1c1bf1e558 t/www/js/javascriptAES.js
 SHA1 2b6ce7be25cd17ba485e20eec8a9a91519d016f3 t/www/js/jquery-ui-1.7.2.custom.min.js
@@ -292,7 +292,7 @@ SHA1 63657cbb7d7086c56b0cd4e5c6999bb683664868 t/www/robots.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk/k4+8ACgkQAR68wSDJd66ZLgCePBq8cpPtgoY9DQKcuVIiz4w5
-O8gAnRLW94Ild6BR5n0yLz5slrRNFXFa
-=72AL
+iEYEARECAAYFAk/k7qIACgkQAR68wSDJd67jIQCePQCbKNAGV4X2Apxsr0WStwm7
+iScAoIzJk/zV/JIWznx8q6Rgf5PJjLZo
+=/W7+
 -----END PGP SIGNATURE-----
