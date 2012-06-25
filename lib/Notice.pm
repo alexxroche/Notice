@@ -81,6 +81,9 @@ sets an error mode and configures the TT template directory.
 
 sub cgiapp_init {
   my $self = shift;
+  # use 5.12; use utf8; # harshly non-backwardly compatible
+  # http://cgi-app.org/index.cgi?page_name=Utf8Example
+  $self->query->charset('UTF-8'); 
   if(-f 'config/config.pl'){
     use CGI::Application::Plugin::ConfigAuto (qw/cfg/);
     #$self->cfg_file('config/config.pl'); #only needed if ommited from Notice::Dispatch
