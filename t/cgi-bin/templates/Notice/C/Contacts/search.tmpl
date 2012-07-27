@@ -1,0 +1,54 @@
+[%- WRAPPER 'site_wrapper.tmpl' -%]
+ <h1>[% heading %]</h1>
+ <span class="page">[% page %]</span>
+
+This is a more advanced search, (you can search any field, or stipulate ranges).
+
+ [%- # INCLUDE 'Notice/C/Calendar/cal_switcher.tmpl' -%]
+
+ [%- USE Dumper -%]
+ <table>
+    <caption><img src="[%- card.image -%]" /></caption>
+  <tr>
+    <th>Contact</th>
+    <th>Phone</th>
+  </tr>
+  [%- FOREACH vc = card -%]
+   <tr[%- IF loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    <td><a class="blue" href="[%- c.query.url -%]/domains/edit?domain=[%- vc.card_id -%]&id=[%- vc.card_id -%]&1=Edit">[%- vc.card_created -%]</a></td>
+    <td>[%- Dumper.dump(vc) -%]</td>
+  </tr>
+  [%- END #foreach -%]
+  <tr>
+    <th>Private</th>
+    <th>Work</th>
+  </tr>
+  </tr>
+     <tr[%- IF loop.COUNT AND loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    [%- FOREACH vc = card -%]
+    <td>
+        [%- IF ft.vcprofile_type == 'text' -%]
+        <input type="text" name="[%- ft.vcprofile_id -%]" value="" />
+        [%- ELSE -%]
+        <textarea name="[%- ft.vcprofile_id -%]"></textarea>
+        [%- END -%]
+  [%- END #foreach -%]
+  </tr>
+  <tr>
+    <th>Other</th>
+  </tr>
+  </tr>
+     <tr[%- IF loop.COUNT AND loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    [%- FOREACH vc = card -%]
+    <td>
+        [%- IF ft.vcprofile_type == 'text' -%]
+        <input type="text" name="[%- ft.vcprofile_id -%]" value="" />
+        [%- ELSE -%]
+        <textarea name="[%- ft.vcprofile_id -%]"></textarea>
+        [%- END -%]
+  [%- END #foreach -%]
+  </tr>
+
+ </table>
+
+[% END %]

@@ -1,0 +1,194 @@
+<!--form method="post" action="" enctype="multipart/form-data"-->
+<form method="post" action="" enctype="multipart/mixed">
+  <table border="2">
+ <tr><td>
+
+[%- IF card.UID -%]
+    <input type="hidden" name="UID" value="[%- card.UID -%]" />
+[%- END -%]
+[%- IF card.ID -%]
+    <input type="hidden" name="ID" value="[%- card.ID -%]" />
+[%- END -%]
+[%- card.PHOTO || '<center>:-)</center>' -%]
+   <!--input size="5" id="upload_box" name="PHOTO" onchange="display_throbber(); this.form.submit()" title="Upload an image" type="file">
+   <input style="display: none;" id="img_upload" value="picture" class="submit" type="submit"-->
+   <input size="5" name="PHOTO" type="file" />
+</td><td>
+  <table>
+  <tr>
+    <th colspan="2">Profile</th>
+  </tr>
+  <tr>
+<td>Full Name</td><td><input title="Display Name" type="text" name="FN" value="[%- card.FN -%]" /></td>
+  </tr>
+  <tr>
+<td>Name</td><td><input title="Family Name" type="text" name="N" value="[%- card.N -%]" /></td>
+  </tr>
+  <tr>
+<td>Known as</td><td><input title="Known as" type="text" name="NICKNAME" value="[%- card.NICKNAME -%]" /></td>
+  </tr>
+  <tr>
+<td>Sort-string</td><td><input title="Which of their names is key?" type="text" name="SORT-STRING" value="[%- 
+
+ss = 'SORT-STRING'; card.$ss
+
+-%]" /></td>
+  </tr>
+  <tr>
+<td>Birthday</td><td><input title="Date of Birth or age in years" type="text" name="BDAY" value="[%- card.BDAY -%]" /></td>
+  </tr>
+  <tr>
+<td>Pronunciation</td><td><input title="How to say their name" type="text" name="SOUND" value="[%- card.SOUND -%]" /></td>
+  </tr>
+ </table>
+
+ </td><td>
+
+<table>
+<tr>
+    <th colspan="2">Contact</th>
+</tr>
+<tr>
+    <td>Address</td><td><textarea title="address" name="ADR" value="[%- card.ADR -%]" />[%- card.ADR -%]</textarea></td>
+</tr>
+<tr>
+    <td>Telephone</td><td><input title="phone number" type="text" name="TEL" value="[%- card.TEL.home -%]" /></td>
+</tr>
+<tr>
+    <td>E-mail</td><td><input title="Elecronic mail address" type="text" name="EMAIL" value="[%- card.EMAIL -%]" /></td>
+</tr>
+<tr>
+    <td>Emergency Contact</td><td><input title="ICE" type="text" name="AGENT.home" value="[%- card.AGENT.home -%]" /></td>
+</tr>
+<tr>
+    <td>Class</td><td><select name="CLASS">
+        <option name="CONFIDENTIAL">Confidential</option>
+        <option name="PRIVATE">Private</option>
+        <option name="PUBLIC">Public</option>
+        </select>
+    </td>
+</tr>
+</table>
+
+ </td>
+
+<td>
+
+<table>
+<tr>
+    <th colspan="2">Addition Address</th>
+</tr>
+<tr>
+    <td>Postal<br />or<br />Billing</td><td><textarea title="address" name="LABEL">[%- card.LABEL -%]</textarea></td>
+</tr>
+<tr>
+    <th colspan="2">Other</th>
+</tr>
+<tr> <td>Fax</td><td><input title="" type="text" name="TEL.fax" value="[%- card.TEL.fax -%]" /></td> </tr>
+<tr> <td>Pager</td><td><input title="" type="text" name="TEL.pager" value="[%- card.TEL.pager -%]" /></td> </tr>
+<tr> <td>Mobile</td><td><input title="cellphone" type="text" name="TEL.cell" value="[%- card.TEL.cell -%]" /></td> </tr>
+
+</table>
+
+</td>
+
+</tr><tr><td>
+
+[%- card.LOGO || '<center>[Company Logo]</center>' -%]
+           <!--input size="5" id="upload_box" name="LOGO" onchange="display_throbber(); this.form.submit()" title="Upload an image" type="file">
+           <input style="display: none;" id="img_upload" value="LOGO" class="submit" type="submit"-->
+           <input size="5" name="LOGO" title="Company Logo" type="file">
+</td><td>
+<table>
+<tr>
+    <th colspan="2">Work</th>
+</tr>
+<tr>
+    <td>Organisation</td><td><input title="where they work" type="text" name="ORG" value="[%- card.ORG -%]" /></td>
+</tr>
+<tr>
+    <td>Job Title</td><td><input title="title" type="text" name="TITLE" value="[%- card.TITLE -%]" /></td>
+</tr>
+<tr>
+    <td>Categories</td><td><input title="Industry categories" type="text" name="CATEGORIES" value="[%- card.CATEGORIES -%]" /></td>
+</tr>
+<tr>
+    <td>Mailer</td><td><input title="" type="text" name="MAILER" value="[%- card.MAILER -%]" /></td>
+</tr>
+<tr>
+    <td>TimeZone</td><td><input title="" type="text" name="TZ" value="[%- card.TZ -%]" /></td>
+</tr>
+<tr>
+    <td>Location</td><td><input title="latitude and longitude" type="text" name="GEO" value="[%- card.GEO -%]" /></td>
+</tr>
+<tr>
+    <td>Role</td><td><input title="" type="text" name="ROLE" value="[%- card.ROLE -%]" /></td>
+</tr>
+
+</table>
+
+ </td><td>
+
+<table>
+<tr>
+    <th colspan="2">Work Contact</th>
+</tr>
+<tr>
+    <td>Address</td><td><textarea title="address" name="ADR" value="[%- card.ADR.work -%]" />[%- card.ADR.work -%]</textarea></td>
+</tr>
+<tr>
+    <td>Telephone</td><td><input title="phone number" type="text" name="TEL.work" value="[%- 
+IF vcd.vcprofile_feature == 'TEL' AND vcd.vcd_prof_detail == 'work'; vcd.vcd_value; ELSE; card.TEL.work; END
+ -%]" /></td>
+</tr>
+<tr>
+    <td>E-mail</td><td><input title="Elecronic mail address" type="text" name="EMAIL.work" value="[%- card.EMAIL.work -%]" /></td>
+</tr>
+<tr>
+    <td>URL</td><td><input title="www.example.com" placeholder="www.example.com" type="text" name="URL.work" value="[%- card.URL.work -%]" /></td>
+</tr>
+<tr>
+    <td>Digital Key</td><td><input title="PGP GnuPG" type="text" name="KEY.work" value="[%- card.KEY.work -%]" /></td>
+</tr>
+<tr>
+    <td>Boss</td><td><input title="who they answer to most often" type="text" name="AGENT.work" value="[%- card.AGENT.work -%]" /></td>
+</tr>
+</table>
+
+ </td>
+<td>
+
+<table>
+<tr>
+    <th>Notes</th>
+</tr>
+<tr>
+    <td><textarea title="notes" name="NOTE" rows="10">[%- card.NOTE -%]</textarea></td>
+</tr>
+</table>
+
+</td>
+</tr>
+
+<tr>
+<td>
+[%- IF card.ID -%]
+<input type="submit" class="small orange button" value="Update" name="Update" />
+[%- ELSE -%]
+<input type="submit" class="small green button" value="Add" name="Add" />
+[%- END -%]
+</td>
+<td>[%- IF card.REV; -%] Revision:[%- card.REV || '1995-10-31T22:27:10Z' -%] [%- END -%]</td>
+<td>vCard Version: [%- card.VERSION || '3.0 (rfc2426)' -%]<!-- this should be a select -->
+</td><td>
+[%- card.PRODID || 'Notice/Contact/version_'; c.VERSION; '/en_GB' -%]
+</td>
+</tr>
+
+ </table>
+  </td>
+  </tr>
+ </table>
+</form>
+    [%- # Dumper.dump(form); ' form='; form -%]
+    [%- # Dumper.dump(card) -%]

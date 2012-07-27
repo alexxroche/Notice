@@ -1,0 +1,79 @@
+[%- WRAPPER 'site_wrapper.tmpl' -%]
+ <h1>[% heading %]</h1>
+ <span class="page">[% page %]</span>
+ [%- # INCLUDE 'Notice/C/Calendar/cal_switcher.tmpl' -%]
+
+ So this is meant to be a list of just the pertinent contact data.<br />
+ With the ability to upload csv, (and eventually other formats. (The upload-code will make guesses at your csv mapping and ask for confirmation before importing.)
+    
+ [%- USE Dumper -%]
+ <table>
+    <caption><img src="[%- card.image -%]" /></caption>
+  <tr>
+    <th>Contact</th>
+    <th>Phone</th>
+    <th>Updated</th>
+    <th>Hide</th>
+  </tr>
+  [%- FOREACH card = card -%]
+    <!--td>[%- #Dumper.dump(vc) -%]</td-->
+    [%- this_id = card.card_id; FOREACH vc = vcd.$this_id -%]
+        [%- NEXT UNLESS vc.vcd_profile_id.match('\d+') -%]
+        [%- IF vc.vcd_profile_id == 1 OR vc.vcd_profile_id == 2 OR vc.vcd_profile_id == 3; contact = $contact _ vc.vcd_value; -%]
+        [%- ELSIF vc.vcd_profile_id == 8; phone = $phone _ vc.vcd_value; -%]
+        [%- ELSIF 1==2 #DEBUG-%]
+            <tr>
+                <td>[%- vc.vcd_id -%]</td>
+                <td>[%- vc.vcd_profile_id -%]</td>
+                <td>[%- vc.vcd_value -%]</td>
+            </tr>
+        [%- END -%]
+    [%- END -%]
+    [%- UNLESS contact.defined -%]
+    [%- END -%]
+    [%- NEXT UNLESS contact.defined OR phone.defined -%]
+   <tr[%- IF loop.COUNT AND loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    <td><a class="blue" href="[%- c.query.url -%]/contacts/view/[%- card.card_id -%]/&id=[%- card.card_id -%]&1=Edit">[%- 
+        IF contact.defined; contact.join(', '); ELSE; card.card_id; contact; END -%]</a></td>
+    <td><a class="blue" href="[%- c.query.url -%]/contacts/view/[%- card.card_id -%]/&id=[%- card.card_id -%]&1=Edit">[%- phone || $this_id -%]</a></td>
+    <td><a class="blue" href="[%- c.query.url -%]/contacts/view/[%- card.card_id -%]/&id=[%- card.card_id -%]&1=Edit">[%- card.card_updated -%]</a></td>
+    <td><form action="#"><input title="this will be a jQuery row hide" type="checkbox"></form></td>
+  </tr>
+  [%- END #foreach -%]
+
+[%- IF 1==2 -%]
+  <tr>
+    <th>Private</th>
+    <th>Work</th>
+  </tr>
+  </tr>
+     <tr[%- IF loop.COUNT AND loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    [%- FOREACH ft = vcd -%]
+    <td>
+        [%- IF ft.vcprofile_type == 'text' -%]
+        <input type="text" name="[%- ft.vcprofile_id -%]" value="" />
+        [%- ELSE -%]
+        <textarea name="[%- ft.vcprofile_id -%]"></textarea>
+        [%- END -%]
+  [%- END #foreach -%]
+  </tr>
+  <tr>
+    <th>Other</th>
+  </tr>
+  </tr>
+     <tr[%- IF loop.COUNT AND loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    [%- FOREACH vc = card -%]
+    <td>
+        [%- IF ft.vcprofile_type == 'text' -%]
+        <input type="text" name="[%- ft.vcprofile_id -%]" value="" />
+        [%- ELSE -%]
+        <textarea name="[%- ft.vcprofile_id -%]"></textarea>
+        [%- END -%]
+  [%- END #foreach -%]
+  </tr>
+
+[%- END # IF 1==2 -%]
+
+ </table>
+
+[% END %]

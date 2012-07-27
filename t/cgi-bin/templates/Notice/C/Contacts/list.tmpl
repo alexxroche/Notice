@@ -1,0 +1,56 @@
+[%- WRAPPER 'site_wrapper.tmpl' -%]
+ <h1>[% heading %]</h1>
+ <span class="page">[% page %]</span>
+ [%- # INCLUDE 'Notice/C/Calendar/cal_switcher.tmpl' -%]
+
+ [%- IF card.size; USE Dumper -%]
+  [% FOREACH card = card -%]
+    <table border="1">
+        <caption>[%- card.card_id -%] vCard 
+[%- IF card.REV; -%] Revision:[%- card.REV || '1995-10-31T22:27:10Z' -%] [%- END -%]
+vCard Version: [%- card.VERSION || '3.0 (rfc2426)' -%]
+[%- card.PRODID || 'Notice//version_'; c.VERSION; '/en_GB' -%]
+
+[%- c.version -%]</caption>
+<tr><td>Created</td><td>[%- card.card_created -%]</td></tr>
+<tr><td>Updated</td><td>[%- card.card_updated -%]</td></tr>
+<tr><td>Language</td><td>[%- card.card_language -%]</td></tr>
+<tr><td>Encoding</td><td>[%- card.card_encoding -%]</td></tr>
+<tr><td>Account ID</td><td>[%- card.card_acid -%]</td></tr>
+<tr><td>Added by</td><td>[%- card.card_peid -%]</td></tr>
+[%- IF 1==2 -%]
+<tr><td>DEBUG</td><td>[%- Dumper.dump(_column_data.card_language) -%]</td></tr>
+[%- END # DEBUG -%]
+ </table>
+ <table>
+ [%- END # foreach card -%]
+  [%- #FOREACH vc = card -%]
+  [%- FOREACH vc = vcd -%]
+   <tr[%- IF loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    <td><a class="blue" href="[%- c.query.url -%]/Contacts/edit/[%- vc.card_id -%]">[%- vc.vcd_id-%]</a></td>
+
+
+[%- p = vc.profile -%]
+[%- IF 1==2 -%]
+    <td>[%- #Dumper.dump(vc) -%]</td>
+[%- END # DEBUG -%]
+    <td>[%- p.vcprofile_version -%]</td>
+    <td>[%- p.vcprofile_type -%]</td>
+    <td>[%- p.vcprofile_feature -%]</td>
+    <td>[%- vc.vcd_prof_detail -%]</td>
+    <td>[%- vc.vcd_value -%]</td>
+    <td>[%- vc.vcd_bin -%]</td>
+    <td><input type="button" value="Delete" /></td>
+  </tr>
+  [%- END #foreach -%]
+ </table>
+ [%- ELSE; USE Dumper -%]
+   <form method="post">Card ID:<input type="text" name="id" size="8" /><input class="small yellow button" type="submit" name="show" value="Show" /></form>
+   <form method="post">Search:<input type="text" name="search" /><input type="submit" name="find" value="Search" /></form>
+&lt;Debug&gt;<br />
+    0 (zero) vCards found in [%- IF ac_id; ac_id; ELSE; 'this'; END -%] account<br />
+    [%- Dumper.dump(form); ' form='; form -%]
+<br />&lt;/Debug&gt;
+ [%- END -%]
+
+[% END %]

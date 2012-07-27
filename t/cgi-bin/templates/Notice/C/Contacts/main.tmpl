@@ -1,0 +1,66 @@
+[%- WRAPPER 'site_wrapper.tmpl' -%]
+ <h1>[% heading %]</h1>
+ <span class="page">[% page %]</span>
+ [%- # INCLUDE 'Notice/C/Calendar/cal_switcher.tmpl' -%]
+
+ [%- IF card.size; USE Dumper -%]
+ <table>
+  <tr>
+    <th>Domain Name</th>
+    <th>Account ID</th>
+  </tr>
+  [%- FOREACH vc = card -%]
+   <tr[%- IF loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    <td><a class="blue" href="[%- c.query.url -%]/domains/edit?domain=[%- vc.card_id -%]&id=[%- vc.card_id -%]&1=Edit">[%- vc.card_created -%]</a></td>
+    <td>[%- Dumper.dump(vc) -%]</td>
+  </tr>
+  [%- END #foreach -%]
+ </table>
+ [%- ELSE; USE Dumper -%]
+    0 (zero) vCards found in [%- IF ac_id; ac_id; ELSE; 'this'; END -%] account
+  <table>
+  <tr>
+<th>Full Name</th>
+<th>Name</th>
+<th>NICKNAME</th>
+<th>PHOTO</th>
+<th>BDAY</th>
+<th>ADR</th>
+<th>LABEL</th>
+<th>TEL</th>
+<th>EMAIL</th>
+<th>MAILER</th>
+<th>TimeZone</th>
+<th>GEO</th>
+<th>TITLE</th>
+<th>ROLE</th>
+<th>LOGO</th>
+<th>AGENT</th>
+<th>ORG</th>
+<th>CATEGORIES</th>
+<th>NOTE</th>
+<th>PRODID</th>
+<th>REV</th>
+<th>SORT-STRING</th>
+<th>SOUND</th>
+<th>UID</th>
+<th>URL</th>
+<th>VERSION</th>
+<th>CLASS</th>
+<th>KEY</th>
+  </tr>
+     <tr[%- IF loop.COUNT AND loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    [%- FOREACH ft = form -%]
+    <td>
+        [%- IF ft.vcprofile_type == 'text' -%]
+        <input type="text" name="[%- ft.vcprofile_id -%]" value="" />
+        [%- ELSE -%]
+        <textarea name="[%- ft.vcprofile_id -%]"></textarea>
+        [%- END -%]
+  [%- END #foreach -%]
+  </tr>
+ </table>
+    [%- # Dumper.dump(form); ' form='; form -%]
+ [%- END -%]
+
+[% END %]
