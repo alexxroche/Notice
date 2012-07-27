@@ -15,6 +15,36 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+
+CREATE TABLE `vCards` (
+  `card_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `card_peid` int(255) DEFAULT NULL COMMENT 'added by ',
+  `card_acid` int(255) DEFAULT NULL COMMENT 'ef_acid',
+  `card_language` varchar(5) DEFAULT NULL COMMENT 'en en_GB',
+  `card_encoding` varchar(32) DEFAULT 'UTF-8' COMMENT 'why use anything else?',
+  `card_created` datetime NOT NULL,
+  `card_updated` datetime NOT NULL,
+  PRIMARY KEY (`card_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=latin1 COMMENT='These are the contact cards';
+
+CREATE TABLE `vCard_data` (
+  `vcd_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `vcd_card_id` int(255) NOT NULL,
+  `vcd_profile_id` int(255) NOT NULL,
+  `vcd_prof_detail` varchar(255) DEFAULT NULL COMMENT 'work,home,preferred,order for e.g. multiple email addresses',
+  `vcd_value` varchar(255) DEFAULT NULL,
+  `vcd_bin` blob COMMENT 'for when varchar(255) is too small',
+  PRIMARY KEY (`vcd_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=169 DEFAULT CHARSET=latin1 COMMENT='The actual vCard data';
+
+CREATE TABLE `vCard_profile` (
+  `vcprofile_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `vcprofile_version` enum('rfc2426') DEFAULT 'rfc2426' COMMENT 'defaults to vCard 3.0',
+  `vcprofile_feature` char(16) DEFAULT NULL COMMENT 'FN to CATEGORIES',
+  `vcprofile_type` enum('text','bin') DEFAULT 'text' COMMENT 'if it is too large for vcd_value then user vcd_bin',
+  PRIMARY KEY (`vcprofile_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=latin1 COMMENT='These are the valid types of card entry';
+
 --
 -- Table structure for table `SSLcerts`
 --
@@ -511,7 +541,7 @@ CREATE TABLE `conf_data` (
 
 LOCK TABLES `conf_data` WRITE;
 /*!40000 ALTER TABLE `conf_data` DISABLE KEYS */;
-INSERT INTO `conf_data` VALUES (1,'welcome','<center>Welcome</center>',12,NULL,1,NULL),(2,'message','This is an example of CGI::Application in the form of the Notice project. Notice is a modular framework that can be used to store and manage any type of data on a small to medium size. For larger systems Notice can distribute using the delegate module and simple hierarchical IP network principles.\n\nThe people table has users each linked to an entry in the account table. An account can be a company, a family, department or branch. Each account has a parent account. The root account\'s parent is Notice. This message, for example, is configured on a per-account basis, and each child account will default to the message set by the parent account. Because of the hierarchical nature any user in a parent account has, (some) access to the child accounts. Because humans always need flexibility, and we will have NO exceptions hacked into the code, \"just for this user\" we have the groups table. With this we can add a user to a group that will give them access to which ever corner of Notice they need.\n\nEach module determines who has access to do what within itself, (mostly based on the group membership of that user.) E.g. someone in the network_admin group would be able to delete an IP entry, but someone in the more general sysadmin group would only have read access to the IP tables.\n\nEach install of Notice has the option to generate its own uuid and register with any other install of Notice, (and assign trust levels to that connection.) This way it is possible to create a web-of-trust between installs, and combined with the certificate_authority module it is possible to have a decentralised x509 network, (no more licence-to-print-money-dangerous-centralisation for you-know-who!)\n\nIf that is too political then you can just look through the code for examples; Fix it where it is _really_ poorly written and even develop a module for your own data needs. Because of the flexibility of this framework it is possible to have it present as an asset database to one user in one account and a domain management system to another user. This is why it was originally called, \"an ISP in a box\".\n',12,NULL,1,NULL);
+INSERT INTO `conf_data` VALUES (1,'welcome','<center>Welcome</center>',12,NULL,1,NULL),(2,'message','This is an example of CGI::Application in the form of the Notice project. Notice is a modular framework that can be used to store and manage any type of data on a small to medium size. For larger systems Notice can distribute using the delegate module and simple hierarchical IP network principles.\n\nThe people table has users and contacts, each linked to an entry in the account table. An account can be a company, a family, department or branch. Each account has a parent account. The root account\'s parent is Notice. This message, for example, is configured on a per-account basis, and each child account will default to the message set by the parent account. Because of the hierarchical nature any user in a parent account has, (some) access to the child accounts. Because humans always need flexibility, and we will have NO exceptions hacked into the code, \"just for this user\" we have the groups table. With this we can add a user to a group that will give them access to which ever corner of Notice they need.\n\nEach module determines who has access to do what within itself, (mostly based on the group membership of that user.) E.g. someone in the network_admin group would be able to delete an IP entry, but someone in the more general sysadmin group would only have read access to the IP tables.\n\nEach install of Notice has the option to generate its own uuid and register with any other install of Notice, (and assign trust levels to that connection.) This way it is possible to create a web-of-trust between installs, and combined with the certificate_authority module it is possible to have a decentralised x509 network, (no more licence-to-print-money-dangerous-centralisation for you-know-who!)\n\nIf that is too political then you can just look through the code for examples; Fix it where it is _really_ poorly written and even develop a module for your own data needs. Because of the flexibility of this framework it is possible to have it present as an asset database to one user in one account and a domain management system to another user. This is why it was originally called, \"an ISP in a box\".\n',12,NULL,1,NULL);
 /*!40000 ALTER TABLE `conf_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -851,7 +881,7 @@ CREATE TABLE `groups` (
 
 LOCK TABLES `groups` WRITE;
 /*!40000 ALTER TABLE `groups` DISABLE KEYS */;
-INSERT INTO `groups` VALUES (1,1,'Senior IP sysadmin','People who can make serious changes to the IP database','',NULL,NULL),(2,1,'IP sysadmin','People who can make minor changes to the IP database','',NULL,NULL),(3,0,'External Domain','Email Domains that can transit externally','1',NULL,NULL),(4,0,'Reflexive Email Domains','Email Domains that can only send to themselves','0',NULL,NULL),(5,0,'Local Email Domains','Local Email Domains that can transit externally','0',NULL,NULL),(6,1,'Server','A computer that performs a function','0','8','2'),(7,1,'Data Centre Admin','People with access to datacentres','0','','1'),(8,1,'Special Domains','Let any account use this domain for Special activity','0','7.1','3'),(9,0,'A Field','Type of Farming object holding plants and animals','0','','2'),(10,0,'A Tree','Tall thing made of wood','0','','2'),(11,0,'Deciduous Trees','The leaves die off in autumn','0','','2'),(12,0,'Common Ash','Fraxinus excelsior','0','','2'),(13,0,'Evergreen Trees','Most Coniferous and some others','0','','2'),(14,0,'Horse Chestnut','Aesculus hippocastanum','0','','2'),(15,0,'Sycamore','Acer pseudoplatanus','0','','2'),(16,0,'Hazel','Corylus avellana','0','','2'),(17,0,'Elder','Sambucus nigra','0','','2'),(18,0,'Lime','Tilia X europaea','0','','2'),(19,0,'Holly','Acrifolium ilex','0','','2'),(20,0,'Blackthorn','Prunus spinosa [Sloes, from Old English slah \"plum\"]','0','','2'),(21,0,'Larch','Larix decidua','0','','2'),(22,0,'Hawthorn','Crataegus monogyna','0','','2'),(23,0,'Rowan','Sorbus aucuparia [Mountain Ash]','0','','2'),(24,0,'Beech','Fagus sylvatica','0','','2'),(25,0,'Birch','Betula pubescens','0','','2'),(26,0,'Silver Birch','Betula pendula','0','','2'),(27,0,'Apple','Malus domestica','0','','2'),(28,0,'Quince','Cydonia oblong [sole member of the genus Cydonia]','0','','2'),(29,0,'Damson','PrunusÂ domesticaÂ subsp.Â insititia','0','','2'),(30,0,'Victoria Plumb','Prunus victoria','0','','2'),(31,0,'Yellow Plumb','Prunus mirabelle','0','','2'),(32,0,'Green Pear','Pyrus communis','0','','2'),(33,0,'Scots Pine','Pinus sylvestris','','','2'),(34,0,'Corsican Pine','Pinus nigra var. calabrica','','','2');
+INSERT INTO `groups` VALUES (1,1,'Senior IP sysadmin','People who can make serious changes to the IP database','',NULL,NULL),(2,1,'IP sysadmin','People who can make minor changes to the IP database','',NULL,NULL),(3,0,'External Domain','Email Domains that can transit externally','1',NULL,NULL),(4,0,'Reflexive Email Domains','Email Domains that can only send to themselves','0',NULL,NULL),(5,0,'Local Email Domains','Local Email Domains that can transit externally','0',NULL,NULL),(6,1,'Server','A computer that performs a function','0','8','2'),(7,1,'Data Centre Admin','People with access to datacentres','0','','1'),(8,1,'Special Domains','Let any account use this domain for _special_ activity','0','7.1','3'),(9,0,'A Field','Type of Farming object holding plants and animals','0','','2'),(10,0,'A Tree','Tall thing made of wood','0','','2'),(11,0,'Deciduous Trees','The leaves die off in autumn','0','','2'),(12,0,'Common Ash','Fraxinus excelsior','0','','2'),(13,0,'Evergreen Trees','Most Coniferous and some others','0','','2'),(14,0,'Horse Chestnut','Aesculus hippocastanum','0','','2'),(15,0,'Sycamore','Acer pseudoplatanus','0','','2'),(16,0,'Hazel','Corylus avellana','0','','2'),(17,0,'Elder','Sambucus nigra','0','','2'),(18,0,'Lime','Tilia X europaea','0','','2'),(19,0,'Holly','Acrifolium ilex','0','','2'),(20,0,'Blackthorn','Prunus spinosa [Sloes, from Old English slah \"plum\"]','0','','2'),(21,0,'Larch','Larix decidua','0','','2'),(22,0,'Hawthorn','Crataegus monogyna','0','','2'),(23,0,'Rowan','Sorbus aucuparia [Mountain Ash]','0','','2'),(24,0,'Beech','Fagus sylvatica','0','','2'),(25,0,'Birch','Betula pubescens','0','','2'),(26,0,'Silver Birch','Betula pendula','0','','2'),(27,0,'Apple','Malus domestica','0','','2'),(28,0,'Quince','Cydonia oblong [sole member of the genus Cydonia]','0','','2'),(29,0,'Damson','PrunusÂ domesticaÂ subsp.Â insititia','0','','2'),(30,0,'Victoria Plumb','Prunus victoria','0','','2'),(31,0,'Yellow Plumb','Prunus mirabelle','0','','2'),(32,0,'Green Pear','Pyrus communis','0','','2'),(33,0,'Scots Pine','Pinus sylvestris','','','2'),(34,0,'Corsican Pine','Pinus nigra var. calabrica','','','2');
 /*!40000 ALTER TABLE `groups` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1136,7 +1166,7 @@ CREATE TABLE `modules` (
   `mo_user_use` enum('none','use','access','limited read','read','insert','update','admin_read','admin_write') DEFAULT 'none',
   `mo_notes` blob,
   PRIMARY KEY (`mo_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=112 DEFAULT CHARSET=latin1 COMMENT='The modules';
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1 COMMENT='The modules';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1214,7 +1244,7 @@ CREATE TABLE `people` (
 
 LOCK TABLES `people` WRITE;
 /*!40000 ALTER TABLE `people` DISABLE KEYS */;
-INSERT INTO `people` VALUES (2,23,'The','Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'a@b.com','876dfefef3ef6f4548f48bbddd856cef','2',NULL,'20120111203706_::1_61345e84c75359_6','1',NULL,'876dfefef3ef6f4548f48bbddd856cef'),(1,24,'Alexx','Roche',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'notice-dev@alexx.net','f3d9d042b89daf317475c95049c347f6','1',101,'1',',',NULL,'876dfefef3ef6f4548f48bbddd856cef');
+INSERT INTO `people` VALUES (2,23,'The','Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'a@b.com','876dfefef3ef6f4548f48bbddd856cef','2',NULL,'20120111203706_::1_f927298785ec9d04f661345e84c75359_6','1',NULL,'876dfefef3ef6f4548f48bbddd856cef'),(1,24,'Alexx','Roche',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'notice-dev@alexx.net','f3d9d042b89daf317475c95049c347f6','1',101,'1',',0,1,1.0,1.1,1.2,1.2.1,1.2.2,1.2.2.1,1.2.2.2,1.2.3,1.2.4,1.3,1.3.1,1.3.2,1.3.3,2,3,3.1,3.2,4,5,5.1,6,7,7.1,7.2,8,9,10,11,12,13,14,15,',NULL,'876dfefef3ef6f4548f48bbddd856cef');
 /*!40000 ALTER TABLE `people` ENABLE KEYS */;
 UNLOCK TABLES;
 
