@@ -27,7 +27,7 @@ vCard Version: [%- card.VERSION || '3.0 (rfc2426)' %]
   [%- #FOREACH vc = card -%]
   [%- FOREACH vc = vcd -%]
    <tr[%- IF loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
-    <td><a class="blue" href="[%- c.query.url -%]/Contacts/edit/[%- vc.vcd_id -%]">[%- vc.vcd_id-%]</a></td>
+    <td><a class="blue" href="[%- c.query.url -%]/Contacts/edit/[%- vc.card_id -%]">[%- vc.vcd_id-%]</a></td>
 
 
 [%- p = vc.profile -%]
@@ -45,7 +45,7 @@ vCard Version: [%- card.VERSION || '3.0 (rfc2426)' %]
   [%- END #foreach -%]
  </table>
  [%- ELSE; USE Dumper -%]
-   <form method="post"><a class="black"  href="[%- c.query.url -%]/Contacts/list/all">Card ID:</a><input type="text" name="id" size="8" /><input class="small yellow button" type="submit" name="show" value="Show" /></form>
+   <form method="post">Card ID:<input type="text" name="id" size="8" /><input class="small yellow button" type="submit" name="show" value="Show" /></form>
    <form method="post">Search:<input type="text" name="search" /><input type="submit" name="find" value="Search" /></form>
 &lt;Debug&gt;<br />
     0 (zero) vCards found in [%- IF ac_id; ac_id; ELSE; 'this'; END -%] account<br />

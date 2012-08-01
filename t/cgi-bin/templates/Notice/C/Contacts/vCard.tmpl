@@ -1,3 +1,4 @@
+[%- headmsg -%]
 <!--form method="post" action="" enctype="multipart/form-data"-->
 <form method="post" action="" enctype="multipart/mixed">
   <table border="2">
@@ -9,7 +10,9 @@
 [%- IF card.ID -%]
     <input type="hidden" name="ID" value="[%- card.ID -%]" />
 [%- END -%]
-[%- card.PHOTO || '<center>:-)</center>' -%]
+[%- IF card.PHOTO -%] 
+  <center><img src="data:image/[%- card.PHOTO.type -%];base64,[%- card.PHOTO.bin -%]" title="[%- card.PHOTO.name -%]" alt=":-)" /></center>
+[%- END # IF card.PHOTO -%]
    <!--input size="5" id="upload_box" name="PHOTO" onchange="display_throbber(); this.form.submit()" title="Upload an image" type="file">
    <input style="display: none;" id="img_upload" value="picture" class="submit" type="submit"-->
    <input size="5" name="PHOTO" type="file" />
@@ -28,17 +31,23 @@
 <td>Known as</td><td><input title="Known as" type="text" name="NICKNAME" value="[%- card.NICKNAME -%]" /></td>
   </tr>
   <tr>
-<td>Sort-string</td><td><input title="Which of their names is key?" type="text" name="SORT-STRING" value="[%- 
-
-ss = 'SORT-STRING'; card.$ss
-
--%]" /></td>
+<td>Sort-string</td><td><input title="Which of their names is key?" type="text" name="SORT-STRING" value="[%- ss = 'SORT-STRING'; card.$ss -%]" /></td>
   </tr>
   <tr>
 <td>Birthday</td><td><input title="Date of Birth or age in years" type="text" name="BDAY" value="[%- card.BDAY -%]" /></td>
   </tr>
   <tr>
-<td>Pronunciation</td><td><input title="How to say their name" type="text" name="SOUND" value="[%- card.SOUND -%]" /></td>
+<td>Pronunciation</td><td>
+[%- IF card.SOUND.bin.length AND card.SOUND.name.length AND ( card.SOUND.bin.length > card.SOUND.name.length ) -%] 
+<audio controls="controls">
+<source src="SOUND;TYPE=BASIC;[%- card.SOUND.type -%]=[%- card.SOUND.bin -%]" type="audio/[%- card.SOUND.type -%]" title="[%- card.SOUND.name -%]" alt="[%- card.SOUND.name -%]" />
+Your browser does not support the audio element.
+</audio>
+
+[%- ELSE -%]
+<input title="How to say their name" type="text" name="SOUND" value="[%- card.SOUND.name -%]" />
+[%- END # IF card.PHOTO -%]
+</td>
   </tr>
  </table>
 
@@ -52,10 +61,10 @@ ss = 'SORT-STRING'; card.$ss
     <td>Address</td><td><textarea title="address" name="ADR" value="[%- card.ADR -%]" />[%- card.ADR -%]</textarea></td>
 </tr>
 <tr>
-    <td>Telephone</td><td><input title="phone number" type="text" name="TEL" value="[%- card.TEL.home -%]" /></td>
+    <td>Telephone</td><td><input title="phone number" type="text" name="TEL.home" value="[%- card.TEL.home -%]" /></td>
 </tr>
 <tr>
-    <td>E-mail</td><td><input title="Elecronic mail address" type="text" name="EMAIL" value="[%- card.EMAIL -%]" /></td>
+    <td id="email">E-mail</td><td><input title="Elecronic mail address" type="text" name="EMAIL.home" value="[%- card.EMAIL.home -%]" /></td>
 </tr>
 <tr>
     <td>Emergency Contact</td><td><input title="ICE" type="text" name="AGENT.home" value="[%- card.AGENT.home -%]" /></td>
@@ -94,7 +103,9 @@ ss = 'SORT-STRING'; card.$ss
 
 </tr><tr><td>
 
-[%- card.LOGO || '<center>[Company Logo]</center>' -%]
+[%- IF card.LOGO -%] 
+  <center><img src="data:image/[%- card.LOGO.type -%];base64,[%- card.LOGO.bin -%]" title="[%- card.LOGO.name -%]" alt="[Company Logo]" /></center>
+[%- END # IF card.LOGO -%]
            <!--input size="5" id="upload_box" name="LOGO" onchange="display_throbber(); this.form.submit()" title="Upload an image" type="file">
            <input style="display: none;" id="img_upload" value="LOGO" class="submit" type="submit"-->
            <input size="5" name="LOGO" title="Company Logo" type="file">

@@ -408,7 +408,7 @@ sub list: Runmode {
         }
     }else{
         unless($card_id eq 'all' || $card_id=~m/^\d+$/){ $card_id = ''; }
-        $self->tt_params({ no_card_selected => 1, message => "You can search for a a card or enter its id:" . $card_id });
+        $self->tt_params({ no_card_selected => 1, message => "You can search for a card or enter its id:" . $card_id });
     }
     return $self->tt_process();
 }
@@ -442,7 +442,142 @@ sub view: Runmode {
         $ac_id = $user_details->pe_acid;
     }
 
-    if(defined $q->{'param'} && $q->param('Add')){
+    if(defined $q->{'param'} && $q->param('Update')){
+        my %p; # profile
+
+
+    warn "IN contact::view,UPDATE" if $opt{D}>=99;
+
+        my $profile_rs = $self->resultset('VCardProfile')->search();
+        while( my $prid = $profile_rs->next){
+            my $pro_id = $prid->vcprofile_id;
+            my $pro_fet = $prid->vcprofile_feature;
+            $p{$pro_fet} = $pro_id;
+            $p{'type'}{$pro_fet} = $prid->vcprofile_type;
+        }
+
+        my %card;
+        my %create_data;
+        PROFILE: foreach my $ak (keys %{ $q->{'param'} } ){
+            if($q->param($ak) eq ''){
+                #warn "$ak is blank";
+                next PROFILE;
+            }
+            if($ak=~m/^(\w+)\.(\w+)/){
+                my $profile = $1;
+                my $sub_pro = $2;
+                if($p{$profile}){
+                    #warn $p{$profile};
+            
+                # we may have to have an array
+                    
+                    if(defined $create_data{"$p{$profile}"}){
+                      if(ref($create_data{"$p{$profile}"}) eq 'HASH'){
+                            my @hold = $create_data{"$p{$profile}"};
+                            #warn Dumper(\@hold);
+                            delete $create_data{"$p{$profile}"};
+                           push @{ $create_data{"$p{$profile}"} }, @hold;
+                            #warn Dumper(\%create_data);
+                           my @new = { detail => $sub_pro, value => $q->param($ak) };
+                           push @{ $create_data{"$p{$profile}"} }, @new;
+                      }else{
+                           my @new = { detail => $sub_pro, value => $q->param($ak) };
+                           push @{ $create_data{"$p{$profile}"} }, @new;
+                      }
+                    }else{
+                        $create_data{"$p{$profile}"}{'detail'} = $sub_pro;
+                        $create_data{"$p{$profile}"}{'value'} = $q->param($ak);
+                    }
+                }else{ warn "$profile is not a valid vCard profile";
+                }
+            }else{
+                
+               if($ak eq 'ID'){
+                    $card_id = $q->param($ak);
+               }elsif($p{$ak}){
+                    #warn $p{$ak};
+                    # we should check that this isn't a default that is being added to an existing array of hashes
+                    if($p{'type'}{$ak} eq 'text'){
+                        $create_data{"$p{$ak}"}{'value'} = $q->param($ak);
+                    }elsif($p{'type'}{$ak} eq 'bin'){
+                        $create_data{"$p{$ak}"}{'value'} = $q->param($ak);
+                        # then we add the actual binary_data
+                        $create_data{"$p{$ak}"}{'bin'} = $q->param($ak);  #NTS this isn't it
+                    }
+                #}else{ warn "$ak is not a valid vCard profile";
+                }
+            }
+        } 
+        #warn Dumper(\%create_data);
+
+        warn "updating vCard $card_id" if $opt{D}>=10;
+        if(defined $card_id){
+                delete($create_data{as_date}); # this is the "created date" so we never updated it.
+                my $touch_update = $self->resultset('VCard')->update_or_create({ card_id => $card_id, card_updated => \'NOW()' });
+
+        #If we update the card_updated first then we /might/ fail to update vCard_data and then the first update seems silly
+        #If we do it the other way round then we /might/ fail to update the card_updated. Of the two I prefere the first.
+        # (we could store the card_updated value so that we can roll back when we fail; I'll let you do that if you like.)
+        # The other problem is that we changed card_updated even if no new data is submitted.
+
+            # looks like we will have to loop through each row and do an update, remembing to set vcd_card_id for each one
+            #  this presumes that the vcard_profile_id is unique and that simply isn't the case.
+            # so we are going to have include that in the form somehow.
+            # or find it here with the data that we have.
+
+               # so from %create_data we extract the data that we use to find the row that we are interested
+               # and the data that we need to update.
+
+            foreach my $vcd_row (keys %create_data){
+
+                if(ref($create_data{$vcd_row}) eq 'HASH'){
+             #we should use ->single to cover the case where the user DEMANDS to break the RFC and have more versions of a profile within a single card
+                    my $sth = $self->resultset('VCardData')->search({ vcd_card_id => $card_id, vcd_profile_id => $vcd_row});
+                    if($sth){
+                        $sth->update_or_create({ vcd_card_id => $card_id, vcd_profile_id => $vcd_row, vcd_value=> "$create_data{$vcd_row}{value}" });
+                    }else{
+                        my $new_sth = $self->resultset('VCardData')->create({ vcd_card_id => $card_id, vcd_profile_id => $vcd_row, vcd_value=> "$create_data{$vcd_row}{value}" });
+                    }
+                        
+                }elsif(ref($create_data{$vcd_row}) eq 'ARRAY'){
+                    # we have an array of hashes, (so more than one row for each profile_type)
+                    #warn "$vcd_row (" . ref($create_data{$vcd_row}) . ") = " . @{ $create_data{$vcd_row} };
+                    foreach my $cd_row (@{ $create_data{$vcd_row} }) {
+                       # warn "UPDATE vCard_data SET vcd_value = \"$cd_row->{value}\" WHERE vcd_card_id = $card_id AND vcd_prof_detail = '$cd_row->{detail}'"; 
+                        my $sth = $self->resultset('VCardData')->search({ 
+                                vcd_card_id => $card_id, 
+                                vcd_profile_id => $vcd_row, 
+                                vcd_prof_detail => $cd_row->{detail}
+                            })->single;
+                        $sth->update_or_create({ vcd_card_id => $card_id, 
+                                                vcd_profile_id => $vcd_row, 
+                                                vcd_prof_detail => $cd_row->{detail}, 
+                                                vcd_value=> "$cd_row->{value}" 
+                                               });
+                    }
+                }else{
+                    # we have something else
+                    warn "ERROR: $vcd_row (" . ref($create_data{$vcd_row}) . ") = " . Dumper($create_data{$vcd_row});
+                }
+            }
+            $self->tt_params( headmsg => qq |<span class="warning">updated.</span>|);
+        }elsif(defined $q->{'param'} && $q->param('Add')){
+         #NOTE this is where we are going to put in the Add code
+                my $warning .= "Update failed... sorry. (Let your sysadmin know.)";
+                $self->tt_params({headmsg => $warning});
+                #warn Dumper($rs->as_id);
+                warn "update of vCard $card_id by " . $self->authen->username . " failed";
+        }
+
+
+# NTS the add logic works for adding, but it is flawed
+# You should only create a card if it does not exist
+# You should update_or_create so that 'Add' and 'Update' can be combined
+# which is what you are trying to do in the section above, (then merge in 'Add')
+#
+# then we can think about merging &add and &view
+
+    }elsif(defined $q->{'param'} && $q->param('Add')){
 
         my %p; # profile
 
@@ -618,10 +753,18 @@ sub view: Runmode {
             $card{ID} = $card_id;
             while( my $vcd = $vc_rs->next){
                 #my $p_f = 'profile.vcprofile_feature'; my $p_feature = $vcd->$p_f;
+                my $p_type = $vcd->profile->vcprofile_type;
                 my $p_feature = $vcd->profile->vcprofile_feature;
                 my $p_detail = $vcd->vcd_prof_detail;
                 my $p_value = $vcd->vcd_value;
-                if($p_detail){
+                if($p_type eq 'bin'){
+                    my $p_bin = $vcd->vcd_bin;
+                    $card{$p_feature}{'bin'} = $p_bin;
+                    my $img_type = $p_value;
+                    $img_type=~s/^.*\.//;
+                    $card{$p_feature}{'type'} = $img_type;
+                    $card{$p_feature}{'name'} = $p_value;
+                }elsif($p_detail){
                     $card{$p_feature}{$p_detail} = $p_value;
                 }else{
                     $card{$p_feature} = $p_value;
@@ -640,8 +783,6 @@ sub view: Runmode {
     # We can select the add.tmpl that this user needs, (if they only ever add [FN,EMAIL] then only use a form with those
     return $self->tt_process();
 }
-
-
 
 =head3 search
 
@@ -667,7 +808,7 @@ sub search: Runmode {
   * State   - To be written
   * Function- This enabled sales people to rapidly cold-call lists of contacts
 
- - yes, this /can/ be used for evil.
+ - yes, this /could/ be used for evil.
 
 =cut
 
@@ -697,27 +838,27 @@ sub sales: Runmode {
     }
     unless($ef_acid >= 1){ $ef_acid = $ac_id };
 
+   # warn "in Contacts::sales card_id = $card_id";
     unless($card_id=~m/^\d+$/){
             $card_id = {'like' => '%'};
     }
-        my $card_rs = $self->resultset('VCard')->search({ card_id => $card_id });
-        my $card_exists = $card_rs->count;
-        if($card_exists){
+   # warn "in Contacts::sales card_id = $card_id";
+    my $card_rs = $self->resultset('VCard')->search({ card_id => $card_id });
+    my $card_exists = $card_rs->count;
+    if($card_exists){
             my @cards = $self->resultset('VCard')->search({
                     card_id => $card_id,
-                    card_peid => $pe_id
-            #    },{
-            #        join => {
-            #            data => 'profile',
-            #        },
+                    #card_peid => $pe_id
+                },{
+                    #join => { data => 'profile', },
             #        #'+columns' => [ 'vCard_profile.vcprofile_version','vCard_profile.vcprofile_feature','vCard_profile.vcprofile_type',
             #        #'vCard_data.vcd_id', 'vCard_data.vcd_prof_detail', 'vCard_data.vcd_value', 'vCard_data.vcd_bin' ],
             #        #columns => [ 'card_id', 'card_acid', 'card_encoding', 'card_updated', 
                 });
             $self->tt_params({ card => \@cards });
         # VCardData.pm     VCard.pm         VCardProfile.pm
-           while( my $vc = $card_rs->next){ 
             my %vcd;
+           while( my $vc = $card_rs->next){ 
              if(defined $vc->card_id && $vc->card_id=~m/^\d+$/){
                 my @vcd = $self->resultset('VCardData')->search({
                     vcd_card_id => $vc->card_id
@@ -726,9 +867,9 @@ sub sales: Runmode {
                     '+columns' => [qw/profile.vcprofile_version profile.vcprofile_type profile.vcprofile_feature/],
                   });
                 @{ $vcd{$vc->card_id} } = @vcd;
-             }
-             $self->tt_params({ vcd => \%vcd });
+             } 
             }
+            $self->tt_params({ vcd => \%vcd });
             my $message='';
             if($card_id=~m/^\d+$/){
                 $message = "Everything in card $card_id";
@@ -737,11 +878,28 @@ sub sales: Runmode {
             }
             $self->tt_params({ message => $message });
             #return $self->tt_process('Notice/C/Contacts/vCard.tmpl');
-        }else{
+    }else{
             $self->tt_params({ error => "The vCard is yet to be created." });
-        }
+    }
     return $self->tt_process();
 }
+
+=head3 edit
+
+  * Purpose - edit a single vCard_data row
+  * State   - To be written
+  * Function- This enabled additional rows to contacts
+
+=cut
+
+sub edit: Runmode {
+    my ($self) = @_;
+    my $url = $self->query->url;
+    my $q = $self->query();
+    $self->tt_params({ message => "Don't be evil" });
+    return $self->tt_process();
+}
+
 
 1;
 

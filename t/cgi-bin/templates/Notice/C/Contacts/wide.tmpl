@@ -4,6 +4,11 @@
  [%- # INCLUDE 'Notice/C/Calendar/cal_switcher.tmpl' -%]
 
  [%- IF card.size; USE Dumper -%]
+ <table>
+  <tr>
+    <th>Domain Name</th>
+    <th>Account ID</th>
+  </tr>
   [%- FOREACH vc = card -%]
    <tr[%- IF loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
     <td><a class="blue" href="[%- c.query.url -%]/domains/edit?domain=[%- vc.card_id -%]&id=[%- vc.card_id -%]&1=Edit">[%- vc.card_created -%]</a></td>
@@ -11,7 +16,7 @@
   </tr>
   [%- END #foreach -%]
  </table>
- [%- ELSIF card.length; USE Dumper -%]
+ [%- ELSE; USE Dumper -%]
     0 (zero) vCards found in [%- IF ac_id; ac_id; ELSE; 'this'; END -%] account
   <table>
   <tr>

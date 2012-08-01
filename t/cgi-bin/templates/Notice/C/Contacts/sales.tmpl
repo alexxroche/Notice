@@ -1,7 +1,6 @@
 [%- WRAPPER 'site_wrapper.tmpl' -%]
  <h1>[% heading %]</h1>
  <span class="page">[% page %]</span>
- [%- # INCLUDE 'Notice/C/Calendar/cal_switcher.tmpl' -%]
 
  So this is meant to be a list of just the pertinent contact data.<br />
  With the ability to upload csv, (and eventually other formats. (The upload-code will make guesses at your csv mapping and ask for confirmation before importing.)
@@ -17,21 +16,20 @@
   </tr>
   [%- FOREACH card = card -%]
     <!--td>[%- #Dumper.dump(vc) -%]</td-->
+    [%- contact = ''; phone = '' #TT2 is too global -%]
     [%- this_id = card.card_id; FOREACH vc = vcd.$this_id -%]
-        [%- NEXT UNLESS vc.vcd_profile_id.match('\d+') -%]
+        [%- #NEXT UNLESS vc.vcd_profile_id.match('\d+') -%]
         [%- IF vc.vcd_profile_id == 1 OR vc.vcd_profile_id == 2 OR vc.vcd_profile_id == 3; contact = $contact _ vc.vcd_value; -%]
         [%- ELSIF vc.vcd_profile_id == 8; phone = $phone _ vc.vcd_value; -%]
-        [%- ELSIF 1==2 #DEBUG-%]
+        [%- ELSIF 2==1 #DEBUG-%]
             <tr>
                 <td>[%- vc.vcd_id -%]</td>
                 <td>[%- vc.vcd_profile_id -%]</td>
                 <td>[%- vc.vcd_value -%]</td>
             </tr>
         [%- END -%]
-    [%- END -%]
-    [%- UNLESS contact.defined -%]
-    [%- END -%]
-    [%- NEXT UNLESS contact.defined OR phone.defined -%]
+    [%- END # FOREACH vcd -%]
+    [%- #NEXT UNLESS contact.defined OR phone.defined -%]
    <tr[%- IF loop.COUNT AND loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
     <td><a class="blue" href="[%- c.query.url -%]/contacts/view/[%- card.card_id -%]/&id=[%- card.card_id -%]&1=Edit">[%- 
         IF contact.defined; contact.join(', '); ELSE; card.card_id; contact; END -%]</a></td>
