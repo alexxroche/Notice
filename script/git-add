@@ -1,0 +1,4 @@
+#!/bin/sh
+
+#check that we have xargs or xjobs installed!
+git st|grep modified:|awk '{print $NF}'|xargs git add

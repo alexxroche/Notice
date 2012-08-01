@@ -1,4 +1,140 @@
 [% WRAPPER 'site_wrapper.tmpl' %]
+[%- USE Dumper -%]
+
+[%- # N.B. We expect two hashes %p which is user_details of the viewer and %d which is the same but of the viewed -%]
+ [%- IF p.pe_id AND p.pe_id == 1 -%]
         <h1>[% heading %]</h1>
         <span class="page">[% page %]</span>
+ [%- END -%]
+ [%- #stripe = 'stripe' -%]
+ [%- stripe = 'strip' -%]
+    <form method="post" action="[%- action -%]" name="form">
+<table>
+ [%- IF p.pe_id -%]
+    <input type="hidden" name="pe_id" value="[%- p.pe_id -%]"/>
+ [%- END -%]
+
+
+ [%- IF ranks -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+        <td class="edit">Title</td>
+        <td class="edit"><select name="pe_raid">
+[% FOREACH rank = ranks %]
+<option value="[% rank.ra_id %]" [%- 
+        IF rank.ra_id AND d.pe_raid AND d.pe_raid == rank.ra_id; 'selected="selected"'; ELSIF !d.pe_raid AND !rank.ra_name; 'selected="selected"'; END%]>[% rank.ra_name or '&lt;optional&gt;' %]
+</option>
+[% END # foreach rank %]
+</select>
+    </tr>
+ [%- END -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+        <td class="edit">First Name</td>
+        <td class="edit">[%- IF edit -%]<input type="text" name="pe_fname" value="[%- END -%][%- d.pe_fname -%][%- IF edit -%]" />[%- END -%]</td>
+    </tr>
+ [%- IF new_user || full_form -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+         <td class="edit">Middle Name(s)</td>
+         <td class="edit"><input type="text" name="pe_mname" value="[%- p.pe_mname -%]" /></td>
+    </tr>
+ [%- END -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+                <td class="edit">Last Name</td>
+                <td class="edit">[%- IF edit -%]<input type="text" name="pe_lname" value="[%- END -%][%- p.pe_lname -%][%- IF edit -%]" />[%- END -%]</td>
+        </tr>
+ [%- IF new_user || full_form -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+        <tr class="stripe">
+                <td class="edit">Mobile</td>
+                <td class="edit"><input type="text" name="pe_mobile" value="[%- p.mobile -%]" /></td>
+        </tr>
+ [%- END -%]
+
+
+ [%- required = '<span class="required">&#42;</span>' -%]
+                                      [%-    #2008-07-25 22:12:41 10.2.2.50 20080725211535 -%]
+ [%- # IF  d.pe_email AND env.REQUEST_URI.match('new_user') AND ! d.pe_confirmed.match('_ZERO_') AND ! d.pe_confirmed..match("/^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2} .+$/"); -%]
+ [%- IF  d.pe_email AND env.REQUEST_URI.match('new_user' AND ! d.pe_confirmed.match('_ZERO_'));
+    confirmed = ' <span class="required"> Unconfirmed</span>
+    <input type="submit" name="VALID_$details{"pe_id"}" value="Validate" class="edituser" onmouseover="this.className=\'edituser edituserhov\'" onmouseout="this.className=\'edituser\'" onclick="this.className=\'edituser\'"/>';
+   END -%]
+
+ [%- # IF d.pe_confirmed.match("/^(\d{4}-\d{2}-\d{2}) \d{1,2}:\d{1,2}:\d{1,2} .+$/") AND d.pe_confirmed.match("/^0000/"); -%]
+ [%- IF ! d.pe_confirmed.match("^0000");
+    confirmed = '<span class="required">Valid since:' _ d.pe_confirmed _ '</span>';
+  ELSIF  d.pe_email && env.REQUEST_URI.match('new_user') && d.pe_confirmed.match('_ZERO_');
+    confirmed = ' <span class="required"> Waiting Validation</span>';
+  -%][%- # ELSIF ($details{pe_email} && $ENV{REQUEST_URI}!~m/new_user/ && $details{pe_confirmed}=~m/^(\d{4}-\d{1,2}-\d{1,2}) \d{1,2}:\d{1,2}:\d{1,2} .+$/);
+  -%][%-
+  ELSIF d.pe_email && ! env.REQUEST_URI.match('new_user'); #  && d.pe_confirmed.match("^(\d{4}-\d{1,2}-\d{1,2}) \d{1,2}:\d{1,2}:\d{1,2} .+$");
+  -%][%-
+    confirmed = '<span class="required">Confirmed matches.1</span>';
+  END; -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+        <td class="edit">Existing Email
+        [%- IF new_user; $required; END -%]
+        </td>
+        <td class="edit">[%- IF edit -%]<input type="text" name="pe_email" value="[%- END -%][%- d.pe_email -%][%- IF edit -%]"/>[%- END -%][%- $confirmed -%]</td>
+    </tr>
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+        <td nowrap="nowrap" class="edit">Password
+        [%- IF new_user; $required; END -%]
+        </td>
+        <td class="edit">[%- IF edit -%]<input type="text" name="pe_password" value="[%- d.pe_password -%]" />[%- ELSE; '*********'; END -%]</td>
+    </tr>
+  [%- IF p.pe_level && p.pe_level >= 100 -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="stripe">
+                <td class="edit">Level</td>
+                <td class="edit">[%- levels_html -%]</td>
+    </tr>
+  [%- END -%]
+ [%- IF d.pe_goesby -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr>
+        <td class="edit">Likes to be know as</td>
+        <td class="edit"><input type="text" name="pe_goesby" value="[%- d.pe_goesby -%]"/></td>
+    </tr>
+  [%- END -%]
+  [%- IF d.pe_alias -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+                <td class="edit">Other accounts</td>
+                <td class="edit"><a href="users.cgi?pe_id=$details{'pe_alias'}">Alias</a></td>
+    </tr>
+  [%- END -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+       <td class="edit">Account</td>
+       <td>[%- IF edit -%]<select id="ac_select" name="pe_acid">
+
+[% IF accounts.size == 0 %]
+<option value="" selected="selected">Create new account</option>
+[% ELSE %]
+[% IF new_account AND new_account >= 1 %]
+<option value="" selected="selected">Create new account</option>
+[% END # IF new_account %]
+[% FOREACH ac = accounts %]
+<option value="[% ac.ac_id %]" [% IF accounts.size == 0 OR ac_selected == ac.ac_name; 'selected="selected"'; END %]>[% ac.ac_name or 'Create new account' %]</option>
+[% END # foreach rank %]
+[% END # if accounts.size == 0 %]
+</select>[%- ELSE; accounts.0.ac_name; END #edit -%]</td>
+
+    </tr>
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+       <td class="edit">Date of Birth</td>
+       <td class="edit">[%- IF edit -%]<input type="text" name="pe_dob" value="[%- END -%][%- d.pe_dob -%][%- IF edit -%]"/> (CCYY-MM-DD)[%- END -%]</td>
+    </tr>
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+        <td colspan="2"><input type="submit" value="Edit" name="Edit" class="edituser" onmouseover="this.className='edituser edituserhov'" onmouseout="this.className='edituser'" onclick="this.className='edituser'"/></td>
+    </tr>
+</table>
+
 [% END %]

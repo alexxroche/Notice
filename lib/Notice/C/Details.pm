@@ -2,7 +2,7 @@ package Notice::C::Details;
 
 use warnings;
 use strict;
-use lib 'lib';
+use lib 'lib'; #DEBUG
 use base 'Notice';
 use Data::Dumper;
 
@@ -41,33 +41,6 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(':all');
-    $self->tt_params({ submenu => \%submenu });
-    my $runmode;
-    $runmode = ($self->query->self_url);
-    $runmode =~s/\/$//;
-    if($self->param('rm')){ 
-        $runmode = $self->param('rm'); 
-    }
-    $runmode =~s/^.*\/(.+\/.+)$/$1/;
-    if($self->param('id')){
-        my $id = $self->param('id');
-        if($self->param('extra1')){
-            my $extra = $self->param('extra1');
-            $runmode =~s/\/$extra[^\/]*//;
-        }
-        if($self->param('sid')){
-            my $sid = $self->param('sid');
-            $runmode =~s/\/$sid[^\/]*//;
-        }
-        $runmode =~s/\/$id[^\/]*$//;
-    }
-    if($runmode=~m/\/.*[=].*/){
-        $runmode=~s/\/.*//;
-    }else{
-        $runmode=~s/.*\///;
-    }
-    $runmode=~s/.*\///;
-
 }
 
 =head2 RUN MODES
@@ -80,37 +53,65 @@ sub setup {
 
 sub main: StartRunmode {
     my ($self) = @_;
-    my ($message,$body,%opt);
+    my ($message,$body,%opt,$who_rs);
     my $q = $self->query;
     my $surl;
        $surl = ($self->query->self_url);
+    our $pe_id;
+    our $ud_rs;
+    if($self->param('ef_peid')){ $pe_id = $self->param('ef_peid'); }
+    elsif($self->param('pe_id')){ $pe_id = $self->param('pe_id'); }
 
-    my ($ac_id,@domains);
-    if($self->param('ef_acid')){ $ac_id = $self->param('ef_acid'); }
-    elsif($self->param('ac_id')){ $ac_id = $self->param('ac_id'); }
-    if($ac_id){
-        # NTS need to join the group table so that we only list domains that are not in the
-        # "no email" domains group
-        @domains = $self->resultset('Domain')->search({
-            do_acid=>{'=',"$ac_id"}
-             },{
-        });
+    if($q->param('Edit')){
+        $self->tt_params({ edit => 'Edit' });
     }
-    #if($domains[0]->{_column_data}{do_name}){
-    if($domains[1]->{_column_data}{do_name}){
-        $opt{default_domain} = '/' . $domains[1]->{_column_data}{do_name};
-    }
+    # NOTE we have to let them update their details here
 
+
+    if($pe_id && $pe_id=~m/^\d+$/){
+        $ud_rs = $self->resultset('People')->search({pe_id => $pe_id})->first;
+    }else{
+        our $username;
+        $username = $self->authen->username;
+        $ud_rs = $self->resultset('People')->search({pe_email => $username})->first;
+    }
+    if($self->param('id') && $self->param('id')=~m/^\d+$/){
+        our $who_id = $self->param('id');
+        $who_rs = $self->resultset('People')->search({pe_id => $who_id})->first;
+    }else{
+        $who_rs = $ud_rs;
+    }
+    our $ac_id;
+    eval {
+          $ac_id = $who_rs->pe_acid;
+    };
+
+    my @ranks = $self->resultset('Rank')->search({'ra_boatn' => 'before'},{ 'columns'   => ['ra_id','ra_name'] });
+    my @accounts = $self->resultset('Account')->search({
+        -or => [
+        'ac_id' => $ac_id,
+        'ac_useradd' => { '>', '40' }, 
+        ],
+        },{ 'columns'   => ['ac_id','ac_name'], order_by => {-asc =>['ac_id+0','ac_id']}
+    });
+    my @countries = $self->resultset('Country')->search({'curid' => { '!=', undef },},{'columns'   => ['iso']});
+    $self->tt_params({
+        ranks   => \@ranks,
+        accounts=> \@accounts,
+        countries=> \@countries,
+    });
+
+    
     $message = 'Welcome to the Your Details section<br />';
-    $body .=qq |In this section you can: <br />
-                 add,view,edit your details in this copy of Notice, (and its associated network.)<br />
-|;
+    $body .=qq |In this section you can: <br />add,view,edit your details in this copy of Notice, (and its associated network.)<br />|;
     
     $self->tt_params({
-    action  => "$surl/aliases",
-    domains => \@domains,
+    action  => "$surl",
+    p       => $ud_rs, #person doing the looking
+    d       => $who_rs, #person being looked at (usually the same)
+    submenu => \%submenu,
 	message => $message,
-    body    => $body
+    page    => $body
 		  });
     return $self->tt_process();
 }
@@ -134,6 +135,7 @@ sub css: Runmode {
 
 
     $self->tt_params({
+    submenu => \%submenu,
     message => $message,
     body    => $body
           });
@@ -155,12 +157,16 @@ sub menu: Runmode {
     $body .=qq |
 |; 
 
+
     $self->tt_params({
+    submenu => \%submenu,
     message => $message,
     body    => $body
           });
     return $self->tt_process();
 }
+
+
 
 
 1;
