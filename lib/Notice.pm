@@ -305,8 +305,11 @@ sub cgiapp_init {
                         }
                     }
 
-                    push @menu_order, '1.0';
-                    $menu{'1.0'} = {hidden=>'',rm=>'config',name=>'Configuration', class => "$menu_class"};
+                    # Should we demand certain things?
+                    if(!$menu{'1.0'} && $user_details{pe_level}>=100){
+                        push @menu_order, '1.0';
+                        $menu{'1.0'} = {hidden=>'',rm=>'config',name=>'Configuration', class => "$menu_class"};
+                    }
 
 =pod
 
@@ -472,7 +475,7 @@ sub cgiapp_prerun {
     my $pe_id = $self->param('pe_id');
     # still looking for a reliable way to collect the runmode
     my $page = ($self->query->self_url);
-    # This has to be a little complicated to cove:
+    # This has to be a little complicated to cope:
     # with i18n in the URI
     # without i18n in the URI
     # we /may/ want to add complication so that email/edit_alias/ and email/aliases/ have the option of seperate CSS
