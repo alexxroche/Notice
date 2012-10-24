@@ -6,7 +6,18 @@ use Exporter;
 my @ISA=('Exporter','Notice::C');
 my @EXPORT=();
 my @EXPORT_OK = qw( _name_to_child _to_path );
+use lib 'lib'; #DEBUG
 use base 'Notice';
+use Data::Dumper;
+our %opt;
+
+our $VERSION = 0.02;
+
+my %submenu = (
+   '1.2' => [
+        '1' => { peer => 1, name=> 'Preferences', rm => 'prefs', class=> 'navigation'},
+    ],
+);
 
 
 =head1 NAME
@@ -34,31 +45,197 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 
 sub setup {
     my ($self) = @_;
+    $self->authen->protected_runmodes(':all');
 }
 
 =head2 RUN MODES
 
-=head3 index
+=head3 main
 
   * Defauly runmode
-  * Expects the user's ef_ac_id
+  * Expects the user's effective account ID (ef_acid)
+  -  and will collect or deduce their real account ID (pe_acid)
 
 =cut
 
-sub index: StartRunmode {
-    my ($c) = @_;
-    my $title = 'Notice CRaAM ' . $c->get_current_runmode() . ' - from ' . $ENV{REMOTE_ADDR};
-    my $username = $c->authen->username;
-    if($username){
-        $title=~s/from/$username at/;
+sub main: StartRunmode {
+    my ($self) = @_;
+    my ($message,$body,%opt,$who_rs);
+    my $test='';
+    my $username = $self->authen->username;
+    my $q = $self->query;
+    my $surl;
+       $surl = ($self->query->self_url);
+    our $pe_id;
+    our $ud_rs;
+    our $ac_id;
+    $ac_id = $self->_acid;
+    #$ac_id = _acid($self);
+    unless($ac_id=~m/^\d+$/ && $ac_id>=1){
+        if($self->param('id') && $self->param('id')=~m/^\d+$/){
+            our $who_id = $self->param('id');
+            $who_rs = $self->resultset('People')->search({pe_id => $who_id})->first;
+        }else{
+            $who_rs = $ud_rs;
+        }
+        warn "BAAAAAAAAAAAAAAD";
+        eval {
+            $ac_id = $who_rs->pe_acid;
+        };
     }
-    $c->tt_params({
-	message => 'Hello world!',
-	title   => $title,
-		  });
-    return $c->tt_process();
+
+    #if($q->param('Change') eq 'Change Account'){
+    if($q->param('Change')){
+        my $new_ac = $q->param('set_acid');
+        #warn Dumper($new_ac);
+        if($q->param('Change') eq 'back'){
+            $self->param('ef_acid' => $ac_id);
+            $self->session->param('ef_acid' => $ac_id);
+        }elsif($new_ac=~m/^\d+$/){
+            $self->param('ef_acid' => $new_ac);
+            $self->session->param('ef_acid' => $new_ac);
+            $self->tt_params({ change => 'Back to your account' }) unless($ac_id == $new_ac);
+        }
+        #$pe_id = 1;
+    }elsif($q->param('add')){
+        warn "We are adding an account!";
+        #$test .= \%{ $q->{'param'} };
+        $test = "Added a " . $q->param('what') . " account to " . $self->param('ef_acid') . " called '" . $q->param('ac_name') . "'";
+        #warn keys %{ $q->{'param'} };
+        warn join(', ', keys %{ $q->{'param'} });
+
+        $self->param('ac_parent' => $self->param('ef_acid'));
+        $self->param('ac_name' => $self->param('ac_name'));
+        my $ac_tree;
+        my $new_ac;
+        #use Notice::C::Account;
+        #($new_ac,$ac_tree) = Notice::C::Account::_new_child($self);
+        ($new_ac,$ac_tree) = _new_child($self);
+        warn "New account created: " . $new_ac . ' with tree:' . $ac_tree;
+        $test .= " - added account $new_ac, with tree: $ac_tree" if $new_ac =~m/^\d+$/;
+    }else{
+        $test =  keys %{ $q->{'param'} };
+        if($q->param('back')){
+            $self->param('ef_acid' => $ac_id);
+            $self->session->param('ef_acid' => $ac_id);
+        }else{
+            #warn keys %{ $q->{'param'} };
+            if($self->param('ef_peid')){ $pe_id = $self->param('ef_peid'); }
+            elsif($self->param('pe_id')){ $pe_id = $self->param('pe_id'); }
+        }
+    }
     
+    $self->tt_params({ 
+            ef_acid => $self->param('ef_acid'),
+            ac_id => $ac_id
+    });
+
+=pod
+
+    $test = "You are in";
+    if($self->param('ef_acid') == $self->param('ac_tree')){
+        $test .= ' (your own) ';
+    }
+    $test .= " account: " . $self->param('ef_acid');
+    unless($self->param('ef_acid') == $ac_id){
+        $test .= " Your account is: " . $ac_id;
+    }
+
+=cut
+
+    unless($self->param('ac_tree')){
+        $self->param('ac_tree' => $self->session->param('ac_tree'));
+    }
+
+    my @accounts = $self->resultset('Account')->search({
+        -or => [
+        'ac_id' => $ac_id,
+        'ac_useradd' => { '>', '0' },
+        ],
+        },{ 'columns'   => ['ac_id','ac_name'], order_by => {-asc =>['ac_id+0','ac_id']}
+    });
+    $self->param('ac_parent' => $ac_id);
+    my @child_list = $self->_list_children($ac_id);
+    my $csl;
+    foreach my $cld (@child_list){
+       $csl .= " ac_tree = '$cld' OR";
+    }
+    $csl=~s/OR$//;
+    #my $csl = {'-or' => [ $csl ]};
+    my @children = $self->resultset('Account')->search({
+        -or => [ \$csl ]
+        },{ 'columns'   => ['ac_id','ac_name','ac_tree'], order_by => {-asc =>['ac_id+0','ac_id']}
+    });
+    if($self->param('pe_acid')){
+        warn "settin TT_params for pe_acid";
+        $self->tt_params({ pe_acid => $self->param('pe_acid')});
+    }else{
+        $self->tt_params({ pe_acid => $ac_id});
+    }
+
+    $self->tt_params({
+    accounts => \@accounts,
+    #children => \@{ $self->_list_children($ac_id) },
+    children => \@children,
+    test => $test,
+	message => $message
+		  });
+    return $self->tt_process();
 }
+
+=head3 _ef_acid
+
+return the effective account ID
+
+=cut
+
+sub _ef_acid {
+    my ($self) = @_;
+    my $username = $self->authen->username;
+    my $ef_acid = 0;
+    if($self->session->param('ef_acid')){
+        $ef_acid = $self->session->param('ef_acid');
+    }elsif($self->session->param('ef_acid')){
+        $ef_acid = $self->session->param('ef_acid');
+    }else{
+        $ef_acid = $self->_acid();
+    }
+    return $ef_acid;
+}
+
+=head3 _acid
+
+return the account ID
+
+=cut
+
+sub _acid {
+    my ($self) = @_;
+    my $username = $self->authen->username;
+    my $acid = 0;
+    if($self->session->param('pe_acid')){
+        $acid = $self->session->param('pe_acid');
+    }elsif($self->session->param('pe_acid')){
+        $acid = $self->session->param('pe_acid');
+    }else{
+        my $user_data = $self->resultset('People')->search({
+            'pe_email' => { '=', "$username"},
+           },{
+            columns => ['pe_id','pe_acid','pe_fname','pe_lname','pe_menu']
+        })->first;
+        eval {
+            #warn "doing it the hard way";
+            $acid = $user_data->pe_acid;
+        };   
+        if($@){
+            warn "failed to find an account for $username";
+            warn $? . ' ' . $!;
+        }
+    }
+    # should we try a few other things
+    return $acid;
+}   
+
 
 =head3 _list_children
 
@@ -71,9 +248,13 @@ this is used by Account::new_child
 
 sub _list_children {
     my $c = shift;
+    my $p = shift;
+    my $t = shift;
+    # we should use these parent/tree values if we have them or ELSE...
     my $ac_parent = '1';
     $ac_parent = $c->param('ac_parent') if $c->param('ac_parent');
     my $ac_tree = $c->param('ac_tree');
+    #warn "parent: $ac_parent, tree: $ac_tree";
     $c->param(message => "ac_parent in _list_children is $ac_parent") if $c->param('debug') >=1;
     #my @children = ('1'); #we should pull the default from the database?
     my @children = (); #we should pull the default from the database?
@@ -142,15 +323,14 @@ returns the new child account
 =cut
 
 sub _new_child {
-    my $c = shift;
-    my $ac_min      = $c->param('ac_min') ? $c->param('ac_min') : '';
-    my $ac_max      = $c->param('ac_max') ? $c->param('ac_max') : '';
-    my $ac_parent   = $c->param('ac_parent') ? $c->param('ac_parent') : '1';
-    my $ac_name     = $c->param('ac_name') ? $c->param('ac_name') : '';
-    my $ac_notes    = $c->param('ac_notes') ? $c->param('ac_notes') : '';
-    my $ac_useradd  = $c->param('ac_useradd') ? $c->param('ac_useradd') : '';
-    my @children = _list_children($c);
-    use Data::Dumper;
+    my $self = shift;
+    my $ac_min      = $self->param('ac_min') ? $self->param('ac_min') : '';
+    my $ac_max      = $self->param('ac_max') ? $self->param('ac_max') : '';
+    my $ac_parent   = $self->param('ac_parent') ? $self->param('ac_parent') : '1';
+    my $ac_name     = $self->param('ac_name') ? $self->param('ac_name') : '';
+    my $ac_notes    = $self->param('ac_notes') ? $self->param('ac_notes') : '';
+    my $ac_useradd  = $self->param('ac_useradd') ? $self->param('ac_useradd') : '';
+    my @children = _list_children($self);
     my @last_child = ('0');
     @last_child = split /\./, $children[@children -1];
    
@@ -162,7 +342,7 @@ sub _new_child {
     else{ push @last_child,'1'; } # If this account has  no children then this is the first one
     my ($ac_tree) = join('.', @last_child); #could probably do these split and join and increment with one map but this is clearer
     #SELECT ac_tree,ac_max FROM account WHERE ac_id = $ac_parent
-    my($parent_tree,$min,$max) = _tree_min_max($c);
+    my($parent_tree,$min,$max) = _tree_min_max($self);
 
     # we could nest this new account at the front using 
     #unless($ac_min){ $ac_min = $min+1;}
@@ -180,9 +360,9 @@ sub _new_child {
 
     return ":$ac_tree:" unless ($ac_tree=~m/^\d+(\.\d+)*$/ && $ac_tree=~m/$parent_tree/);
     # update the ac_min and ac_max to make space for this new account;
-    my $action  = $c->resultset('Account')->search({'ac_min' => {'>' => "$max"} }, undef);
+    my $action  = $self->resultset('Account')->search({'ac_min' => {'>' => "$max"} }, undef);
     $action->update({'ac_min' => \'ac_min+2'});
-    $action  = $c->resultset('Account')->search({'ac_max' => {'>=' => "$max"} }, undef);
+    $action  = $self->resultset('Account')->search({'ac_max' => {'>=' => "$max"} }, undef);
     $action->update({'ac_max' => \'ac_max+2'});
     # and finally add the account
     my $data = {
@@ -194,7 +374,7 @@ sub _new_child {
                  ac_parent => "$ac_parent",
                  ac_useradd => "$ac_useradd"
                };
-    my $comment = $c->resultset('Account')->create( $data )->update;
+    my $comment = $self->resultset('Account')->create( $data )->update;
     my $ac_id = $comment->id;
     return ($ac_id,$ac_tree);
 }
@@ -206,7 +386,7 @@ this is used by new_child - can't remember how or why
 =cut
 
 sub _list_child {
-    my $c = shift;
+    my ($self) = @_;
 }
 
 =head3 _name_to_child

@@ -1,0 +1,27 @@
+[% WRAPPER 'site_wrapper.tmpl' %]
+[%- USE Dumper -%]
+
+ [%- # N.B. We expect two hashes %p which is user_details of the viewer and %d which is the same but of the viewed -%]
+ [%- IF p.pe_id AND p.pe_id == 1 -%]
+        <h1>[% heading %]</h1>
+        <span class="page">[% page %]</span>
+ [%- END -%]
+ [%- IF people AND people.size >= 1 -%]
+     [%- #stripe = 'stripe' -%]
+     [%- stripe = 'strip' -%]
+    <form method="post" action="[%- action -%]" name="form">
+    <table>
+     <tr><th>User ID</th><th>Known as</th><th>Account</th></tr>
+    [% FOREACH ppl = people %]
+     [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+     <tr class="[%- stripe -%]">
+        <td>[%- ppl.pe_id -%]</td>
+        <td>[%- ppl.pe_fname; ' '; ppl.pe_lname -%]</td>
+        <td><a class="black" href="[%- c.query.url -%]/account/[%- ppl.pe_acid -%]">[%- ppl.accounts.ac_name -%]</a></td>
+    </tr>
+    [%- END #FOREACH -%]
+    </table>
+
+ [% ELSE; Dumper.dump(people) %]
+ [% END %]
+[% END %]

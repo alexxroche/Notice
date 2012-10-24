@@ -17,6 +17,7 @@ This will try to install the database needed for for Notice
 
 use warnings;
 use strict;
+use lib './lib/';
 use Notice::DB;
 use Config::Auto;
 $|=1;

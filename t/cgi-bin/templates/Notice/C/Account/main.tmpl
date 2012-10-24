@@ -1,0 +1,106 @@
+[% WRAPPER 'site_wrapper.tmpl' %]
+[%- USE Dumper -%]
+
+[%- IF test; test; END -%]
+[%- #Wow! is this really the best way to do this? -%]
+[% FOREACH ac = children; IF ef_acid == ac.ac_id; ef_acid_ac_name = ac.ac_name; END; END #FOREACH  -%]
+
+
+<br />
+
+The main function here is to display a list of child accounts and enable a user to 'enter' that account, (change their effective_account_id)
+<br />
+
+<form method="post">
+<table>
+
+[%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+       <td class="edit"><a class="black" href="[%- c.query.url -%]/Account">Your Account</a></td>
+       <td>[%- IF edit -%]<select id="ac_select" name="pe_acid">
+
+            [% IF accounts.size == 0 %]
+            <option value="" selected="selected">Create new account</option>
+            [% ELSE %]
+                [% IF new_account AND new_account >= 1 %]
+                <option value="" selected="selected">Create new account</option>
+                [% END # IF new_account %]
+                [% FOREACH ac = accounts %]
+                <option value="[% ac.ac_id %]" [% IF accounts.size == 0 OR ac_selected == ac.ac_name; 'selected="selected"'; END %]>[% ac.ac_name or 'Create new account' %]</option>
+            [% END %]
+            [% END # if accounts.size == 0 %]
+            </select>
+        [%- ELSE; accounts.0.ac_name; END #edit -%]</td>
+    </tr>
+
+
+[%- IF c.param('ef_acid') != pe_acid -%]
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]"><td>You are in</td>
+    <td>[%- ef_acid_ac_name; 
+ #this_acid = c.param('ef_acid') - 2; children.$this_acid.ac_name 
+    #'(';c.param('ef_acid');':';ef_acid;')'
+    ' (';c.param('ef_acid');')'
+    -%]
+    </td>
+    </tr>
+[%- END # IF in child account -%]
+
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+<tr class="[%- stripe -%]"><td>Children</td>
+<td>
+    [% IF children.size == 0 %]
+        No chid accounts found
+    [%- ELSE -%]
+        <select id="ac_child_account" name="set_acid">
+        <option value="[%- ac_id -%]">Your account</option>
+        [% FOREACH ac = children -%]
+            [%- tree_padding='';tree_depth = ac.ac_tree; generation = tree_depth.match('(\.)', 1) -%]
+            [%- IF generation.size >=2 -%] 
+                [%-  FOREACH gen = generation -%]
+                    [%- tree_padding = "=$tree_padding" -%]
+                [%- END #FOREACH -%]
+            [%- END #IF -%]
+            [%- tree_padding = "$tree_padding&gt;" -%]
+            <option value="[% ac.ac_id %]" [% IF ef_acid == ac.ac_id; 'selected="selected"'; END %]> [%- tree_padding; ' '; ac.ac_name or ac; IF ac.ac_name.length <= 1; ' - [Personal Account] '; END -%]</option>
+        [% END #FOREACH %]
+        </select>
+    [% END # if accounts.size == 0 %]
+</td></tr>
+
+
+ [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+        <td colspan="2">
+<input type="submit" value="Change Account" name="Change" class="edituser" onmouseover="this.className='edituser edituserhov'" onmouseout="this.className='edituser'" onclick="this.className='edituser'"/>
+[%- IF change OR c.param('ef_acid') != pe_acid OR ef_acid != ac_id -%]
+    <input type="submit" value="[%- change || 'Return to your account' -%]" name="back" class="edituser" onmouseover="this.className='edituser edituserhov'" onmouseout="this.className='edituser'" onclick="this.className='edituser'"/>
+[%- END #change back -%]
+</td>
+    </tr>
+
+</table>
+</form>
+
+<hr>
+<form method="post">
+<table>
+<tr>
+    <td>Add a new
+ <select name="what">
+<option value='child'>child</option>
+<option value='sibling'>sibling</option>
+    [%- IF ef_acid != ac_id -%]
+<option value='uncle'>parent sibling</option>
+    [%- END -%]
+</select> 
+account to account [%- ef_acid -%] called:</td>
+<td><input type="text" name="ac_name" /></td>
+<td><input class="small green button" type="submit" name="add" value="add" /></td>
+</tr>
+</table>
+</form>
+
+        [% #Dumper.dump(accounts) %]
+
+[% END #WRAPPER%]

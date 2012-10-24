@@ -80,6 +80,7 @@ $(document).load(function() { $('#pe_email').focus(); });
 $(document).ready(function() {
    $(".headmsg").fadeOut(5000);
    $(".warning").fadeOut(7000);
+   $(".fade").fadeOut(5000);
    $('#pe_email').focus(); //seems to have stopped working 20101121
 
     $("#signup_table").hide();
