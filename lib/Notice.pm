@@ -230,6 +230,7 @@ sub cgiapp_init {
                     $self->session->param(menu => $pe_menu);
                     $self->param(ef_acid => $ef_acid); # this can be changed by some users
                     $self->param(pe_acid => $ef_acid); # this is _ALWAYS_ thier real ac_id
+                    #warn "SETTING the pe_acid in Notice.pm";
                     $known_as = $ud->pe_fname . ' ' . $ud->pe_lname;
                     $self->param(known_as => $username);
                     $self->param(pe_id => $pe_id);
@@ -247,8 +248,13 @@ sub cgiapp_init {
                     },{});
                     while( my $ac = $acrs->next){
                         my $ac_tree = $ac->ac_tree;
+                        my $ac_id = $ac->ac_id;
                         $self->param(ac_tree => $ac_tree);
                         $self->session->param(ac_tree => $ac_tree);
+                        unless($self->param('pe_acid')){
+                            warn "RE-setting the pe_acid in Notice.pm";
+                            $self->param(pe_acid => $ac_id);
+                        }
                     }
                     $self->session->param(pe_id => $pe_id);
 
@@ -306,7 +312,7 @@ sub cgiapp_init {
                     }
 
                     # Should we demand certain things?
-                    if(!$menu{'1.0'} && $user_details{pe_level}>=100){
+                    if(!$menu{'1.0'} && $self->param('pe_level') && $self->param('pe_level')>=100){
                         push @menu_order, '1.0';
                         $menu{'1.0'} = {hidden=>'',rm=>'config',name=>'Configuration', class => "$menu_class"};
                     }
