@@ -1,17 +1,21 @@
+use utf8;
 package Notice::DB::Result::People;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
+
+=head1 NAME
+
+Notice::DB::Result::People
+
+=cut
 
 use strict;
 use warnings;
 
 use base 'DBIx::Class::Core';
 
-
-=head1 NAME
-
-Notice::DB::Result::People
+=head1 TABLE: C<people>
 
 =cut
 
@@ -97,9 +101,9 @@ __PACKAGE__->table("people");
 
 =head2 pe_acid
 
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 255
+  data_type: 'integer'
+  default_value: 1
+  is_nullable: 0
 
 =head2 pe_level
 
@@ -153,13 +157,13 @@ __PACKAGE__->add_columns(
   "pe_dob",
   {
     data_type => "datetime",
-    datetime_undef_if_invalid => 1,
+    "datetime_undef_if_invalid" => 1,
     is_nullable => 1,
   },
   "pe_dod",
   {
     data_type => "datetime",
-    datetime_undef_if_invalid => 1,
+    "datetime_undef_if_invalid" => 1,
     is_nullable => 1,
   },
   "pe_mobile",
@@ -169,7 +173,7 @@ __PACKAGE__->add_columns(
   "pe_password",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "pe_acid",
-  { data_type => "varchar", is_nullable => 1, size => 255 },
+  { data_type => "integer", default_value => 1, is_nullable => 0 },
   "pe_level",
   { data_type => "integer", is_nullable => 1 },
   "pe_loggedin",
@@ -181,12 +185,22 @@ __PACKAGE__->add_columns(
   "pe_passwd",
   { data_type => "varchar", is_nullable => 1, size => 256 },
 );
+
+=head1 PRIMARY KEY
+
+=over 4
+
+=item * L</pe_id>
+
+=back
+
+=cut
+
 __PACKAGE__->set_primary_key("pe_id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-24 17:01:30
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wXr4fG5W4ye2w8jBwvcmQg
+# Created by DBIx::Class::Schema::Loader v0.07015 @ 2012-10-24 14:53:44
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3qgsztpQSxyBUV0YXOPigw
 
-
-# You can replace this text with custom code or comments, and it will be preserved on regeneration
+__PACKAGE__->has_one('accounts' => 'Notice::DB::Result::Account', {'foreign.ac_id' => 'self.pe_acid'});
 1;
