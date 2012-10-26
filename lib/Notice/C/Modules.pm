@@ -298,7 +298,14 @@ and optionally update them from a master server
 sub main: StartRunmode {
     my ($self) = @_;
 
-    my $message = '<table id="modules" class="none"><tr><th>Modules and Functions</th><th>Menu Tag</th><th>Version</th><th>Installed</th><th>Enabled</th></tr>';
+    my $message = '<table id="modules" class="none">
+    <tr>
+        <th>Modules and Functions</th>
+        <th>Menu Tag</th><th>Version</th>
+        <th>Installed</th>
+        <th>Enabled</th>
+        <th>Category</th>
+    </tr>';
 
     # collect the modules in the database and compare them with the list here
     my $modules_rs = $self->resultset('Module')->search({
@@ -327,13 +334,15 @@ sub main: StartRunmode {
             #$mlist{$mtid}{active} = $mo->me->is_active; does not work
         };
         if($@){ 
+            warn "$@ $! $?";
             #my %deref_mo; %deref_mo = %{ $mo }; $mlist{$mtid}{active} = $deref_mo{_column_data}{is_active} . " ERR";
             $mlist{$mtid}{active} = $mo->{_column_data}{is_active};
         }
         $mlist{$mtid}{name} = $mo->mo_name;
         $mlist{$mtid}{ver} = $mo->mo_version;
-        $mlist{$mtid}{rm} = $mo->mo_runmode;
+        $mlist{$mtid}{rm} = $mo->mo_runmode;    # If there is no runmode then it is Disabled.
         $mlist{$mtid}{desc} = $mo->mo_description;
+        $mlist{$mtid}{cat} = $mo->mo_catagorie; # If there isn't a cat then it won't show up in any menu EVEN if a user has it in their menu!
         $mlist{$mtid}{installed} = 1;
     }
 
@@ -366,13 +375,33 @@ sub main: StartRunmode {
             #my $no_re =qw |onclick="if(!this.checked){this.disabled=true};"|; #the opposite
             my $timeless =qq |onclick="if(this.checked){this.checked=false}else{this.checked=true};alert('Not possible, yet, to install mods from here');"|; #nothing changes!
             my $disabled = '';
-            $disabled = 'disabled' if ( $self->param('debug') || $self->query->self_url=~m/debug=\d/); # turning off for debug
+            #$disabled = 'disabled' if ( $self->param('debug') || $self->query->self_url=~m/debug=\d/ || ! $mlist{$keynum}{cat} ); # turning off for debug
+            my %cat; # this selects which category each module is in.
+            if($mlist{$keynum}{cat}){
+                $cat{$mlist{$keynum}{cat}} = 'selected="selected"'; 
+               # warn "$keynum = '$mlist{$keynum}{cat}'";
+            }else{
+                $disabled = 'disabled';
+                $timeless = '';
+                $installed = '';
+                warn "$keynum = '$mlist{$keynum}{cat}'";
+            }
             $message .= qq (<tr class="thinborder">
                 <td><span class="$class">$indent$mlist{$keynum}{name}</span></td>
                 <td>$keynum</td>
                 <td>$version</td>
-                <TD>Installed:<input type="checkbox" id="${keynum}_installed" $disabled $installed $timeless /></td>
-                <TD>Active:<input type="checkbox" $active/>$mlist{$keynum}{active}</td>
+                <td>Installed:<input type="checkbox" id="${keynum}_installed" $disabled $installed $timeless /></td>
+                <td>Active:<input type="checkbox" $active/>$mlist{$keynum}{active}</td>
+                <td><select name="catagorie" title="$mlist{$keynum}{cat}">
+                        <option name="" $cat{'null'}>Disabled</option>
+                        <option name="core" title="Immutable" $cat{'core'}>Required</option>
+                        <option name="base" title="required functions" $cat{'base'}>Base</option>
+                        <option name="service" $cat{'service'}>Service</option>
+                        <option name="function" $cat{'function'}>Function</option>
+                        <option name="sysadmin" $cat{'sysadmin'}>sysAdmin</option>
+                        <option name="details" $cat{'details'}>Details</option>
+                        <option name="category" $cat{'category'}>Category</option>
+                    </select></td>
             </tr>);
         }
     }
