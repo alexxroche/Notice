@@ -22,6 +22,8 @@
     [%- END #FOREACH -%]
     </table>
 
- [% ELSE; Dumper.dump(people) %]
+ [% ELSE; ' No users found in this account'; #Dumper.dump(people) %]
  [% END %]
+
+[%- INCLUDE 'Notice/C/Users/add.tmpl' -%]
 [% END %]

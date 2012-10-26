@@ -8,11 +8,11 @@ use Data::Dumper;
 
 # NTS pull this from the menu and modules table
 my %submenu = ( 
-   '1.2' => [
-        '1' => { peer => 1, name=> 'Preferences', rm => 'prefs', class=> 'navigation'},
-        '2' => { name=> 'CSS', rm => 'css', class=> 'navigation'},
-        '3' => { name=> 'Menu', rm => 'menu', class=> 'navigation'},
-    ],
+   #'1.2' => [
+   #     '1' => { peer => 1, name=> 'Preferences', rm => 'prefs', class=> 'navigation'},
+   #     '2' => { name=> 'CSS', rm => 'css', class=> 'navigation'},
+   #     '3' => { name=> 'Menu', rm => 'menu', class=> 'navigation'},
+   # ],
 );
 
 
@@ -86,13 +86,21 @@ sub main: StartRunmode {
     eval {
           $ac_id = $who_rs->pe_acid;
     };
-        my $ef_acid = $self->param('ef_acid');
         my $ac_tree = $self->param('ac_tree');
+        my %child;
+        if( $self->param('pe_level') && $self->param('pe_level') >= 100 
+            || $self->param('inc_child') || $self->session->param('inc_child')
+        ){
+            # We don't want to clutter things with child accounts unless the user wants that
+            %child = ( 'accounts.ac_tree' => {'like' => "$ac_tree\%" });
+        }
+        my $ef_acid = $self->param('ef_acid');
         my @people = $self->resultset('People')->search({
             -or => [
-                pe_acid => $ac_id,
+                #pe_acid => $ac_id,
                 pe_acid => $ef_acid,
-                'accounts.ac_tree' => {'like' => "$ac_tree\%" }
+               \%child
+            #{ 'accounts.ac_tree' => {'like' => "$ac_tree\%" } }
             ]
             },{
             join => ['accounts'],
@@ -116,8 +124,8 @@ sub main: StartRunmode {
     });
 
     
-    $message = 'Welcome to the Your Details section<br />';
-    $body .=qq |In this section you can: <br />add,view,edit your details in this copy of Notice, (and its associated network.)<br />|;
+    $message = 'The people in this account<br />';
+    $body .=qq |In this section you can: <br />add,view,edit the people in this account<br />|;
     
     $self->tt_params({
     action  => "$surl",
@@ -129,6 +137,7 @@ sub main: StartRunmode {
 		  });
     return $self->tt_process();
 }
+
 
 1;
 
