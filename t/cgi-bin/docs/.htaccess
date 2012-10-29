@@ -1,4 +1,4 @@
 AuthType Basic
-AuthUserFile /var/www/sites/www.princeofwalesslodge.com/t/cgi-bin/.htpasswd
+AuthUserFile /var/www/sites/www.example.com/t/cgi-bin/.htpasswd
 AuthName "Members Section"
 Require valid-user

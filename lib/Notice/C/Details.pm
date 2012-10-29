@@ -280,7 +280,7 @@ sub menu: Runmode {
     { #DEBUG
         no strict 'refs';
         foreach my $mi (@menu){
-            $opt{mi}{$mi->menu} = $mi->hidden;
+            $opt{mi}{$mi->menu} = {hidden => $mi->hidden};
         }
         #keys %{ $menu } ? warn keys %{ $menu } : warn Dumper($menu);
         #warn Dumper(%{ $opt{mi} });
@@ -340,7 +340,15 @@ sub menu: Runmode {
             my $version = $mlist{$keynum}{ver} ? $mlist{$keynum}{ver} : '0.01';
             my $installed = $mlist{$keynum}{installed} ? 'checked="checked"':'';
             #my $active = $menu->menu ? '': 'checked="checked"';
-            my $active = $opt{mi}{$keynum} ? '': 'checked="checked"';
+            my $active='';
+            if(defined $opt{mi}){
+                $active = ( defined $opt{mi}{$keynum} ) ? 'checked="checked"' : '' ;
+                if($keynum && defined $opt{mi}{$keynum}){
+                    warn "this user has /some/ menu and for $keynum they have " . $opt{mi}{"$keynum"};
+                }else{
+                    #warn "$keynum is not known for this user";
+                }
+            }   
             if($active){
                 $opt{mi_seen}{$keynum} = 1;
             }
