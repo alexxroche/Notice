@@ -16,14 +16,14 @@ This will try to dump the Notice database
 
 use warnings;
 use strict;
-use lib './lib/';
+use lib './lib/', '../';
 use Notice::DB;
 use Config::Auto;
 $|=1;
 
 my $cfg_location =  'config';
 my $your_pwd = `echo \$PWD`; chomp($your_pwd);
-if($your_pwd=~m/script$/){ 
+if($your_pwd=~m/script$/ || $your_pwd=~m/config$/){ 
 	#warn "you are in $your_pwd, this script should be run from Notice/script/create_notice_db.pl\n"; exit;
 	$cfg_location = '../config';
 }
