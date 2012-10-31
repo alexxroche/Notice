@@ -48,37 +48,37 @@ sub setup {
 =cut
 
 sub main: StartRunmode {
-    my ($c) = @_;
+    my ($self) = @_;
     use Data::Dumper;
-    my $q = \%{ $c->query() };  # WORKS
+    my $q = \%{ $self->query() };  # WORKS
     my $message;
     my $warning;
     my $error;
-    my $title = 'Notice CRaAM ' . $c->get_current_runmode() . ' - from ' . $ENV{REMOTE_ADDR};
+    my $title = 'Notice CRaAM ' . $self->get_current_runmode() . ' - from ' . $ENV{REMOTE_ADDR};
 
-    if($c->param('id')){ $message = "Signup up action " . $c->param('id') . '[main] ';
-        if($c->param('sid')){ $message .= $c->param('sid');}
+    if($self->param('id')){ $message = "Signup up action " . $self->param('id') . '[main] ';
+        if($self->param('sid')){ $message .= $self->param('sid');}
     }#else{ $message .= ""; }
 
-    unless($c->param('id') || $q->param('id')){
+    unless($self->param('id') || $q->param('id')){
         DEBUG: {
             last DEBUG unless ($q->param('debug') && $q->param('debug')>=2);
             $message .= "QUERY: ";
             $message .= Dumper($q);
             $message=~s/\n/<br \/>\n/g;
-            $message .= Dumper($c);
+            $message .= Dumper($self);
         }
     }
-    if($q->param('debug')){ $c->tt_params(no_js => 1); } #remove the javascript checks
+    if($q->param('debug')){ $self->tt_params(no_js => 1); } #remove the javascript checks
 
     # almost certainly going to need these
-    my @ranks = $c->resultset('Rank')->search({'ra_boatn' => { '=', 'before' } },{ 'columns'   => ['ra_id','ra_name'] });
-    my @accounts = $c->resultset('Account')->search(
+    my @ranks = $self->resultset('Rank')->search({'ra_boatn' => { '=', 'before' } },{ 'columns'   => ['ra_id','ra_name'] });
+    my @accounts = $self->resultset('Account')->search(
         {'ac_useradd' => { '>', '40' }, },
         { 'columns'   => ['ac_id','ac_name'], order_by => {-asc =>['ac_id+0','ac_id']}
     });
-    my @countries = $c->resultset('Country')->search({'curid' => { '!=', undef },},{'columns'   => ['iso']});
-    $c->tt_params({
+    my @countries = $self->resultset('Country')->search({'curid' => { '!=', undef },},{'columns'   => ['iso']});
+    $self->tt_params({
         form => $q,
         ranks   => \@ranks,
         accounts=> \@accounts,
@@ -87,7 +87,7 @@ sub main: StartRunmode {
     });
 
     my $ac_id; $ac_id = $q->param('ac_id');
-    #$c->param(message => "Got ac_id of $ac_id<br />\n");
+    #$self->param(message => "Got ac_id of $ac_id<br />\n");
     if($ac_id){ $message .= "Got ac_id of $ac_id<br />\n"; }
 
      if ( $q->param('Add') && ( 
@@ -130,7 +130,31 @@ sub main: StartRunmode {
                     #%create_user .= ("pe_password" => \'md5(\'' . $q->param($ak) . '\')');
                     #$create_user{"pe_password"} = 'md5(' . $pe_password . ')';
                     #$create_user{"pe_password"} = $pe_password;
-                    $create_user{"pe_password"} = md5_hex($q->param($ak));
+                    eval {
+                        use Crypt::CBC;
+                        use MIME::Base64;
+                         
+                        my $cipher = Crypt::CBC->new({
+                            key         => $self->cfg("key"),
+                            iv          => $self->cfg("iv"), # 128 bits / 16 char
+                            cipher      => "Crypt::Rijndael",
+                            literal_key => 1,
+                            header      => "none",
+                            keysize     => 32 # 256/8
+                        });
+                         
+                        my $encrypted = $cipher->encrypt($q->param($ak));
+                        # base64 encode so we can store in db
+                        $encrypted = encode_base64($encrypted);
+                        # remove trailing newline inserted by encode_base64
+                        chomp($encrypted);
+                        $create_user{"pe_password"} = $encrypted;
+                        # my $enc = SELECT pe_password from people;
+                        ## $enc = pack(“H*”,$enc); #convert from hex
+                        # $enc = decode_base64($enc); #decode base 64
+                        # my $decrypted = $cipher->decrypt($enc);
+                    };
+                    if($@){ $create_user{"pe_password"} = md5_hex($q->param($ak)); }
                     #$create_user{"pe_$pe_key"} = md5_hex("$q->param($ak)");
                     $create_user{"pe_$pe_key"} = md5_hex($q->param($ak));
                     #$create_user{"pe_$pe_key"} = md5_hex($pe_password); #works
@@ -163,104 +187,104 @@ sub main: StartRunmode {
             }else{
                 $message =qq |Passwords don't match|; #'
             }
-           $c->tt_params({
+           $self->tt_params({
                 message => $message,
                 new_account => $new_account,
                 warning => "Passwords need checking",
             });
-            return $c->tt_process();
+            return $self->tt_process();
         }
         #check we have the required data
         unless($create_user{pe_email} && $create_user{pe_passwd}){
-            $c->tt_params({
+            $self->tt_params({
                 message => "Try filling in the form rather than just clicking like an epelectic monkey",
                 new_account => $new_account,
                 warning => "<br />Some data from you would be nice",
             });
-            return $c->tt_process();
+            return $self->tt_process();
 
         }
         # check that we don't already have this email address in our database
         if(%create_user){
-            my $existing_user = $c->resultset('People')->search(
+            my $existing_user = $self->resultset('People')->search(
             {pe_email => {'LIKE', $q->param('pw_email')}},
             undef
             )->count;
             if($existing_user >=1){
-                $c->tt_params({
+                $self->tt_params({
                 message => "Email address already in use",
                 new_account => $new_account,
                 warning => "",
             });
                 #warning => "Looks like you are trying to use someone else's email address",
-            return $c->tt_process();
+            return $self->tt_process();
             }
         }else{
-            $c->tt_params({
+            $self->tt_params({
                 message => "Try filling in the form rather than just clicking like an epelectic monkey",
                 new_account => $new_account,
                 warning => "No data found",
             });
-            return $c->tt_process();
+            return $self->tt_process();
         }
 
         
         #first we create the account (if it does not exist)
         if(!$q->param('pw_acid') || $q->param('pw_acid') eq '' || $q->param('pw_acid') eq '0'){
-            $c->param(ac_name => $q->param('ac_name'));
-            $c->param(ac_approved => _walk_up_type($c));
+            $self->param(ac_name => $q->param('ac_name'));
+            $self->param(ac_approved => _walk_up_type($self));
             my $new_ac=0;
             my $n2ac=''; #Name to accounts 
             my $names = $q->param('pw_lname').$q->param('pw_fname');
             $n2ac = substr($names,0,1);
 
-            if($c->param('ac_approved') eq 'nbh'){ #explained in _walk_up_type
-                #$c->param(n2ac => substr("$c->param('pw_lname')$c->param('pw_fname')",0,1));
+            if($self->param('ac_approved') eq 'nbh'){ #explained in _walk_up_type
+                #$self->param(n2ac => substr("$self->param('pw_lname')$self->param('pw_fname')",0,1));
                 $message .= "<br />Names: " . $q->param('pw_lname') . $q->param('pw_fname') . "<br />";
                 #$n2ac = substr("$q->param('pw_lname')$q->param('pw_fname')",0,1);
                 $message .= "produces: $n2ac<br />";
                 unless($n2ac){ $n2ac = '?';}
                 $n2ac = $q->param('pw_acid') . '.' . $n2ac . '.' . $q->param('pw_lname');
-                unless($c->param('pe_lname')){ $n2ac .= '?';} #lazy nameless or secretive
-                $c->param(n2ac => $n2ac);
+                unless($self->param('pe_lname')){ $n2ac .= '?';} #lazy nameless or secretive
+                $self->param(n2ac => $n2ac);
                 use Notice::C::Account;
                 # create the account
-                $new_ac = Notice::C::Account::_name_to_child($c);
-                $c->param(ac_id => $new_ac);
-            }elsif($c->param('ac_approved') eq 'fixed-next'){ #explained in _walk_up_type
-                #$c->param(ac_parent => '3');
-                $c->param(ac_name => "$n2ac") unless $c->param('ac_name');
-                $c->param(ac_notes => "$names");
+                $new_ac = Notice::C::Account::_name_to_child($self);
+                $self->param(ac_id => $new_ac);
+            }elsif($self->param('ac_approved') eq 'fixed-next'){ #explained in _walk_up_type
+                #$self->param(ac_parent => '3');
+                $self->param(ac_name => "$n2ac") unless $self->param('ac_name');
+                $self->param(ac_notes => "$names");
                 use Notice::C::Account;
                 my $ac_tree;
-                ($new_ac,$ac_tree) = Notice::C::Account::_new_child($c);
+                ($new_ac,$ac_tree) = Notice::C::Account::_new_child($self);
                 if($ac_tree!~m/^\d+(\.\d+)*$/){ #then we have failed to find a valid account
                         $warning =qq |<br />Account NOT created and hence we could not add you as a user. <br />
                         If you feel that this is a mistake/error or not what you want then please contact us.|;
-                        $message = "Sorry, we were unable to find a valid account ($ac_tree.)(o)" . $c->param('message');
-                    $c->tt_params({
+                        $message = "Sorry, we were unable to find a valid account ($ac_tree.)(o)" . $self->param('message');
+                    $self->tt_params({
                         error => "Failed to find a valid account ($ac_tree)()",
                         message => $message,
                         warning => $warning
                     });
-                    return $c->tt_process();
+                    return $self->tt_process();
                 }
-                $c->param(ac_id => $new_ac);
+                $self->param(ac_id => $new_ac);
             }else{
-                $c->tt_params({
+                $self->tt_params({
                     error => "Failed to find a valid account to add you to.",
                     message => "Sorry, we are not creating new accounts at this time",
                     warning => $warning
                 });
-                return $c->tt_process();
+                return $self->tt_process();
             }
-            $c->param(ef_acid => $ac_id);
-            $create_user{pe_acid} = $c->param('ac_id');
+            $self->param(ef_acid => $ac_id);
+            $create_user{pe_acid} = $self->param('ac_id');
         }
 
         #now we have an account we create the address (if supplied)
-        $c->param('ad_adcountry' => $create_address{ad_adcountry});
-        $c->param('ad_type' => $create_address{ad_type});
+        $self->param('ad_adcountry' => $create_address{ad_adcountry});
+        $self->param('ad_type' => $create_address{ad_type});
         delete($create_address{ad_adcountry});
         delete($create_address{ad_type});
         # One day the Address will be just one textarea and we will split it up for them
@@ -272,18 +296,18 @@ sub main: StartRunmode {
                 $create_address{ad_adnumber} = $create_address{ad_adname};
                 delete($create_address{ad_adname});
             }
-            $create_address{ad_acid} = $c->param('ac_id');
-            $c->param('create_address' => \%create_address);
+            $create_address{ad_acid} = $self->param('ac_id');
+            $self->param('create_address' => \%create_address);
             use Notice::C::Addresses;
-            my $ad_added = Notice::C::Addresses::_add($c);
+            my $ad_added = Notice::C::Addresses::_add($self);
             if($ad_added!~m/^\d+$/){
                 $message .= $ad_added;
-                $c->tt_params({
+                $self->tt_params({
                     error => $error,
                     message => $message,
                     warning => $warning
                 });
-                return $c->tt_process();
+                return $self->tt_process();
             }
         }
 
@@ -292,24 +316,51 @@ sub main: StartRunmode {
         #$warning = Dumper(\%create_user);
         my $pe_id;
         if(%create_user){
-            my $existing_user = $c->resultset('People')->search(
+            my $existing_user = $self->resultset('People')->search(
             {pe_email => {'LIKE', $q->param('pw_email')}},
             undef
             );
-            my $comment = $c->resultset('People')->create( \%create_user );
+            my $comment = $self->resultset('People')->create( \%create_user );
                 $comment->update;
             $pe_id = $comment->id;
             # and they will need some menu items
 
-            # NTS this should be an array pulled from the database
-            # either the defaults for that account or the global defaults
-            my %menu = (
-            'pe_id' => $pe_id,
-            'menu' => '3', #3 is domains
-            );
+            my $ef_acid = $create_user{'pe_acid'};
 
-            my $menu = $c->resultset('Menu')->create( \%menu );
-                $menu->update;
+            my $m_rs = $self->resultset('ConfData')->search({
+                'ac_id' => "$ef_acid",
+                'cf_name' => "menu",
+                -or => [
+                    'cfd_key' => "default_menu",
+                    'cfd_key' => "default_walkup_menu",
+                 ],
+               },{
+                join     => ['config','ac_parent'],
+                columns => ['cfd_key','cfd_value'],
+            });
+            my $menu_done=0;
+            while(my $v = $m_rs->next){
+                if($v->cfd_key eq 'default_menu'){
+                    my @menu_items = split(',', $v->cfd_value);
+                    foreach my $ak (@menu_items){
+                        if($pe_id && $pe_id=~m/^\d+$/ && $ak=~m/^\d+(\.\d+)*$/){
+                            my $rs = $self->resultset('Menu')->update_or_create({ pe_id => "$pe_id", menu => "$ak", hidden => '0' });
+                            $menu_done .= $rs->id;
+                        }
+                    }
+                }
+            }
+            unless($menu_done){
+
+                # either the defaults for that account or the global defaults
+                my %menu = (
+                'pe_id' => $pe_id,
+                'menu' => '3', #3 is domains
+                );
+
+                my $menu = $self->resultset('Menu')->create( \%menu );
+                    $menu->update;
+            }
         }
         $warning .= "UserID: $pe_id<br />\n" unless $pe_id=~m/^\d+$/;
         # we have to know if this account wants to send out confirmation emails
@@ -330,25 +381,25 @@ sub main: StartRunmode {
 #<a href="cgi-bin/index.cgi/login/">log in page</a>|;   #fail
 
 
-        $c->tt_params({
+        $self->tt_params({
     message => $message,
     new_account => $new_account,
     warning => $warning,
     body => $body,
     no_page => 1
           });
-    return $c->tt_process();
+    return $self->tt_process();
 
 
     } # end of Add
 
-    $c->tt_params({
+    $self->tt_params({
        # ac_selected => 'Default',  # this works
         new_account => 1,           # let them add new accounts
         message => $message,
         warning => $warning,
 	});
-    return $c->tt_process();
+    return $self->tt_process();
     
 }
 
@@ -386,28 +437,28 @@ e.g.
 =cut
 
 sub verify: Runmode {
-    my ($c) = @_;
+    my ($self) = @_;
     use Data::Dumper;
-    my $q = \%{ $c->query() };  # WORKS
+    my $q = \%{ $self->query() };  # WORKS
     my $message;
     my $warning;
-    my $title = 'Notice CRaAM ' . $c->get_current_runmode() . ' - from ' . $ENV{REMOTE_ADDR};
+    my $title = 'Notice CRaAM ' . $self->get_current_runmode() . ' - from ' . $ENV{REMOTE_ADDR};
     my $code='';
-    if($c->param('id')){ 
-        $code = substr($c->param('id'), 0, 32);
+    if($self->param('id')){ 
+        $code = substr($self->param('id'), 0, 32);
         $code =~s/[^a-f0-9]//g;
-        $message = "Verification code: <blockquote>" . $c->param('id') . "</blockquote>";
-        if($c->param('sid') || $c->param('id') ne $code){ 
+        $message = "Verification code: <blockquote>" . $self->param('id') . "</blockquote>";
+        if($self->param('sid') || $self->param('id') ne $code){ 
             $warning = "Dodgy looking validation code... but I can work with it.";
         }
     }
-    $c->tt_params({
+    $self->tt_params({
         message => $message,
         code => $code,
         warning => $warning,
         title => $title
     });
-    return $c->tt_process();
+    return $self->tt_process();
 }
 
 =head3 _walk_up_type
@@ -448,21 +499,21 @@ or nbh-name for nbh
 =cut
 
 sub _walk_up_type{
-    my ($c) = @_;
+    my ($self) = @_;
     my $type = '';
     #NTS move this into a http://search.cpan.org/~frew/DBIx-Class-0.08192/lib/DBIx/Class/Manual/Cookbook.pod#Arbitrary_SQL_through_a_custom_ResultSource
     my $query =qq |SELECT cfd_value FROM conf_data,config 
             WHERE config.cf_id=conf_data.cfd_cfid and cf_name='walk-up' and cf_moid = '1.4.1' and cfd_key='type';|;
     #$type = $cd_rs->search(\[ 'cdid = ? AND (artist = ? OR artist = ?)', [ 'cdid', 2 ], [ 'artist', 1 ], [ 'artist', 2 ] ]);
-   # $type = $c->resultset('ConfData')->search(\[ 'cf_name = ? ', 'cf_moid = ?', 'cfd_key = ?', [ 'cf_name', 'walk-up' ], [ 'cf_moid', '1.4.1' ], [ 'cfd_key', 'type' ] ],
+   # $type = $self->resultset('ConfData')->search(\[ 'cf_name = ? ', 'cf_moid = ?', 'cfd_key = ?', [ 'cf_name', 'walk-up' ], [ 'cf_moid', '1.4.1' ], [ 'cfd_key', 'type' ] ],
     #       { 
     #          'columns'   => ['cfd_value'],
     #          join => 'config'
     #        });
-    #$c->param(error => 'Got here' funky => 'Brown' });
+    #$self->param(error => 'Got here' funky => 'Brown' });
     #$type = 'nbh';
     $type = 'fixed-next';
-    $c->param(error => 'Got here');
+    $self->param(error => 'Got here');
 
     return $type;
 }
