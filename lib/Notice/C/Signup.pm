@@ -328,14 +328,17 @@ sub main: StartRunmode {
             my $ef_acid = $create_user{'pe_acid'};
 
             my $m_rs = $self->resultset('ConfData')->search({
-                'ac_id' => "$ef_acid",
+                -or => [
+                    'cfd_acid' => "$ef_acid",
+                    'cfd_acid' => "0",
+                ],
                 'cf_name' => "menu",
                 -or => [
                     'cfd_key' => "default_menu",
                     'cfd_key' => "default_walkup_menu",
                  ],
                },{
-                join     => ['config','ac_parent'],
+                join     => ['config'],
                 columns => ['cfd_key','cfd_value'],
             });
             my $menu_done=0;

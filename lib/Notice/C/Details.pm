@@ -128,7 +128,7 @@ sub css: Runmode {
     my ($message,$body,%opt);
     my $q = $self->query;
 
-    $message = 'Here you can update the CSS that you user for this site.<br />';
+    $message = 'Here you can update the CSS that you use for this site.<br />';
     $body .=qq |You can create a new css just for you. If you give it a name then others will be able to find and use it. They will even be able to take a copy and change it for their needs. You can even have a css for each page!<br />
         Account admin can set a default css for their account, and Notice_admin can set the default css for the whole site.<br />
 |; 
