@@ -1,0 +1,18 @@
+[% WRAPPER site_wrapper.tmpl %]
+
+[%- IF people.size; USE Dumper -%]
+ <table>
+  <tr>
+    <th>Name</th>
+    <th>Account ID</th>
+  </tr>
+ [%- FOREACH p = people -%]
+   <tr[%- IF loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    <td>[%- p.pe_fname; ' '; p.pe_lname -%]</td>
+    <td>[%- p.pe_acid -%]</td>
+  </tr>
+ [%- END #foreach -%]
+ </table>
+[%- END -%]
+
+[% END #WRAPPER %]

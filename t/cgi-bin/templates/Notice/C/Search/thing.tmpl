@@ -1,0 +1,34 @@
+[% WRAPPER site_wrapper.tmpl %]
+
+[%- IF domains.size; USE Dumper -%]
+ <table>
+  <tr>
+    <th>Domain Name</th>
+    <th>Account ID</th>
+  </tr>
+ [%- FOREACH d = domains -%]
+   <tr[%- IF loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    <td><a class="blue" href="[%- c.query.url -%]/domains/edit?domain=[%- d.do_name -%]&id=[%- d.do_id -%]&1=Edit">[%- d.do_name -%]</a></td>
+    <td>[%- d.do_acid -%]</td>
+  </tr>
+ [%- END #foreach -%]
+ </table>
+[%- END -%]
+[%- IF email.size -%]
+ <table>
+  <tr>
+    <th>Email Addresses</th>
+    <th>Account ID</th>
+    <th>Destination</th>
+  </tr>
+ [%- FOREACH e = email -%]
+   <tr[%- IF loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    <td><a class="blue" href="[%- c.query.url -%]/domains/edit?domain=[%- d.do_name -%]&id=[%- d.do_id -%]&1=Edit">[%- d.do_name -%]</a></td>
+    <td>[%- d.do_acid -%]</td>
+  </tr>
+ [%- END #foreach -%]
+ </table>
+[%- END -%]
+
+
+[% END #WRAPPER %]

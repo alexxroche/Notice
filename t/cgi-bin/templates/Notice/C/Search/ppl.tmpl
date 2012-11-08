@@ -1,0 +1,39 @@
+[% WRAPPER site_wrapper.tmpl %]
+[%- USE Dumper -%]
+[%- IF tables.size -%]
+ [%- FOREACH t = tables -%]
+ <table>
+    [%- IF t.value.caption -%]
+        <caption>[%- t.value.caption -%]</caption>
+    [%- END # IF caption -%]
+  <tr>
+    [%- FOREACH v = t.value.th -%]
+    <th>[%- v -%]</th>
+    [%- END -%]
+  </tr>
+  [%- # NTS you are HERE - if we have a t.value.tr then use it to build rows # ELSE the usual -%]
+ [%- FOREACH p = ${t.key} -%]
+   <tr[%- IF loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    [%- FOREACH v IN t.value.tc -%]
+    <td>[%- p.${v} -%]</td>
+    [%- END -%]
+  </tr>
+ [%- END #foreach -%]
+ </table>
+ [%- END #FOREACH -%]
+[%- ELSIF people.size -%]
+ <table>
+  <tr>
+    <th>Name</th>
+    <th>Account ID</th>
+  </tr>
+ [%- FOREACH p = people -%]
+   <tr[%- IF loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+    <td>[%- p.pe_fname; ' '; p.pe_lname -%]</td>
+    <td>[%- p.pe_acid -%]</td>
+  </tr>
+ [%- END #foreach -%]
+ </table>
+[%- END #IF -%]
+
+[% END #WRAPPER %]
