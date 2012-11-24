@@ -40,32 +40,6 @@ sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(':all');
     $self->tt_params({ submenu => \%submenu });
-    my $runmode;
-    $runmode = ($self->query->self_url);
-    $runmode =~s/\/$//;
-    if($self->param('rm')){ 
-        $runmode = $self->param('rm'); 
-    }
-    $runmode =~s/^.*\/(.+\/.+)$/$1/;
-    if($self->param('id')){
-        my $id = $self->param('id');
-        if($self->param('extra1')){
-            my $extra = $self->param('extra1');
-            $runmode =~s/\/$extra[^\/]*//;
-        }
-        if($self->param('sid')){
-            my $sid = $self->param('sid');
-            $runmode =~s/\/$sid[^\/]*//;
-        }
-        $runmode =~s/\/$id[^\/]*$//;
-    }
-    if($runmode=~m/\/.*[=].*/){
-        $runmode=~s/\/.*//;
-    }else{
-        $runmode=~s/.*\///;
-    }
-    $runmode=~s/.*\///;
-
 }
 
 =head2 RUN MODES
@@ -159,7 +133,7 @@ sub aliases: Runmode{
     elsif($self->param('ac_id')){ $ac_id = $self->param('ac_id'); }
 
     # maybe they are added an alias
-    if($q->param('userid') && $q->param('doid')){
+    if($q->param('userid') && $q->param('doid')) {
         $opt{ea_userid} = $q->param('userid');
         $opt{ea_doid} = $q->param('doid');
 
@@ -171,6 +145,7 @@ sub aliases: Runmode{
             ){
                 $create_data{"ea_$ak"} = $q->param($ak);
             }elsif($ak eq 'to'){
+            #warn "$ak = " . $q->param($ak);
                 my $to = $q->param($ak); 
                 $to=~s/[^a-z]\s*$//;
                 $to=~s/\s+/ /g;
@@ -182,15 +157,13 @@ sub aliases: Runmode{
                     $opt{error} .= "Just one destination address for now";
                     $self->tt_params({ error => $opt{error} });
                     return $self->tt_process();
-                }elsif($to=~m/^|/){ #we have a pipe
+                }elsif($to=~m/^\|/){ #we have a pipe
                     $create_data{'ea_touser'} = $to;
                 }else{
-                    my ($ea_touser,$ea_at) = split /\@/, $q->param($ak); 
+                    #my ($ea_touser,$ea_at) = split /\@/, $q->param($ak); 
+                    my ($ea_touser,$ea_at) = split /\@/, $to;
                     $create_data{'ea_touser'} = $ea_touser;
                     $create_data{'ea_at'} = $ea_at;
-                }
-                #check that they are not trying to create a loop
-
                  my @this_domain = $self->resultset('Domain')->search({
                     do_acid=>{'=',"$ac_id"},
                     do_name =>{'=',"$create_data{'ea_at'}"}
@@ -198,13 +171,14 @@ sub aliases: Runmode{
                     });
                  my $this_doid;
                     $this_doid = $this_domain[0]->{_column_data}{do_id};
-                 #if($this_domain[0]->{_column_data}{do_id} == $create_data{'doid'}){
-                 if($create_data{'doid'} && int($this_doid) == int($create_data{'doid'})){
-                    $self->tt_params({ error => 'I think we will skip the email loop today'});
-                    return $self->tt_process();
-                 }else{
-                    $opt{'from_domain'} = $this_domain[0]->{_column_data}{do_name};
-                 }
+                    #check that they are not trying to create a loop
+                     if($create_data{'doid'} && int($this_doid) == int($create_data{'doid'})){
+                        $self->tt_params({ error => 'I think we will skip the email loop today'});
+                        return $self->tt_process();
+                     }else{
+                        $opt{'from_domain'} = $this_domain[0]->{_column_data}{do_name};
+                     }
+                }
             }
         }
         #warn Dumper(\%create_data);
@@ -235,7 +209,24 @@ sub aliases: Runmode{
             }
         }
     } #/ if new alias data
-
+    #maybe they are deleting an aliase
+    elsif($q->param('id') && $q->param('Delete')) {
+        my %data;
+        foreach my $ak (keys %{ $q->{'param'} } ){
+            #warn  "$ak = " . $q->param($ak);
+            if($ak eq 'id'){
+                $data{ea_id} = $q->param($ak);
+            }
+        }
+        if(%data){
+            # we should have alias_hist and store this old aliase there for roll back
+            my $rs = $self->resultset('Aliase')->search( \%data )->delete;
+            if($rs){ $message = 'That Aliase is no more'; }
+            else{ $message = 'I tried to delete that for you but...' . $? ; }
+        }else{
+            $message = "do what now?";
+        }
+    }
     if($ac_id){
         # NTS need to join the group table so that we only list domains that are not in the
         # "no email" domains group
@@ -288,17 +279,16 @@ sub edit_alias: Runmode{
     my ($self) = @_;
     my ($message,$body,%opt,%ref);
 
-    my $q = $self->query;
+    #my $q = $self->query;
+    my $q = \%{ $self->query() };
     if($q->param('id')){
         $opt{ea_id} = $q->param('id');
     }elsif($self->param('id')){
         $opt{ea_from} = $self->param('id');
     }
 
-    # NTS you are here => lets see if they are chaning the forwarding
 
-
-    # lets see if we are adding/changing the alias_details
+    # lets see if we are adding or changing the alias_details
 
     if($self->param('password_size')){
             $self->tt_params({ password_size => $self->param('password_size')});
@@ -338,6 +328,73 @@ sub edit_alias: Runmode{
         return $self->tt_process('site_wrapper.tmpl');
     }        
 
+    # NTS you are here => lets see if they are chaning the forwarding
+    %find_alias = ();
+    $find_alias{ea_id} = $ref[0]->{_column_data}{ea_id};
+    my %update_alias;
+    my %update_details;
+    my %find_details;
+
+    if($q->param('save')){
+        foreach my $ak (keys %{ $q->{'param'} } ){
+            if($ak eq 'status'){
+                # the status may change (enabled || disabled )
+                my $status = $q->param('status') eq 'enabled' ? 1 : 0 ;
+                unless($ref[0]->{_column_data}{ea_suspended} eq $status){
+                    $update_alias{ea_suspended} = $q->param($ak);
+                    $update_alias{ea_id} = $q->param('editAlias');
+                }
+            }elsif($ak eq 'to'){
+                my($ea_touser,$ea_at) = split('@', $q->param($ak));
+                unless($ref[0]->{_column_data}{ea_touser} eq $ea_touser &&
+                        $ref[0]->{_column_data}{ea_at} eq $ea_at
+                ){
+                    $update_alias{'ea_at'} = $ea_at;
+                    $update_alias{'ea_touser'} = $ea_touser;
+                }
+            }elsif($ak eq 'website'){
+                unless($ref[0]->{_column_data}{'aliasdetails.ead_website'} eq $q->param($ak)){
+                    $update_details{"ead_$ak"} = $q->param($ak);
+                    $find_details{ead_userid} = $q->param('from');
+                    $find_details{ead_doid} = $q->param('domain');
+                }
+            }elsif($ak eq 'passwd'){
+                unless($ref[0]->{_column_data}{'aliasdetails.ead_password'} eq $q->param($ak)){
+                    $update_details{'ead_password'} = $q->param($ak);
+                    $find_details{ead_userid} = $q->param('from');
+                    $find_details{ead_doid} = $q->param('domain');
+                }
+            }elsif($ak eq 'notes'){
+                unless($ref[0]->{_column_data}{'aliasdetails.ead_notes'} eq $q->param($ak)){
+                    $update_details{"ead_$ak"} = $q->param($ak);
+                    $find_details{ead_userid} = $q->param('from');
+                    $find_details{ead_doid} = $q->param('domain');
+                }
+            }else{
+              #  warn "$ak = " . $q->param($ak);
+            }
+        }
+
+        my $done=0;
+        if(%update_alias){
+            my $rc = $self->resultset('Aliase')->search(\%find_alias);
+            $done += $rc->update( \%update_alias );
+        }
+        if(%update_details){
+            my $rc = $self->resultset('AliasDetail')->search(\%find_details);
+            $done += $rc->update_or_create( \%update_details );
+        }
+        if($done){
+                @ref = $self->resultset('Aliase')->search({ %find_alias },{
+                    join => ['domains', 'aliasdetails'],
+                    columns => [ 'domains.do_name', 'ea_id', 'ea_userid', 'ea_doid', 'ea_touser', 'ea_at', 'ea_suspended', 'aliasdetails.ead_website', 'aliasdetails.ead_password', 'aliasdetails.ead_notes' ],
+                });
+        }
+        # we need to be able to delete the AliasDetail row if we get no data
+
+    }
+
+
     $self->tt_params({
     ref     => \@ref,
     silent_password => 1, # turn off the javascript alert
@@ -375,6 +432,31 @@ sub imap: Runmode{
     body    => $body,
           });
     return $self->tt_process();
+}
+
+=head3 _send
+
+    This expects to be called either with an array of data,
+    OR a hash of data
+    OR a string of data
+
+    If the string then we try to split it back up into from, to, body
+    If the hash then we expect each data type to have the right key, but
+        if not we again try to split it.
+
+    The most usual way to call it is $self->_send($from,$to,$subject,$body);
+        but $self->_send($message); will also work.
+
+   If the system has the right modules installed, then we will use them to
+    form the message and send it.
+   else we will fall back on `sendmail` or `exim` or `postfix`
+
+    Only after trying all of those will we return an error.
+
+=cut
+
+sub _send: Runmode{
+    my ($self,$from,$to,$subject,$body) = @_;
 }
 
 1;
