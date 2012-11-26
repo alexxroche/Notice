@@ -344,7 +344,7 @@ sub edit_alias: Runmode{
                     $update_alias{ea_suspended} = $q->param($ak);
                     $update_alias{ea_id} = $q->param('editAlias');
                 }
-            }elsif($ak eq 'to'){
+            }elsif($ak eq 'destination'){
                 my($ea_touser,$ea_at) = split('@', $q->param($ak));
                 unless($ref[0]->{_column_data}{ea_touser} eq $ea_touser &&
                         $ref[0]->{_column_data}{ea_at} eq $ea_at
@@ -371,7 +371,7 @@ sub edit_alias: Runmode{
                     $find_details{ead_doid} = $q->param('domain');
                 }
             }else{
-              #  warn "$ak = " . $q->param($ak);
+               # warn "$ak = " . $q->param($ak);
             }
         }
 
@@ -379,6 +379,7 @@ sub edit_alias: Runmode{
         if(%update_alias){
             my $rc = $self->resultset('Aliase')->search(\%find_alias);
             $done += $rc->update( \%update_alias );
+            #warn "updating" . Dumper(\%update_alias);
         }
         if(%update_details){
             my $rc = $self->resultset('AliasDetail')->search(\%find_details);
@@ -457,6 +458,7 @@ sub imap: Runmode{
 
 sub _send: Runmode{
     my ($self,$from,$to,$subject,$body) = @_;
+    
 }
 
 1;
