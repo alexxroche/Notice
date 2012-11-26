@@ -319,7 +319,6 @@ sub edit_alias: Runmode{
         },{
         join => ['domains', 'aliasdetails'],
         columns => [ 'domains.do_name', 'ea_id', 'ea_userid', 'ea_doid', 'ea_touser', 'ea_at', 'ea_suspended', 'aliasdetails.ead_website', 'aliasdetails.ead_password', 'aliasdetails.ead_notes' ],
-        #select => [ 'ea_id', 'domains.do_name', 'ea_userid', 'ea_doid', 'ea_touser', 'ea_at', 'ea_suspended', 'aliasdetails.ead_website', 'aliasdetails.ead_password', 'aliasdetails.ead_notes' ],
         });
 
     # If we don't have any data then this is an error
@@ -338,10 +337,9 @@ sub edit_alias: Runmode{
     if($q->param('save')){
         foreach my $ak (keys %{ $q->{'param'} } ){
             if($ak eq 'status'){
-                # the status may change (enabled || disabled )
-                my $status = $q->param('status') eq 'enabled' ? 1 : 0 ;
-                unless($ref[0]->{_column_data}{ea_suspended} eq $status){
-                    $update_alias{ea_suspended} = $q->param($ak);
+                my $status = $q->param($ak) eq 'enabled' ? 0 : 1 ;
+                unless($ref[0]->{_column_data}{ea_suspended} && $ref[0]->{_column_data}{ea_suspended} eq $status){
+                    $update_alias{ea_suspended} = $status;
                     $update_alias{ea_id} = $q->param('editAlias');
                 }
             }elsif($ak eq 'destination'){
@@ -352,21 +350,16 @@ sub edit_alias: Runmode{
                     $update_alias{'ea_at'} = $ea_at;
                     $update_alias{'ea_touser'} = $ea_touser;
                 }
-            }elsif($ak eq 'website'){
-                unless($ref[0]->{_column_data}{'aliasdetails.ead_website'} eq $q->param($ak)){
+            }elsif($ak eq 'website' || $ak eq 'notes'){
+                unless($ref[0]->{_column_data}{"aliasdetails.ead_$ak"} && $ref[0]->{_column_data}{"aliasdetails.ead_$ak"} eq $q->param($ak)){
                     $update_details{"ead_$ak"} = $q->param($ak);
                     $find_details{ead_userid} = $q->param('from');
                     $find_details{ead_doid} = $q->param('domain');
                 }
+            # we should change this to passphrase
             }elsif($ak eq 'passwd'){
                 unless($ref[0]->{_column_data}{'aliasdetails.ead_password'} eq $q->param($ak)){
                     $update_details{'ead_password'} = $q->param($ak);
-                    $find_details{ead_userid} = $q->param('from');
-                    $find_details{ead_doid} = $q->param('domain');
-                }
-            }elsif($ak eq 'notes'){
-                unless($ref[0]->{_column_data}{'aliasdetails.ead_notes'} eq $q->param($ak)){
-                    $update_details{"ead_$ak"} = $q->param($ak);
                     $find_details{ead_userid} = $q->param('from');
                     $find_details{ead_doid} = $q->param('domain');
                 }
