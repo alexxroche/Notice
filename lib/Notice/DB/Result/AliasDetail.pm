@@ -1,17 +1,21 @@
+use utf8;
 package Notice::DB::Result::AliasDetail;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
+
+=head1 NAME
+
+Notice::DB::Result::AliasDetail - email alias details - passwords will be hashed somehow
+
+=cut
 
 use strict;
 use warnings;
 
 use base 'DBIx::Class::Core';
 
-
-=head1 NAME
-
-Notice::DB::Result::AliasDetail
+=head1 TABLE: C<alias_details>
 
 =cut
 
@@ -67,7 +71,7 @@ __PACKAGE__->add_columns(
   "ead_date",
   {
     data_type => "datetime",
-    datetime_undef_if_invalid => 1,
+    "datetime_undef_if_invalid" => 1,
     is_nullable => 1,
   },
   "ead_notes",
@@ -75,9 +79,10 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-24 17:01:30
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lDMXNhaAWypvCRQU0gxNMg
+# Created by DBIx::Class::Schema::Loader v0.07015 @ 2012-05-30 18:50:31
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:G7TlclQJiQBBgLLOdqRsGw
 
-
-# You can replace this text with custom code or comments, and it will be preserved on regeneration
+#__PACKAGE__->set_primary_key(__PACKAGE__->columns);
+__PACKAGE__->set_primary_key('ead_userid','ead_doid');
+# we must migrate to using ead_id as primary key and ead_edid as the link to aliases.ea_id
 1;
