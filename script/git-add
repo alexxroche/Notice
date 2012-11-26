@@ -1,4 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 #check that we have xargs or xjobs installed!
-git st|grep modified:|awk '{print $NF}'|xargs git add
+XARGS=$(which xargs)
+if [ -x $XARGS ]
+then
+    git st|grep modified:|awk '{print $NF}'|$XARGS git add
+else
+    for i in `git st|grep modified:|grep '\.'|awk '{print \$NF}'`;do git add $i; done
+fi
