@@ -32,6 +32,7 @@
         </form>
        </td><td>
         <form method="POST" action="/cgi-bin/index.cgi/email/aliases/[% do_name %]">
+        <input type="hidden" name="id" value="[%- f.ea_id - %]" />
         <input type="submit" name="Delete" value="Delete Alias" class="small button [%- IF f.ea_suspended -%]orange[%- ELSE -%]del red[%- END -%]" />
         </form>
        </td>
