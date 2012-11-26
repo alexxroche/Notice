@@ -235,8 +235,8 @@ sub aliases: Runmode{
              },{
         });
         # NOTE this is a dirty hack to give the user something to click on
-        if($domains[0]->{_column_data}{do_id}){
-                my $this_name = $domains[0]->{_column_data}{do_name};
+        if(defined $domains[0]->do_id && $domains[0]->do_id){
+                my $this_name = $domains[0]->do_name;
                 $error .= '<br /><a href="' . $surl .'/' . $this_name . '" class="blue">' . $this_name . '</a><br />';
         }
     }
@@ -322,14 +322,16 @@ sub edit_alias: Runmode{
         });
 
     # If we don't have any data then this is an error
-    unless($ref[0]->{_column_data}{ea_touser}){
+    unless(defined $ref[0]->ea_touser){
         $self->tt_params({error => 'Unknown Email Alias'});
         return $self->tt_process('site_wrapper.tmpl');
     }        
 
     # NTS you are here => lets see if they are chaning the forwarding
     %find_alias = ();
-    $find_alias{ea_id} = $ref[0]->{_column_data}{ea_id};
+    if(defined $ref[0]->ea_id){
+        $find_alias{ea_id} = $ref[0]->ea_id;
+    }
     my %update_alias;
     my %update_details;
     my %find_details;
@@ -338,27 +340,34 @@ sub edit_alias: Runmode{
         foreach my $ak (keys %{ $q->{'param'} } ){
             if($ak eq 'status'){
                 my $status = $q->param($ak) eq 'enabled' ? 0 : 1 ;
-                unless($ref[0]->{_column_data}{ea_suspended} && $ref[0]->{_column_data}{ea_suspended} eq $status){
+                unless(defined $ref[0]->ea_suspended && $ref[0]->ea_suspended eq $status){
                     $update_alias{ea_suspended} = $status;
                     $update_alias{ea_id} = $q->param('editAlias');
                 }
             }elsif($ak eq 'destination'){
                 my($ea_touser,$ea_at) = split('@', $q->param($ak));
-                unless($ref[0]->{_column_data}{ea_touser} eq $ea_touser &&
-                        $ref[0]->{_column_data}{ea_at} eq $ea_at
+                unless(defined $ref[0]->ea_touser && $ref[0]->ea_touser eq $ea_touser &&
+                       defined $ref[0]->ea_at && $ref[0]->ea_at eq $ea_at
                 ){
                     $update_alias{'ea_at'} = $ea_at;
                     $update_alias{'ea_touser'} = $ea_touser;
                 }
             }elsif($ak eq 'website' || $ak eq 'notes'){
-                unless($ref[0]->{_column_data}{"aliasdetails.ead_$ak"} && $ref[0]->{_column_data}{"aliasdetails.ead_$ak"} eq $q->param($ak)){
+                    if(defined $ref[0]->aliasdetails){ 
+                            #warn $ref[0]->aliasdetails->ead_website;   #WORKS
+                            # NOTE how to do dynamic method references
+                            #warn $ref[0]->aliasdetails->${\"ead_$ak"}; #ALSO WORKS
+                            #warn $ref[0]->aliasdetails->{_column_data}{"ead_$ak"}; #ALSO WORKS, but is ugly and wrong
+                    }
+                unless(defined $ref[0]->aliasdetails && $ref[0]->aliasdetails->${\"ead_$ak"} eq $q->param($ak)){
                     $update_details{"ead_$ak"} = $q->param($ak);
                     $find_details{ead_userid} = $q->param('from');
                     $find_details{ead_doid} = $q->param('domain');
                 }
             # we should change this to passphrase
             }elsif($ak eq 'passwd'){
-                unless($ref[0]->{_column_data}{'aliasdetails.ead_password'} eq $q->param($ak)){
+                unless(defined $ref[0]->aliasdetails && 
+                       $ref[0]->aliasdetails->${\"ead_password"} eq $q->param($ak)){
                     $update_details{'ead_password'} = $q->param($ak);
                     $find_details{ead_userid} = $q->param('from');
                     $find_details{ead_doid} = $q->param('domain');
@@ -375,8 +384,17 @@ sub edit_alias: Runmode{
             #warn "updating" . Dumper(\%update_alias);
         }
         if(%update_details){
+            warn "finding" . Dumper(\%find_details);
+            warn "updating" . Dumper(\%update_details);
             my $rc = $self->resultset('AliasDetail')->search(\%find_details);
-            $done += $rc->update_or_create( \%update_details );
+                #$update_details{"ead_date"} = \'NOW()'; # is this more useful as created or updated?
+                #$done += $rc->update_or_create( \%update_details );
+            if($rc->count){
+                $done += $rc->update( \%update_details );
+            }else{
+                $update_details{"ead_date"} = \'NOW()';
+                $done += $rc->create( \%update_details );
+            }
         }
         if($done){
                 @ref = $self->resultset('Aliase')->search({ %find_alias },{
