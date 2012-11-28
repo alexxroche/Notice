@@ -53,3 +53,85 @@
 .button.large:hover { background-position: 0 -35px; }
 .button.large:active { padding: 7px 12px 6px; background-position: 0 top; }
 
+table tr.stripe {
+        background: #cfF0E6;
+        vertical-align:middle;
+        color: #000;
+        font-weight: normal;
+    white-space: nowrap;
+        text-align: left;
+        font-family: sans-serif;
+        border-style: solid;
+        border-left-color: #660;
+        border-right-color: #669E5D;
+        border-bottom-color: #669E5D;
+        border-top-color: #660;
+        border-width: 1px;
+        padding: 20px;
+        padding-left: 5px;
+        padding-right: 5px;
+        padding-top: 14px;
+        padding-bottom: 14px;
+}
+
+table tr.strip {
+        background: #F0cfE6;
+        vertical-align:middle;
+        color: #000;
+        font-weight: normal;
+    white-space: nowrap;
+        text-align: left;
+        font-family: sans-serif;
+        border-style: solid;
+        border-left-color: #660;
+        border-right-color: #669E5D;
+        border-bottom-color: #669E5D;
+        border-top-color: #660;
+        border-width: 1px;
+        padding: 20px;
+        padding-left: 5px;
+        padding-right: 5px;
+        padding-top: 14px;
+        padding-bottom: 14px;
+}
+
+ul li.stripe {        
+        background: #F0E6cf;
+        vertical-align:middle;
+        color: #000;
+        font-weight: normal;
+    white-space: nowrap;
+        text-align: left;
+        font-family: sans-serif;
+        border-style: solid;
+        border-left-color: #660;
+        border-right-color: #669E5D;
+        border-bottom-color: #669E5D;
+        border-top-color: #660;
+        border-width: 1px;
+        padding: 20px;
+        padding-left: 5px;
+        padding-right: 5px;
+        padding-top: 14px;
+        padding-bottom: 14px;
+ }
+ul li.strip { 
+        background: #E6F0cf;
+        vertical-align:middle;
+        color: #000;
+        font-weight: normal;
+        white-space: nowrap;
+        text-align: left;
+        font-family: sans-serif;
+        border-style: solid;
+        border-left-color: #660;
+        border-right-color: #669E5D;
+        border-bottom-color: #669E5D;
+        border-top-color: #660;
+        border-width: 1px;
+        padding: 20px;
+        padding-left: 5px;
+        padding-right: 5px;
+        padding-top: 14px;
+        padding-bottom: 14px;
+}

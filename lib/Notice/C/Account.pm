@@ -1,6 +1,6 @@
 package Notice::C::Account;
 
-#use warnings;
+use warnings;
 use strict;
 use Exporter;
 my @ISA=('Exporter','Notice::C');
@@ -11,11 +11,11 @@ use base 'Notice';
 use Data::Dumper;
 our %opt;
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 my %submenu = (
-   '1.2' => [
-        '1' => { peer => 1, name=> 'Preferences', rm => 'prefs', class=> 'navigation'},
+   '1.4.1' => [
+        '1' => { name=> 'Tree', rm => 'tree', class=> 'navigation'},
     ],
 );
 
@@ -46,6 +46,7 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(':all');
+    $self->tt_params({ submenu => \%submenu });
 }
 
 =head2 RUN MODES
@@ -183,6 +184,41 @@ sub main: StartRunmode {
     return $self->tt_process();
 }
 
+=head3 tree
+
+a tree of accounts
+
+=cut
+
+sub tree: Runmode {
+    my ($self) = @_;
+
+=pod
+SELECT 
+    me.ac_id,CONCAT( REPEAT(' ', COUNT(p.ac_name) -1), me.ac_name) AS name,me.ac_tree as t,me.ac_min,me.ac_max,me.ac_parent 
+FROM account as me, account as p 
+WHERE me.ac_min BETWEEN p.ac_min and p.ac_max 
+GROUP BY me.ac_id 
+ORDER BY me.ac_min;
+
+SELECT me.ac_id,CONCAT( REPEAT(' ', COUNT(p.ac_name) -1), me.ac_name) AS name,me.ac_tree as t,me.ac_min,me.ac_max,me.ac_parent FROM account as me, account as p WHERE me.ac_min BETWEEN p.ac_min and p.ac_max GROUP BY me.ac_id ORDER BY me.ac_min;
+
+=cut
+
+   # my %rc = $self->resultset('Account')->search({
+   #     'me.ac_min' => {'BETWEEN' => ['account.ac_min','account.ac_max'] }
+   #     },{
+   #         join => ['account'],
+   #         '+column' => [{name => 'CONCAT( REPEAT(" ", COUNT(p.ac_name) -1), me.ac_name)'}],
+   #         group => ['ac_tree','ac_id'],
+   #         order => 'ac_min',
+   #     })->all;
+    my @rc = $self->resultset('Account')->search(undef,{order_by => {-asc =>['ac_tree','ac_id']}})->all;
+    my @rd = $self->resultset('People')->search->all;
+    $self->tt_params({ accounts => \@rc, people => \@rd });
+    return $self->tt_process();
+}
+
 =head3 _ef_acid
 
 return the effective account ID
@@ -195,8 +231,8 @@ sub _ef_acid {
     my $ef_acid = 0;
     if($self->session->param('ef_acid')){
         $ef_acid = $self->session->param('ef_acid');
-    }elsif($self->session->param('ef_acid')){
-        $ef_acid = $self->session->param('ef_acid');
+    }elsif($self->session->param('pe_acid')){
+        $ef_acid = $self->session->param('pe_acid');
     }else{
         $ef_acid = $self->_acid();
     }

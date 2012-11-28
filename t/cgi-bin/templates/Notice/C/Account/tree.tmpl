@@ -1,0 +1,49 @@
+[% WRAPPER 'site_wrapper.tmpl' %]
+ [%- USE Dumper -%]
+
+ [%- IF accounts.size -%]
+<ul>
+  [%- last_tree = '0'; -%]
+  [%- FOREACH ac = accounts -%]
+    [%- branch = last_tree.length -%]
+    [%- IF ac.ac_tree.length > branch; 
+        '<ul class="acc_list">';
+      ELSIF ac.ac_tree.length < branch;
+            WHILE ac.ac_tree.length < branch;
+                branch = branch - 2;
+                '</li></ul>'; 
+      END;
+    END -%]
+        [%- last_tree = ac.ac_tree -%]
+        [%- IF ul_stripe == 'stripe'; ul_stripe = 'strip'; ELSE; ul_stripe = 'stripe'; END -%]
+        <li class="[%- ul_stripe -%]">([%- ac.ac_id -%]) [%- ac.ac_name -%] { [%- ac.ac_tree -%] } [%- ac.ac_min -%] - [%- ac.ac_max -%]
+        [%- IF people.size; stripe = 'stripe' -%]
+            <table>
+            [%- FOREACH p = people -%]
+             [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+             [%- IF p.pe_acid == ac.ac_id -%]
+                <tr class="[%- stripe -%]"><td>[[%- p.pe_id -%]]</td>
+                    <td>[%- p.pe_fname; ' '; p.pe_lname -%]</td>
+                    <td>[%- p.pe_email -%]</td>
+                </tr>
+             [%- END # IF right account -%]
+            [%- END -%]
+            </table>
+        [%- END -%]
+  [%- END #FOREACH -%]
+</li>
+</ul>
+<p>
+<span name="key">
+People id [pe_id] &lt; square brackets<br />
+Account id (ac_id) &lt; brackets<br />
+Account tree {ac_tree} &lt; curly braces<br />
+Account min - max &lt; number - bigger number <br />
+</span>
+</p>
+ [%- ELSE #IF ! accounts.size -%]
+    We have no accounts listed
+ [%- END #IF accounts.size -%]
+ [% #Dumper.dump(accounts) %]
+
+[% END #WRAPPER%]

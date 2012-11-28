@@ -62,7 +62,9 @@ The main function here is to display a list of child accounts and enable a user 
                 [%- END #FOREACH -%]
             [%- END #IF -%]
             [%- tree_padding = "$tree_padding&gt;" -%]
-            <option value="[% ac.ac_id %]" [% IF ef_acid == ac.ac_id; 'selected="selected"'; END %]> [%- tree_padding; ' '; ac.ac_name or ac; IF ac.ac_name.length <= 1; ' - [Personal Account] '; END -%]</option>
+            <option value="[% ac.ac_id %]" [% IF ef_acid == ac.ac_id; 'selected="selected"'; END %]> [%- tree_padding; ' '; 
+                IF ac.ac_name; ac.ac_name; ELSE; '['; ac.ac_id; ']'; END; 
+                IF ac.ac_name.length <= 1; ' - [Personal Account] '; END -%]</option>
         [% END #FOREACH %]
         </select>
     [% END # if accounts.size == 0 %]
