@@ -1,0 +1,28 @@
+[%- WRAPPER blank_wrapper.tmpl -%]
+<center>
+[% message %]
+[% warning %]
+[% IF error; error; ELSE %]
+
+<form name="loginform" method="post" action="[%- action -%]" >
+<table>
+  <caption>entering the following:</caption>
+  <tr>
+    <td align="right">Your new, (not to be forgotten) Pass Phrase:</td>
+    <td><input type="password" name="passphrase1" size="20" value="[%- passphrase1 -%]" autofocus required /></td>
+  </tr>
+  <tr>
+    <td align="right">Same thing, just to make sure you really can type it:</td>
+    <td><input type="password" name="passphrase2" size="20" value="[%- passphrase2 -%]" autofocus required /></td>
+  </tr>
+  <tr>
+    <td> &nbsp; </td>
+    <td><input type="submit" name="submit" value="Update Passphrase" class="small blue button" /></td>
+  </tr>
+</table>
+<input type="hidden" name="destination" value="[%- dest || 'ForgotPassword' -%]" />
+<input type="hidden" name="rm" value="login" />
+</form>
+</center>
+[% END # IF -%]
+[%- END # WRAPPER -%]

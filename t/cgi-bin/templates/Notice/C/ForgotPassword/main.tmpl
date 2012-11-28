@@ -1,0 +1,24 @@
+[%- WRAPPER blank_wrapper.tmpl -%]
+<center>
+[% message %]
+[% warning %]
+[% IF error; error; ELSE %]
+
+<form name="loginform" method="post" action="[%- action -%]" >
+<table>
+  <caption>entering the following:</caption>
+  <tr>
+    <td align="right">Your Email address:</td>
+    <td><input type="text" name="email" size="20" value="[%- email -%]" autofocus required /></td>
+  </tr>
+  <tr>
+    <td> &nbsp; </td>
+    <td><input type="submit" name="submit" value="Send Passphrase reset" class="small yellow button" /></td>
+  </tr>
+</table>
+<input type="hidden" name="destination" value="[%- dest || 'ForgotPassword' -%]" />
+<input type="hidden" name="rm" value="main" />
+</form>
+</center>
+[% END # IF -%]
+[%- END # WRAPPER -%]

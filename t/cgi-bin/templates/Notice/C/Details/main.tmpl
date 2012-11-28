@@ -80,13 +80,6 @@
         </td>
         <td class="edit">[%- IF edit -%]<input type="text" name="pe_email" value="[%- END -%][%- d.pe_email -%][%- IF edit -%]"/>[%- END -%][%- $confirmed -%]</td>
     </tr>
- [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
-    <tr class="[%- stripe -%]">
-        <td nowrap="nowrap" class="edit">Password
-        [%- IF new_user; $required; END -%]
-        </td>
-        <td class="edit">[%- IF edit -%]<input type="text" name="pe_password" value="[%- d.pe_password -%]" />[%- ELSE; '*********'; END -%]</td>
-    </tr>
   [%- IF p.pe_level && p.pe_level >= 100 -%]
  [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
     <tr class="stripe">
@@ -110,7 +103,7 @@
   [%- END -%]
  [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
     <tr class="[%- stripe -%]">
-       <td class="edit">Account</td>
+       <td class="edit"><a class="black" href="[%- c.query.url -%]/Account/">Account</a></td>
        <td>[%- IF edit -%]<select id="ac_select" name="pe_acid">
 
 [% IF accounts.size == 0 %]
@@ -131,6 +124,13 @@
        <td class="edit">Date of Birth</td>
        <td class="edit">[%- IF edit -%]<input type="text" name="pe_dob" value="[%- END -%][%- d.pe_dob -%][%- IF edit -%]"/> (CCYY-MM-DD)[%- END -%]</td>
     </tr>
+ [%- IF pswd AND d.pe_id == 0 -%]
+    [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+    <tr class="[%- stripe -%]">
+        <td class="edit">Shh!</td>
+        <td><span class="green">[%- pswd -%]</span></td>
+    </tr>
+ [%- END # pswd -%]
  [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
     <tr class="[%- stripe -%]">
         <td colspan="2"><input type="submit" value="Edit" name="Edit" class="edituser" onmouseover="this.className='edituser edituserhov'" onmouseout="this.className='edituser'" onclick="this.className='edituser'"/></td>

@@ -468,8 +468,98 @@ sub imap: Runmode{
 =cut
 
 sub _send: Runmode{
-    my ($self,$from,$to,$subject,$body) = @_;
-    
+    my ($self,$from,$to,$subject,$body,$attach,$sign,$encrypt) = @_;
+    my $mailprog='sendmail'; #actually it is exim here through the joys of symlinks
+
+eval {
+    use MIME::Entity;
+    use MIME::Head;
+    use MIME::Body;
+    my $email;
+    if($from->{body}){ 
+        $to = $from->{to};
+        $subject = $from->{subject};
+        $body = $from->{body};
+        $from = $from->{from};
+        $sign = $from->{sign}; #PGP key to use (default $from)
+        $encrypt = $from->{encrypt}; #PGP key to use (default $to)
+        return(-1) unless $body;
+        return(-2) unless $from;
+        return(-3) unless $to;
+    }elsif((! $body || ref($body) eq 'ARRAY') && ref($from) eq 'SCALAR'){
+        if( ! $subject){
+            my $sender='';
+            HEAD: foreach my $line (split("\n", $from)){
+                if( ! $subject && $line=~m/^\s*Subject\s?:\s*(.+)$/){ $subject = $1; next HEAD; }
+                elsif( ! $to   && $line=~m/^\s*To\s?:\s*(.+)$/){ $to = $1; next HEAD; }
+                elsif(!$sender && $line=~m/^\s*From\s?:\s*(.+)$/){ $sender = $1; next HEAD;}
+                #last HEAD if $line=~m/^\s*$/;
+                $body .= $line;
+            }
+            if($sender){ 
+                if(!$body){
+                    $body = $from; 
+                }
+                $from = $sender; 
+            }
+        }
+        $email = MIME::Entity->build(From    => $from,
+                                      To      => $to,
+                                      Subject => $subject,
+                                      Data    => $body);
+   }
+
+   if ($attach) {
+        if(ref($attach) eq 'HASH'){
+            foreach my $att (keys %{ $attach }){
+                $email->attach(Path     => $attach->{$att}{file},
+                    Type     => $attach->{$att}{type});
+            }
+        }
+   }
+
+
+    ($email)=MIME::Entity->build(Type=>'multipart/mixed',
+                               'X-Mailer'=>undef,
+                               From=>$from,
+                               To=>$to,
+                               Subject=>$subject,
+                );
+    if($from->{x_headers}){
+        XFE: foreach my $x_header (@{$from->{x_headers}}){
+            #$email->add($x_header);
+            my($xhlh,$xhrh) = split(/=>/, $x_header);
+            next XFE unless $xhrh;
+            next XFE unless $xhlh=~m/^(Sender|X-.+)/;
+            $email->add($xhlh=>$xhrh);
+        }
+    }
+
+    $email->attach(Data=>"$body",
+               Type=>'text/plain',
+               Encoding=>'quoted-printable');
+
+    # Send e-mail
+    open(MAIL,"|$mailprog -t") or warn "Can't open $mailprog";
+    my $return = $email->print(\*MAIL);
+    close(MAIL);
+    return($return);
+ };
+ if($@){
+        #maybe  MIME::Entity is not installed
+    my $message='';
+    if($subject){
+        $message = "From: $from\nTo: $to\nSubject: $subject\n\n$body";
+    }else{
+        $message = $from;
+    }
+    open(MAIL,"|$mailprog -t") or warn "Can't open $mailprog";
+    my $return = print MAIL $message;
+    close(MAIL);
+    return($return);
+    #`echo $message|$mailprog -t`;
+ }
+
 }
 
 1;

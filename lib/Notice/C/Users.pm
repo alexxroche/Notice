@@ -8,11 +8,11 @@ use Data::Dumper;
 
 # NTS pull this from the menu and modules table
 my %submenu = ( 
-   #'1.2' => [
+   '1.4.2' => [
    #     '1' => { peer => 1, name=> 'Preferences', rm => 'prefs', class=> 'navigation'},
-   #     '2' => { name=> 'CSS', rm => 'css', class=> 'navigation'},
+        '2' => { name=> 'tree', rm => 'tree', class=> 'navigation'},
    #     '3' => { name=> 'Menu', rm => 'menu', class=> 'navigation'},
-   # ],
+    ],
 );
 
 
@@ -136,6 +136,148 @@ sub main: StartRunmode {
     page    => $body
 		  });
     return $self->tt_process();
+}
+
+=head3 tree
+
+  * Gives us a list of everyone in tree format
+
+=cut
+
+sub tree: Runmode {
+    my ($self) = @_;
+    my ($message,$body,%opt,$who_rs,%child);
+    my $ef_acid = $self->param('ef_acid');
+    my $ac_tree = $self->param('ac_tree');
+    if( $self->param('pe_level') && $self->param('pe_level') >= 100
+        && ! $self->param('no_child')
+    ){ 
+        # We want to clutter things with child accounts
+        %child = ( 'accounts.ac_tree' => {'like' => "$ac_tree\%" });
+    }
+
+    my @people = $self->resultset('People')->search({
+            -or => [
+                #pe_acid => $ac_id,
+                pe_acid => $ef_acid,
+               \%child
+            #{ 'accounts.ac_tree' => {'like' => "$ac_tree\%" } }
+            ]
+            },{
+            join => ['accounts'],
+            '+columns' => [ 'accounts.ac_name','accounts.ac_tree']
+           });
+
+    $self->tt_params({
+    people  => \@people,
+    #p       => $ud_rs, #person doing the looking
+    #d       => $who_rs, #person being looked at (usually the same)
+    submenu => \%submenu,
+    #message => $message,
+    #page    => $body
+          });
+    return $self->tt_process();
+}
+
+=head3 _user_details
+
+  * Gives us $hash{pe_id} and we will populate it with data
+
+=cut
+
+sub _user_details: Runmode {
+    my ($self,$ud) = @_;
+    #my ($self) = shift;
+    #my $ud = shift;
+    eval {
+        unless(defined $ud->{pe_id}){
+            return 0;
+        }
+    };
+    if($@){ 
+        warn "$@ $?"; return 0; 
+    }
+    my $pe_id = $ud->{pe_id};
+    my $user_details = $self->resultset('People')->search({ pe_id => "$pe_id" })->first;
+    %{ $ud } = %{ $user_details->{_column_data} };
+    #my %_cd = %{ $user_details->{_column_data} };
+
+=pod 
+
+    #foreach my $row (keys %{ $user_details->{_column_data} }){
+    foreach my $row (keys %_cd ){
+        if(defined $_cd{$row}){
+            $ud->{$row} = $_cd{$row}
+        }
+    }
+
+=cut
+
+    #warn Dumper(\$user_details);
+}
+
+=head3 _set_passphrase
+
+    This is used by Notice::C::ForgotPassword to update the people.pe_passwd field
+    If there is an error, we return it and if there is no error we return 0   
+
+    It expects either a pe_id OR a pe_loggedin 
+    AND a new passphrase
+
+=cut
+
+sub _set_passphrase {
+    my ($self,$pe_id,$pe_password,$pe_loggedin) = @_;
+    my %create_user;
+    eval {
+        use Crypt::CBC;
+        use MIME::Base64;
+
+        my $cipher = Crypt::CBC->new({
+            key         => $self->cfg("key"),
+            iv          => $self->cfg("iv"), # 128 bits / 16 char
+            cipher      => "Crypt::Rijndael",
+            literal_key => 1,
+            header      => "none",
+            keysize     => 32 # 256/8
+        });
+
+        my $encrypted = $cipher->encrypt($pe_password);
+        # base64 encode so we can store in db
+        $encrypted = encode_base64($encrypted);
+        # remove trailing newline inserted by encode_base64
+        chomp($encrypted);
+        $create_user{"pe_password"} = $encrypted;
+    };
+    if($@){ 
+        use Digest::MD5 qw(md5_hex);
+        $create_user{"pe_password"} = md5_hex($pe_password); 
+    }
+    $create_user{"pe_passwd"} = md5_hex($pe_password);
+    if($pe_loggedin){
+        $create_user{"pe_loggedin"} = \'NOW()';
+        $create_user{"pe_confirmed"} = \'NOW()';
+    }
+    my $rc = $self->resultset('People')->search({ 
+                        -or => [
+                            'pe_id' => $pe_id,
+                            'pe_loggedin' => $pe_loggedin
+                        ]
+                    })->first;
+    if($rc){
+        my $count = $rc->pe_loggedin;
+        $count=~s/.*_//g;
+        $count++;
+        $create_user{"pe_loggedin"} = $count;
+        $rc->update( \%create_user );
+        #if($rc->is_changed()){
+            return 0;
+        #}else{
+        #    return 'Sorry - failed to update your passphrase' . $rc->error ;
+        #}
+    }else{
+        return 'failed to find user';
+    }
 }
 
 

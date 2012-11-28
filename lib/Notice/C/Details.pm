@@ -85,6 +85,24 @@ sub main: StartRunmode {
     eval {
           $ac_id = $who_rs->pe_acid;
     };
+    my $pswd='';
+    eval {
+        use Crypt::CBC;
+        use MIME::Base64;
+        my $cipher = Crypt::CBC->new({
+            key         => $self->cfg("key"),
+            iv          => $self->cfg("iv"), # 128 bits / 16 char
+            cipher      => "Crypt::Rijndael",
+            literal_key => 1,
+            header      => "none", 
+            keysize     => 32 # 256/8 -only used for encryt
+        });
+        #$pswd = $cipher->decrypt(decode_base64($who_rs->pe_password)); # not to be confused with their actual password over in pe_passwd
+        $pswd = $who_rs->pe_password; # not to be confused with their actual password over in pe_passwd
+        $pswd = decode_base64($pswd);
+        $pswd = $cipher->decrypt($pswd);
+        $self->tt_params({ pswd => $pswd });
+    };
 
     my @ranks = $self->resultset('Rank')->search({'ra_boatn' => 'before'},{ 'columns'   => ['ra_id','ra_name'] });
     my @accounts = $self->resultset('Account')->search({
@@ -344,7 +362,7 @@ sub menu: Runmode {
             if(defined $opt{mi}){
                 $active = ( defined $opt{mi}{$keynum} ) ? 'checked="checked"' : '' ;
                 if($keynum && defined $opt{mi}{$keynum}){
-                    warn "this user has /some/ menu and for $keynum they have " . $opt{mi}{"$keynum"};
+                    #warn "this user has /some/ menu and for $keynum they have " . $opt{mi}{"$keynum"};
                 }else{
                     #warn "$keynum is not known for this user";
                 }
