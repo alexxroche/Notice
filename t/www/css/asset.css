@@ -52,6 +52,11 @@
 .button.large { font-size: 125%; padding: 7px 12px; }
 .button.large:hover { background-position: 0 -35px; }
 .button.large:active { padding: 7px 12px 6px; background-position: 0 top; }
+.blacktext, .black { color: rgb(000, 000, 000); text-decoration: none; }
+.yellow { color: rgb(255, 255, 000); text-decoration: none; }
+.white { color: rgb(255, 255, 255); text-decoration: none; }
+.grey { color: rgb(128, 128, 128); text-decoration: none; }
+.light-grey { color: rgb(200, 200, 200); text-decoration: none; }
 
 table tr.stripe {
         background: #cfF0E6;

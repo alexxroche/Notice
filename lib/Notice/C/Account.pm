@@ -184,6 +184,69 @@ sub main: StartRunmode {
     return $self->tt_process();
 }
 
+=head3 edit
+
+  * edit an account
+
+=cut
+
+sub edit: Runmode {
+    my ($self) = @_;
+    my %search = ( ac_id => $self->session->param('ef_acid') );
+    my $username = $self->authen->username;
+    if($self->param('id') && $self->param('id')=~m/^(\d+)$/){
+        $search{ac_id} = $1;
+    }
+    my $is_an_admin=0;
+    if(defined $self->cfg('admin')){
+        if( ref($self->cfg('admin')) eq 'ARRAY'){
+            ADMIN_SEARCH: foreach my $adm (@{ $self->cfg('admin') }){
+                if( $adm eq $username){
+                    $is_an_admin=1;
+                    last ADMIN_SEARCH;
+                }
+            }
+        }
+    }
+
+    if( $self->session->param('pe_id') && $self->session->param('pe_id')=~m/^1$/ ||
+        $self->session->param('pe_level') && $self->session->param('pe_level')=~m/^\d\d\d+$/
+    ){
+        $is_an_admin=1;
+    }
+    if($is_an_admin){
+        $self->tt_params({ admin => 1 });
+    }
+
+
+    # Maybe they are updating
+    my $q = $self->query;
+    foreach my $ak (keys %{ $q->{'param'} } ){
+        if($ak ne ''){
+            $self->tt_params({ message => 'Updated - when that is written' });
+        }
+    }
+
+
+    my $acc_list = $self->resultset('Account')->search(\%search)->first;
+     #%search = ( -or => [ ac_min => {'<' => $acc_list->ac_min },  \[ "LENGTH(ac_tree) <= LENGTH(?)", $acc_list->ac_tree ] ] );
+     my $parent_tree = $acc_list->ac_tree;
+     $parent_tree =~s/\.\d*$//;
+     #%search = ([ \[ "LENGTH(ac_tree) <= LENGTH(?)", "$parent_tree" ] ]);
+     my @find = (\[ "LENGTH(ac_tree) <= LENGTH('$parent_tree')" ]);
+     #my @find = (\[ "LENGTH(ac_tree) <= LENGTH('$acc_list->ac_tree')" ]);
+    my @accounts = $self->resultset('Account')->search(\@find)->all;
+    $self->tt_params({ accounts => \@accounts });
+    %search = ( ac_id => $self->session->param('ef_acid') );
+    if($self->param('id') && $self->param('id')=~m/^(\d+)$/){
+        $search{ac_id} = $1;
+    }
+    my @ac = $self->resultset('Account')->search(\%search)->first;
+    $self->tt_params({ ac => \@ac });
+    return $self->tt_process();
+}
+
+
 =head3 tree
 
 a tree of accounts
@@ -192,6 +255,18 @@ a tree of accounts
 
 sub tree: Runmode {
     my ($self) = @_;
+    my %search;
+    #my $q = $self->query;
+    if($self->param('id') && $self->param('id')=~m/^(\d+)$/){
+        $search{ac_id} = $1;
+        my $sth = $self->resultset('Account')->search(\%search)->first;
+        %search = (
+            -and => [
+                    ac_min => {'>=' => $sth->ac_min},
+                    ac_max => {'<=' => $sth->ac_max}
+            ]
+        );
+    }
 
 =pod
 SELECT 
@@ -213,7 +288,7 @@ SELECT me.ac_id,CONCAT( REPEAT(' ', COUNT(p.ac_name) -1), me.ac_name) AS name,me
    #         group => ['ac_tree','ac_id'],
    #         order => 'ac_min',
    #     })->all;
-    my @rc = $self->resultset('Account')->search(undef,{order_by => {-asc =>['ac_tree','ac_id']}})->all;
+    my @rc = $self->resultset('Account')->search(\%search,{order_by => {-asc =>['ac_tree','ac_id']}})->all;
     my @rd = $self->resultset('People')->search->all;
     $self->tt_params({ accounts => \@rc, people => \@rd });
     return $self->tt_process();

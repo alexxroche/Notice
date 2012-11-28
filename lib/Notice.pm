@@ -171,9 +171,17 @@ sub cgiapp_init {
 
     STORE                => 'Session',
     LOGOUT_RUNMODE       => 'logout',
-    LOGIN_RUNMODE        => 'login',
+    LOGIN_RUNMODE        => 'login', # this uses a runMode, OR you can use RENDER_LOGIN OR LOGIN_FORM
     POST_LOGIN_RUNMODE   => 'okay',
-    RENDER_LOGIN         => \&my_login_form,
+    #RENDER_LOGIN         => \&my_login_form,
+    LOGIN_FORM => {
+            REMEMBERUSER_OPTION => 1,
+    #       REMEMBERUSER_LABEL => 'Remember me',
+    #       REGISTER_URL => '/cgi-bin/index.cgi/Signup',
+    #      REGISTER_LABEL=> 'Register Now!',
+    #       FORGOTPASSWORD_URL => '/cgi-bin/index.cgi/Forgot_password',
+    #      # FORGOTPASSWORD_LABEL => 'Forgotten PassPhrase?',
+    }
   );
 
   # define runmodes (pages) that require successful login:
@@ -234,6 +242,7 @@ sub cgiapp_init {
                     $known_as = $ud->pe_fname . ' ' . $ud->pe_lname;
                     $self->param(known_as => $username);
                     $self->param(pe_id => $pe_id);
+                    $self->session->param(pe_id => $pe_id);
                     if($ef_acid=~m/^\d+$/){
                         $self->session->param(ef_acid => $ef_acid);
                     }else{
@@ -565,6 +574,7 @@ sub tt_post_process {
     }
     $$htmlref =~s/Alexx Roche/Alexx Roche <br\/>NOT Cleaned by HTML::Clean/;
   }else{
+   eval {
     require HTML::Clean;
     my $h = HTML::Clean->new($htmlref);
     if($$htmlref=~m/<pre/){
@@ -575,6 +585,7 @@ sub tt_post_process {
     }
     $$htmlref = ${$h->data};
     #my $newref=$h->data;$$htmlref=$$newref;
+   };
   }
   # This is just one of the many ways that i18n/i10n can be achieved
   eval {
@@ -676,68 +687,52 @@ sub login : Runmode {
   my $self   = shift;
   my $url = $self->query->url;
 
+  my ($PATH_INFO,$info,$runmode);
+  if($ENV{'PATH_INFO'}){ 
+    $PATH_INFO = $ENV{'PATH_INFO'} || undef; 
+    (undef, $info, $runmode) = split(/\//, $PATH_INFO);
+  }
+  my $dest= $self->query->param('destination') || 'main';
+  if ($info){
+    $dest = $info;
+    if($runmode){
+        $dest .= "/$runmode";
+        $self->tt_params({ authen_login => $runmode });
+    }
+  }
+  $self->tt_params({ dest => $dest });
+
   my $user = $self->authen->username;
   if ($user) {
-    my $dest = $self->query->param('destination') || 'main';
     $url=~s/\/login$//;
     return $self->redirect("$url/$dest");
     exit;
   } else {
+    my $authen_username = '';
+    if($self->query){
+        my $query       = $self->query;
+        #my $credentials = $self->authen->credentials;
+        $authen_username = $query->param('authen_username');
+        unless($authen_username){
+            $authen_username = $query->cookie('CAPAUTHTOKEN');
+            $self->tt_params({ authen_rememberuser => 'checked="checked"' });
+            #warn "got username from cookie " . $authen_username;
+        }
+    }
+    $self->tt_params({ authen_username => $authen_username });
     my $url = $self->query->self_url;
+    my $warning = $self->authen->login_attempts;
+    if($warning && $warning ne '' && $warning=~m/^\d+$/){
+        $warning = '<span class="red error">Invalid username or password (login attempt ' . $warning . ')</span>';
+        $self->tt_params({ login_warning => $warning });
+    }
     # This should be an option pulled from the DB config table
     unless ($url =~ /^https/) {
       $url =~ s/^http/https/;
-      return $self->my_login_form
+      return $self->tt_process('login.tmpl');
     }
-    return $self->my_login_form;
+    return $self->tt_process('login.tmpl');
   }
-}
-
-=head3 my_login_form
-
-going to move this to Notice::C::Login.pm as soon as I can
-(Or just drop it as I don't think we use it anymore,
-but it shows that we are not locked into TT.)
-
-=cut
-
-sub my_login_form {
-  my $self = shift;
-  my $template = $self->load_tmpl('login_form.html');
-
-  my $PATH_INFO = '';
-  if($ENV{'PATH_INFO'}){ $PATH_INFO = $ENV{'PATH_INFO'} || undef; }
-  (undef, my $info) = split(/\//, $PATH_INFO);
-  my $url = $self->query->url;
-
-  my $destination = $self->query->param('destination');
-
-  unless ($destination) {
-    if ($info) {
-      $destination = $info;
-    } else {
-      $destination = "main";
-    }
-  }
-
-  my $message = 'Would you be so kind as to login using your details. Thank you';
-  my $error = $self->authen->login_attempts;
-  if($url!~m/cgi-bin\/index.cgi/){
-        $url=~s/cgi-bin/cgi-bin\/index.cgi/;
-  }
-  if($url!~m/mustlogin/){
-    $url .= '/mustlogin';
-    $message = 'Please login';
-  }elsif($url=~m/mustlogin\/mustlogin/){
-    $message = 'Try again... or click <a href="/cgi-bin/index.cgi/lost">here</a> to recover your password';
-    $url=~s/mustlogin\/mustlogin/mustlogin/g;
-  }
-
-  $template->param(MESSAGE => $message);
-  $template->param(MYURL => $url);
-  $template->param(ERROR => $error);
-  $template->param(DESTINATION => $destination);
-  return $template->output;
 }
 
 =head3 logout

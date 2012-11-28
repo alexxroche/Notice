@@ -2,27 +2,50 @@
  [%- USE Dumper -%]
 
  [%- IF accounts.size -%]
+  <form method="post">
 <ul>
-  [%- last_tree = '0'; -%]
+  [%- last_tree = '0'; ac_sibling_max=0; ac_previous_min=0; ac_previous_max=0; ac_parent_min = 0; ac_parent_max = 0; -%]
+  [%- # parent has to be an array; each time we go into a child group we push the parent onto the stack and each time we leave we pop it -%]
   [%- FOREACH ac = accounts -%]
     [%- branch = last_tree.length -%]
     [%- IF ac.ac_tree.length > branch; 
-        '<ul class="acc_list">';
+        ac_parent_min = ac_previous_min;
+        ac_parent_max = ac_previous_max;
+        '<ul>';
       ELSIF ac.ac_tree.length < branch;
-            WHILE ac.ac_tree.length < branch;
-                branch = branch - 2;
-                '</li></ul>'; 
-      END;
-    END -%]
+        WHILE ac.ac_tree.length < branch;
+            branch = branch - 2;
+            # pop ac_parent
+            ac_sibling_max = ac_sibling_max + 1;
+            '</li></ul>'; 
+        END;
+      ELSE; 
+        #ac_previous_max = ac.ac_max;
+      END -%]
         [%- last_tree = ac.ac_tree -%]
         [%- IF ul_stripe == 'stripe'; ul_stripe = 'strip'; ELSE; ul_stripe = 'stripe'; END -%]
-        <li class="[%- ul_stripe -%]">([%- ac.ac_id -%]) [%- ac.ac_name -%] { [%- ac.ac_tree -%] } [%- ac.ac_min -%] - [%- ac.ac_max -%]
+        <li class="[%- ul_stripe -%]">(<a class="black" href="[%- c.query.url; '/Account/edit/'; ac.ac_id; '">'; ac.ac_id; '</a>' -%])
+            <a class="blue" href="[%- c.query.url; '/Account/tree/'; ac.ac_id; '">'; ac.ac_name; '</a>' -%] { [%- ac.ac_tree -%] } 
+        [%- 
+            '<span class="light-grey">[['; 
+                ac_parent_min; ';'; ac_parent_max; ';'; ac_sibling_max; ';';                 
+            ']]</span>';
+            '<span'; IF ac.ac_min != ac_parent_min + 1 AND 
+                        ac.ac_min != ac_parent_max + 1 AND 
+                        ac.ac_min != ac_sibling_max + 1; ' class="red"'; ELSE; ac_previous_max = ac.ac_max; END; '>';
+                
+            ac.ac_min -%]</span> - [%- '<span'; 
+            IF ac.ac_max > ( accounts.size * 2 ) AND
+               ac.ac_max != ac_sibling_max + 2
+            ; ' class="red"'; END; '>';
+            ac.ac_max; '</span>';
+        -%]
         [%- IF people.size; stripe = 'stripe' -%]
             <table>
             [%- FOREACH p = people -%]
              [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
              [%- IF p.pe_acid == ac.ac_id -%]
-                <tr class="[%- stripe -%]"><td>[[%- p.pe_id -%]]</td>
+                <tr class="[%- stripe -%]"><td>[<a class="black" href="[%- c.query.url; '/Users/edit/'; p.pe_id; '">'; p.pe_id; '</a>' -%]]</td>
                     <td>[%- p.pe_fname; ' '; p.pe_lname -%]</td>
                     <td>[%- p.pe_email -%]</td>
                 </tr>
@@ -30,9 +53,15 @@
             [%- END -%]
             </table>
         [%- END -%]
+        [%- 
+            ac_sibling_max = ac.ac_max;
+            ac_previous_max = ac.ac_max;
+            ac_previous_min = ac.ac_min;
+        -%]
   [%- END #FOREACH -%]
 </li>
 </ul>
+</form>
 <p>
 <span name="key">
 People id [pe_id] &lt; square brackets<br />
