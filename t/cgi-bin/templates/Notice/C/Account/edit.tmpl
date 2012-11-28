@@ -1,0 +1,64 @@
+[% WRAPPER 'site_wrapper.tmpl' %]
+[%- USE Dumper -%]
+
+[%- error -%]
+[%- warning -%]
+[%- message -%]
+ This will let you edit the account details
+<form method="post">
+
+<table>
+<th>ID</th>
+<th>Name</th>
+<th>Parent</th>
+<th>Join status</th>
+<th><a class="black" title="This tree shows the parent accounts all the way back to the root account">Tree</a></th>
+<th>Notes</th>
+<th>NSM Min <span class="small super">[0]</span></th>
+<th>NSM Max <span class="small super">[0]</span></th>
+</tr>
+<tr>
+    <td><span class="light-grey">[%- ac.0.ac_id -%]</span></td>
+    <td><input type="text" name="name" value="[%- ac.0.ac_name -%]" /></td>
+    <td>
+        <select name="parent">
+         [%- IF accounts.size -%]
+            [%- IF admin AND admin >= 1; '<option name="">Root account</option>'; END; -%]
+            [%- FOREACH acc = accounts -%]
+                <option name="[%- acc.ac_id -%]"[%- 
+                        IF ac.0.ac_parent.length;
+                            IF acc.ac_id == ac.0.ac_parent; ' selected="selected"'; END;
+                        ELSE;
+                            IF acc.ac_id == ac.0.ac_id; ' selected="selected"'; END;
+                        END
+                    -%]>[%- acc.ac_name %]
+            [%- IF admin -%]
+           ([%- acc.ac_id; ';'; ac.0.ac_parent -%])
+            [%- END # IF admin -%]
+        </option>
+            [%- END # foreach -%]
+         [%- ELSIF ac.0.ac_parent.length -%]
+                <option name="[%- ac.0.ac_parent -%]">Parent ID [%- ac.0.ac_parent -%]</option>
+         [%- ELSE -%]
+                <option name="">No Parent</option>
+         [%- END -%]
+        </select>
+    </td>
+    <td>
+        <select name="useradd">
+        <option value="0"[%- IF ac.0.ac_useradd == 0; ' selected="selected"'; END -%]>Private</option>
+        <option value="41"[%- IF ac.0.ac_useradd == 41; ' selected="selected"'; END -%]>Public</option>
+        </select>
+    </td>
+    <td>[%- ac.0.ac_tree -%]</td>
+    <td><textarea name="notes">[%- ac.0.ac_notes -%]</textarea></td>
+    <td><span class="light-grey">[%- ac.0.ac_min -%]</span></td>
+    <td><span class="light-grey">[%- ac.0.ac_max -%]</span></td>
+</tr>
+<tr><td colspan="8" style="text-align: right;" class="right"><input class="small blue button" type="submit" name="update" value="Update" /></td></tr>
+</table>
+
+
+<span class="small super">[0]</span> NSM is <a class="blue" href="http://en.wikipedia.org/wiki/Nested_set_model">Nested Set Model</a>
+
+[% END #WRAPPER%]
