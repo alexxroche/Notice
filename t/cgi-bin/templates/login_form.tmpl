@@ -1,6 +1,6 @@
 <form name="loginform" method="post" action="[%- action -%]" >
 <table>
-  <caption>Login here</caption>
+  <caption>[%- login_warning OR 'Login here' -%]</caption>
   <tr>
     <td align="right">Email address:</td>
     <td><input type="text" name="authen_username" size="20" value="[%- authen_username -%]" autofocus required /></td>
@@ -10,9 +10,31 @@
     <td><input type="password" name="authen_password" size="20" /></td>
   </tr>
   <tr>
-    <td> &nbsp; </td>
-    <td><input type="submit" name="submit" value="Submit" class="small blue button" /></td>
+    <td colspan="2" style="text-align: right"><span style="font-size: x-small">Remember me?</span>
+    <!--/td><td-->
+       <input id="authen_rememberuserfield" tabindex="3" type="checkbox" name="authen_rememberuser" value="1" [%- authen_rememberuser -%] /></td>
   </tr>
+
+  <tr>
+    <td style="text-align: left">
+        <span style="font-size: x-small">
+        <a href="/cgi-bin/index.cgi/Signup" id="authen_registerlink" tabindex="5">Register Now!</a></span>
+    </td>
+    <td style="text-align: center">
+        <input id="authen_loginbutton" tabindex="4" type="submit" name="authen_loginbutton" value="Sign In" class="small blue button" />&nbsp;
+        <span style="font-size: x-small; text-align: right">
+        <a href="/cgi-bin/index.cgi/ForgotPassword" id="authen_forgotpasswordlink" tabindex="6">Forgot Password?</a>
+        </span>
+    </td>
+  [%- IF login_message OR login_error -%]
+  <tr>
+    <td>
+[%- login_message -%]
+[%- login_error -%]
+    </td>
+  </tr>
+  [%- END -%]
 </table>
 <input type="hidden" name="destination" value="[%- dest -%]" />
+<input type="hidden" name="rm" value="[%- authen_login -%]" />
 </form>
