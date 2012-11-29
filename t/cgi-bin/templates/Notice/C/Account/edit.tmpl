@@ -3,10 +3,10 @@
 
 [%- error -%]
 [%- warning -%]
-[%- message -%]
+<br />
  This will let you edit the account details
 <form method="post">
-
+    <input type="hidden" name="id" value="[%- ac.0.ac_id -%]" />
 <table>
 <th>ID</th>
 <th>Name</th>
@@ -25,7 +25,7 @@
          [%- IF accounts.size -%]
             [%- IF admin AND admin >= 1; '<option name="">Root account</option>'; END; -%]
             [%- FOREACH acc = accounts -%]
-                <option name="[%- acc.ac_id -%]"[%- 
+                <option value="[%- acc.ac_id -%]"[%- 
                         IF ac.0.ac_parent.length;
                             IF acc.ac_id == ac.0.ac_parent; ' selected="selected"'; END;
                         ELSE;
@@ -50,15 +50,27 @@
         <option value="41"[%- IF ac.0.ac_useradd == 41; ' selected="selected"'; END -%]>Public</option>
         </select>
     </td>
-    <td>[%- ac.0.ac_tree -%]</td>
+    <td>[%- IF admin; '<input type="text" size="7" name="tree" value="'; END -%]
+        [%- ac.0.ac_tree -%]
+        [%- IF admin; '" />'; END -%]
+    </td>
     <td><textarea name="notes">[%- ac.0.ac_notes -%]</textarea></td>
-    <td><span class="light-grey">[%- ac.0.ac_min -%]</span></td>
-    <td><span class="light-grey">[%- ac.0.ac_max -%]</span></td>
+    <td>[%- IF admin; '<input type="text" size="9" name="min" value="'; ELSE; '<span class="light-grey">'; END; -%]
+        [%- ac.0.ac_min -%]
+        [%- IF admin; '" />'; ELSE; '</span>'; END; -%]
+    </td>
+    <td>[%- IF admin; '<input type="text" size="9" name="max" value="'; ELSE; '<span class="light-grey">'; END; -%]
+        [%- ac.0.ac_max -%]
+        [%- IF admin; '" />'; ELSE; '</span>'; END; -%]
+    </td>
 </tr>
 <tr><td colspan="8" style="text-align: right;" class="right"><input class="small blue button" type="submit" name="update" value="Update" /></td></tr>
 </table>
 
 
+<br />
+You probably do not want to change the tree, (that will be automatically updated if you change the parent account.)<br />
+You are even less likely to want to change the NSM Min and Max values, (unless somone has been playing with the database by hand.)<br />
 <span class="small super">[0]</span> NSM is <a class="blue" href="http://en.wikipedia.org/wiki/Nested_set_model">Nested Set Model</a>
 
 [% END #WRAPPER%]

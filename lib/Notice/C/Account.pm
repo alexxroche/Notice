@@ -219,15 +219,6 @@ sub edit: Runmode {
     }
 
 
-    # Maybe they are updating
-    my $q = $self->query;
-    foreach my $ak (keys %{ $q->{'param'} } ){
-        if($ak ne ''){
-            $self->tt_params({ message => 'Updated - when that is written' });
-        }
-    }
-
-
     my $acc_list = $self->resultset('Account')->search(\%search)->first;
      #%search = ( -or => [ ac_min => {'<' => $acc_list->ac_min },  \[ "LENGTH(ac_tree) <= LENGTH(?)", $acc_list->ac_tree ] ] );
      my $parent_tree = $acc_list->ac_tree;
@@ -242,6 +233,60 @@ sub edit: Runmode {
         $search{ac_id} = $1;
     }
     my @ac = $self->resultset('Account')->search(\%search)->first;
+
+    
+    # Maybe they are updating
+    my %update;
+    my $q = $self->query;
+    foreach my $ak (keys %{ $q->{'param'} } ){
+        if($ak ne ''){
+            if( $ak eq 'id' ||
+                $ak eq 'name' ||
+                $ak eq 'parent' ||
+                $ak eq 'useradd' ||
+                $ak eq 'tree' ||
+                $ak eq 'notes' ||
+                $ak eq 'min' ||
+                $ak eq 'max' ){
+                    my $ref = 'ac_' . $ak;
+                        # ( length( do { no warnings "numeric"; $q->param($ak) & "" } ) )  #check that it is numeric before compare
+                    if( @ac && ( (! defined $ac[0]->$ref ) ||  $q->param($ak) && ( $q->param($ak) ne $ac[0]->$ref ) ) ){
+                        $update{$ref} = $q->param($ak);
+                    }elsif($q->param($ak) eq $ac[0]->$ref){
+                        #no strict 'refs';
+                        #warn "$ak\t has not changed from " . $ac[0]->${"ac_$ak"};  # This does _not_ de-ref
+                        #warn "$ak\t has not changed from " . $ac[0]->$ref;          # This works
+                    }else{
+                        warn "Error: no $ak " .$ac[0]->$ref . "!=" . $q->param($ak);
+                    }
+            }
+        }
+    }
+    if($update{'ac_parent'} == $q->param('id')){
+            delete($update{'ac_parent'});
+    }elsif($update{'ac_parent'}=~m/^\d+$/){
+        # We are going to have to update the tree and the min-max values
+        
+    }
+    if(%update){
+        if($q->param('id')){
+            $update{'ac_id'} = $q->param('id');
+            warn Dumper(\%update);
+            my $rc = $self->resultset('Account')->search(\%search);
+            $rc->update(\%update);
+            # and now that we have an update we check that the new data is in the database
+            @ac = $self->resultset('Account')->search(\%search)->first;
+            # hmm if we have changed the parent account we may need to also do that select again
+            # - then again, by using the old one, it makes it easier to roll back to the previous parent.
+            $self->tt_params({ message => 'Updated' });
+        }else{
+            $self->tt_params({ warning => 'Which account are we updating?', message => 'Error' });
+        }
+    }else{
+        $self->tt_params({ message => 'Nothing to update' });
+        warn "Nothing to update";
+    }
+
     $self->tt_params({ ac => \@ac });
     return $self->tt_process();
 }
