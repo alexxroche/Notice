@@ -1,0 +1,14 @@
+Welcome to Notice
+
+If you want to hack on Notice - feel free; There is a lot to do!
+
+This version of Notice is an MVC using DBIx::Class,Template::Toolkit,CGI::Application, (see what I did there? (If not - the MVC map to the modules.))
+
+The database, with all of its inconsistencies is _NOT_ optimised or fully normalised. This is partly a result of the many uses and applications of Notice. You can deploy it on the small scale, (then pe_mobile might be useful) or with all of the Modules, (and then you are more likely to store data that would live in pe_mobile in the Contacts module.) At least that part of the inconsistency is deliberate. The few extra columns are not going to be a problem for most people, and for now backward compatibility is more important.
+
+The core is just a list of people, each in an account, and both can be grouped for additional functionality. 
+The system has both a static and dynamic configuration and many modules. Each functionality is a module, (not to be confused with actual perl modules), and most are optional.
+
+You are welcome to invent new modules as long at they do not clash with existing modules, (though you can create competing modules that perform the same function - though we would prefer it if you would fit the exiting ones.)
+
+Most people fork a copy from github and then push back their improvements through that site - please do that same.
