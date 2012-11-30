@@ -35,19 +35,19 @@ sub setup {
 
 =head2 RUN MODES
 
-=head3 index
+=head3 main
 
 This lets us give a "well done, you mangaged to not forget your password" page
 
 =cut
 
-sub index: StartRunmode {
-    my ($c) = @_;
-    $c->tt_params({
+sub main: StartRunmode {
+    my ($self) = @_;
+    $self->tt_params({
 	message => 'Hello world!',
 	title   => 'C::Okay'
 		  });
-    return $c->tt_process();
+    return $self->tt_process();
     
 }
 

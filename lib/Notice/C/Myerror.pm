@@ -2,6 +2,7 @@ package Notice::C::Myerror;
 
 use warnings;
 use strict;
+use lib 'lib';
 use base 'Notice';
 
 =head1 NAME
@@ -28,25 +29,33 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 
 sub setup {
     my ($self) = @_;
-
+    # N.B. don't protect the main runmode!
 }
 
 =head2 RUN MODES
 
-=head3 index
+=head3 main
 
   * Purpose - display an error
 
 =cut
 
-sub index: StartRunmode {
-    my ($c) = @_;
-    $c->tt_params({
-	message => 'Hello world!',
-	title   => 'C::Myerror'
-		  });
-    return $c->tt_process();
-    
+sub main: StartRunmode {
+    #my ($self) = @_;
+    my $self = shift;
+    my $error = shift||'';
+    my $url = $self->query->self_url;
+    my $result = "<h1>error</h1>";
+    my $username=$self->authen->username;
+    my $who = ' for ' . $username;
+    $result .= "<h2>$@</h2>$error";
+    $result .= "<br />p.s. URL = $url";
+    # probably don't want a template as that might be what is going wrong
+    $self->tt_params({no_wrapper => 1, message => $result});
+    $self->param('sec' =>  "Notice has a 'myerror' $who");
+    warn "Notice has a 'myerror' $who";
+    #return $self->tt_process('error.tmpl');
+    return $self->tt_process();
 }
 
 1;
@@ -88,5 +97,4 @@ or the Artistic License.
 See http://www.opensource.org/licenses/ for more information.
 
 =cut
-
 

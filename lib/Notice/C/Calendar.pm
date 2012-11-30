@@ -860,7 +860,7 @@ sub edit_entry : Runmode {
                 $events{$thing} = $entry->property("$thing")->[0]->value;
                 # extract the Time Zone
                 if($thing eq 'dtstart' || $thing eq 'dtend'){
-                    unless($tzid && $tzid=~m/\w+\/?\w*/ && $tz_is_set){ 
+                    unless($tzid && $tzid=~m/\w+\/?\w*/ && $tz_is_set){
                         #my $test_tz = Dumper($entry->property("$thing")->[0]->parameters );
                         if( defined $entry->property("$thing")->[0]->parameters) {
                             $tzid = $entry->property("$thing")->[0]->parameters->{'TZID'};
@@ -955,7 +955,6 @@ sub day : Runmode {
        ## categories => \@categories,
     });
     return $self->tt_process('Notice/C/Calendar/day.tmpl');
-
 }
 
 =head3 year
@@ -995,7 +994,6 @@ sub year : Runmode {
         wrapper => 1,
     });
     return $self->tt_process('Notice/C/Calendar/sw_year.tmpl');
-
 }
 
 =head3 new_event
@@ -1034,7 +1032,6 @@ sub new_event : Runmode {
         wrapper => 1,
     });
     return $self->tt_process();
-
 }
 
 
@@ -1074,7 +1071,48 @@ sub add_todo : Runmode {
         wrapper => 1,
     });
     return $self->tt_process();
+}
 
+=head3 search
+
+ * search events
+
+=cut
+
+sub search : Runmode {
+    my ($self) = @_;
+    my $q = $self->query;
+    my ($pe_id,@events);
+    my $surl;
+       $surl = ($self->query->self_url);
+    my $id = $self->param('id');
+    $pe_id = $self->param('pe_id');
+    use DateTime;
+    my $when = $id ? $id : DateTime->now( time_zone => 'UTC' )->strftime("%Y-%m-%d");
+    $when=~s/\D//g;
+    $when=~s/(\d+)(\d{2})(\d{2})$/$1-$2-$3/;
+
+  eval {
+    @events = $self->resultset('Calendar')->search({
+        added_by => {'=', $pe_id},
+        type => {'=', 'vevent'},
+        -or => [
+                start=> {'like', "$when\%"},
+                end  => {'like', "$when\%"},
+        ]
+        },{ order_by => {-asc =>['start','end+0'] }
+    });
+  };
+  if($@){ warn $@; }
+    my @hours = (0..23);
+    $self->tt_params({
+        when => $when,
+        hours => \@hours,
+        events => \@events,
+       ## categories => \@categories,
+    });
+    $self->tt_params({ message => "Sounds important" });
+    return $self->tt_process('Notice/C/Calendar/day.tmpl');
 }
 
 

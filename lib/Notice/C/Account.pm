@@ -238,7 +238,7 @@ sub edit: Runmode {
     # Maybe they are updating
     my %update;
     my $q = $self->query;
-    foreach my $ak (keys %{ $q->{'param'} } ){
+    DATA: foreach my $ak (keys %{ $q->{'param'} } ){
         if($ak ne ''){
             if( $ak eq 'id' ||
                 $ak eq 'name' ||
@@ -250,7 +250,9 @@ sub edit: Runmode {
                 $ak eq 'max' ){
                     my $ref = 'ac_' . $ak;
                         # ( length( do { no warnings "numeric"; $q->param($ak) & "" } ) )  #check that it is numeric before compare
-                    if( @ac && ( (! defined $ac[0]->$ref ) ||  $q->param($ak) && ( $q->param($ak) ne $ac[0]->$ref ) ) ){
+                    if( @ac && ( (! defined $ac[0]->$ref ) || ( $q->param($ak) ne $ac[0]->$ref ) ) ){
+                        if( ($ak eq 'min' || $ak eq 'max') && $q->param($ak)!~m/^\d+$/){ next DATA; }
+                        if( ($ak eq 'tree') && $q->param($ak)!~m/^\d+(\.\d+)*$/){ next DATA; }
                         $update{$ref} = $q->param($ak);
                     }elsif($q->param($ak) eq $ac[0]->$ref){
                         #no strict 'refs';
@@ -262,9 +264,9 @@ sub edit: Runmode {
             }
         }
     }
-    if($update{'ac_parent'} == $q->param('id')){
+    if($update{'ac_parent'} && $update{'ac_parent'} == $q->param('id')){
             delete($update{'ac_parent'});
-    }elsif($update{'ac_parent'}=~m/^\d+$/){
+    }elsif($update{'ac_parent'} && $update{'ac_parent'}=~m/^\d+$/){
         # We are going to have to update the tree and the min-max values
         
     }
@@ -403,19 +405,19 @@ this is used by Account::new_child
 =cut
 
 sub _list_children {
-    my $c = shift;
+    my $self = shift;
     my $p = shift;
     my $t = shift;
     # we should use these parent/tree values if we have them or ELSE...
     my $ac_parent = '1';
-    $ac_parent = $c->param('ac_parent') if $c->param('ac_parent');
-    my $ac_tree = $c->param('ac_tree');
+    $ac_parent = $self->param('ac_parent') if $self->param('ac_parent');
+    my $ac_tree = $self->param('ac_tree');
     #warn "parent: $ac_parent, tree: $ac_tree";
-    $c->param(message => "ac_parent in _list_children is $ac_parent") if $c->param('debug') >=1;
+    $self->param(message => "ac_parent in _list_children is $ac_parent") if $self->param('debug') >=1;
     #my @children = ('1'); #we should pull the default from the database?
     my @children = (); #we should pull the default from the database?
     if($ac_tree=~m/^\d+(\.\d+)*$/){
-        my $rs = $c->resultset('Account')->search({
+        my $rs = $self->resultset('Account')->search({
             -or => [
                 ac_parent=>{'=',$ac_parent},
                 ac_tree=>{ like => "$ac_tree.\%"}
@@ -424,12 +426,12 @@ sub _list_children {
         });
         while(my $crs = $rs->next){
             push(@children,$crs->ac_tree);
-            #my $old_msg = $c->param('message');
-            #$c->param(message => "$old_msg");
+            #my $old_msg = $self->param('message');
+            #$self->param(message => "$old_msg");
         }
     }else{
         $ac_parent = '1' unless $ac_parent=~m/^\d+$/; # again we should pull this from the database
-        my $rs = $c->resultset('Account')->search({
+        my $rs = $self->resultset('Account')->search({
                 'ac_parent'=> "$ac_parent"},
                 {columns=>['ac_tree'], order_by => {-asc =>['ac_id','ac_tree+0','ac_tree']}
         });
@@ -451,14 +453,14 @@ given $ac_id returns SELECT ac_tree,ac_min,ac_max FROM account WHERE ac_id = $ac
 =cut
 
 sub _tree_min_max {
-    my $c = shift;
+    my $self = shift;
     my $t = '1';
     my $m = '1';
     my $x = '2';
-    my $ac_parent   = $c->param('ac_parent') ? $c->param('ac_parent') : '1';
-    my $ac_id      = $c->param('ac_id') ? $c->param('ac_id') : '';
+    my $ac_parent   = $self->param('ac_parent') ? $self->param('ac_parent') : '1';
+    my $ac_id      = $self->param('ac_id') ? $self->param('ac_id') : '';
     unless($ac_id){ $ac_id = $ac_parent; }
-    my $rs = $c->resultset('Account')->search({
+    my $rs = $self->resultset('Account')->search({
         'ac_id'=>{'=' => "$ac_id"}
     },{
         columns => ['ac_tree','ac_min','ac_max']
@@ -552,15 +554,15 @@ given a string (usuall from a persons first name and last name) this returns an 
 =cut
 
 sub _name_to_child {
-    my $c = shift;
-    return unless $c->param('ac_id');
-    my @ac_hi = split/\./, $c->param('ac_id');
+    my $self = shift;
+    return unless $self->param('ac_id');
+    my @ac_hi = split/\./, $self->param('ac_id');
     my($ac_parent,$ac_child,@grand); #children
     my $sproging=0; #have we started on the children yet?
     foreach my $pa (@ac_hi){
       if($pa=~m/^\d+/ && $sproging==0){
         # check that $ac_parent HAS a child account of $pa (or this might be a string)
-        my $exists = list_child($c,$ac_parent,$pa);
+        my $exists = list_child($self,$ac_parent,$pa);
         if($exists){
             $ac_parent = $ac_parent ? $ac_parent.'.'.$pa : $pa;
         }else{
@@ -600,7 +602,7 @@ sub _name_to_child {
         # check that $new_ac does not exist
         my $count = ($c_ac)+1;
         while($c_ac < $count){
-            my @row = $c->resultset('Account')->search({ac_parent=>{'=',$ac_parent},ac_id=>{'=',$new_ac}},{columns=>['ac_id','ac_name']});
+            my @row = $self->resultset('Account')->search({ac_parent=>{'=',$ac_parent},ac_id=>{'=',$new_ac}},{columns=>['ac_id','ac_name']});
             if($lc_child eq lc($row[1])){ #we already have this one letter account created
                 $ac_parent .= '.' . $c_ac;
                 next CHILD;
@@ -619,7 +621,7 @@ sub _name_to_child {
         #$sth->execute($ac_parent,"$child\%");
         #my @row = $sth->fetchrow_array;
         #$child .= $row[0];
-        my @row = $c->resultset('Account')->search({ac_parent=>{'=',$ac_parent},ac_name=>{'like',\"$child\%"}},{columns=>['ac_id']});
+        my @row = $self->resultset('Account')->search({ac_parent=>{'=',$ac_parent},ac_name=>{'like',\"$child\%"}},{columns=>['ac_id']});
         $child .= int($row[0])+1;
         $new_ac = $ac_parent . '.' . $row[0];
        }

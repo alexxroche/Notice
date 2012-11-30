@@ -32,31 +32,11 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(':all');
-    my $runmode;
-    $runmode = ($self->query->self_url);
-    $runmode =~s/\/$//;
-    if($self->param('rm')){
-        $runmode = $self->param('rm');
-    }
-    if($self->param('id')){
-        my $id = $self->param('id');
-        if($self->param('extra1')){
-            my $extra = $self->param('extra1');
-            $runmode =~s/\/$extra[^\/]*//;
-        }
-        if($self->param('sid')){
-            my $sid = $self->param('sid');
-            $runmode =~s/\/$sid[^\/]*//;
-        }
-        $runmode =~s/\/$id[^\/]*$//;
-    }
-    $runmode=~s/.*\///;
-
 }
 
 =head2 RUN MODES
 
-=head3 index
+=head3 main
 
   * Purpose - display addresses
   * State   - To be written
@@ -64,13 +44,13 @@ sub setup {
 
 =cut
 
-sub index: StartRunmode {
-    my ($c) = @_;
-    $c->tt_params({
+sub main: StartRunmode {
+    my ($self) = @_;
+    $self->tt_params({
 	message => 'Hello world!',
 	title   => 'C::Addresses'
 		  });
-    return $c->tt_process();
+    return $self->tt_process();
     
 }
 
@@ -83,13 +63,13 @@ returns ad_id on success or NULL on failure
 =cut
 
 sub _add: Runmode{
-	my $c = shift;
+	my $self = shift;
     my $ac_id;
-    $ac_id = $c->param('ef_acid');
+    $ac_id = $self->param('ef_acid');
     if($ac_id!~m/^\d+$/){
-        $ac_id = $c->param('pe_acid');
+        $ac_id = $self->param('pe_acid');
     }
-    unless($ac_id=~m/^\d+$/){ $ac_id = $c->param('ac_id'); } # last gasp
+    unless($ac_id=~m/^\d+$/){ $ac_id = $self->param('ac_id'); } # last gasp
 
     unless($ac_id=~m/^\d+$/){ return "Failed to find an account for this address $ac_id"; }
     # check we don't have this address already in _this_ account
@@ -97,9 +77,9 @@ sub _add: Runmode{
     #my($query)="SELECT ad_id from address where ad_adpostcode like '%$values->{ad_postcode}%' $child_accounts order by ad_id";
     my $ad_id;
     my $data;
-    $data = $c->param('create_address');
+    $data = $self->param('create_address');
     if($data){
-        my $comment = $c->resultset('Address')->find_or_create( $data );
+        my $comment = $self->resultset('Address')->find_or_create( $data );
         $comment->update;
         $ad_id = $comment->id;
     }else{
