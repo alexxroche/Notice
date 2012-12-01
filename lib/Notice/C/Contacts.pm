@@ -3,7 +3,7 @@ package Notice::C::Contacts;
 use warnings;
 use strict;
 use lib 'lib';
-my %opt=(D=>0); #its nice to have them
+my %opt=(D=>99); #its nice to have them
 use base 'Notice';
 my %submenu = (
    '32' => [
@@ -158,9 +158,9 @@ sub add: Runmode {
         $ac_id = $user_details->pe_acid;
     }
 
-    if(defined $q->{'param'} && $q->param('Add')){
-
+    if(defined $q->{'param'} && ( $q->param('Update') || $q->param('Add') ) ){
         my %p; # profile
+        #warn "IN contact::view,UPDATE" if $opt{D}>=99;
 
         my $profile_rs = $self->resultset('VCardProfile')->search();
         while( my $prid = $profile_rs->next){
@@ -170,86 +170,90 @@ sub add: Runmode {
             $p{'type'}{$pro_fet} = $prid->vcprofile_type;
         }
 
-        #warn "we are adding a card to account: $ac_id";
         my %card;
         my %create_data;
         PROFILE: foreach my $ak (keys %{ $q->{'param'} } ){
             if($q->param($ak) eq ''){
+                # we need to know if this exists before we delete it
+                warn "$ak is blank" if $opt{D}>=9001;
+                # NTS maybe we are deleting ?
                 next PROFILE;
             }
             if($ak=~m/^(\w+)\.(\w+)/){
                 my $profile = $1;
                 my $sub_pro = $2;
                 if($p{$profile}){
-                    #warn $p{$profile};
-                    $create_data{"$p{$profile}"}{'detail'} = $sub_pro;
-                    $create_data{"$p{$profile}"}{'value'} = $q->param($ak);
-                #}else{ warn "$profile is not a valid vCard profile";
+                    #warn "$ak $profile is $p{$profile}";
+            
+                    # we may have to have an array
+                    
+                    if(defined $create_data{"$p{$profile}"}){
+                      if(ref($create_data{"$p{$profile}"}) eq 'HASH'){
+                            my @hold = $create_data{"$p{$profile}"};
+                            #warn Dumper(\@hold);
+                            delete $create_data{"$p{$profile}"};
+                           push @{ $create_data{"$p{$profile}"} }, @hold;
+                            #warn Dumper(\%create_data);
+                           my @new = { detail => $sub_pro, value => $q->param($ak) };
+                           push @{ $create_data{"$p{$profile}"} }, @new;
+                      }else{
+                           my @new = { detail => $sub_pro, value => $q->param($ak) };
+                           push @{ $create_data{"$p{$profile}"} }, @new;
+                      }
+                    }else{
+                        $create_data{"$p{$profile}"}{'detail'} = $sub_pro;
+                        $create_data{"$p{$profile}"}{'value'} = $q->param($ak);
+                    }
+                }elsif($profile eq 'delete' && ( $sub_pro eq 'PHOTO' || $sub_pro eq 'LOGO') ){ 
+                    warn "DELETING IMAGE " . $sub_pro;
+                        $create_data{"$p{$sub_pro}"}{'detail'} = $sub_pro;
+                        $create_data{"$p{$sub_pro}"}{'value'} = '';
+                        $create_data{"$p{$sub_pro}"}{'bin'} = '';
+                }else{ 
+                    warn "$profile is not a valid vCard profile";
                 }
             }else{
-               if($p{$ak}){
-                    #warn $p{$ak};
+                
+               if($ak eq 'ID'){
+                    $card_id = $q->param($ak);
+               }elsif($p{$ak}){
+                    # we should check that this isn't a default that is being added to an existing array of hashes
                     if($p{'type'}{$ak} eq 'text'){
                         $create_data{"$p{$ak}"}{'value'} = $q->param($ak);
                     }elsif($p{'type'}{$ak} eq 'bin'){
                         $create_data{"$p{$ak}"}{'value'} = $q->param($ak);
                         # then we add the actual binary_data
-                        $create_data{"$p{$ak}"}{'bin'} = $q->param($ak);  #NTS this isn't it
+                        if($ak eq 'PHOTO' || $ak eq 'LOGO'){
+                            warn "Found a " . $ak;
+                            if(my $fh = $q->param($ak)){
+                                my $bufsize = 1024;
+                                my $bytes_retreived = 0;
+                                my $limit = $bufsize * 10240; # 10 MB limit
+                                my $buffer;
+                                my $file;
+                                while (($bytes_retreived <= $limit) && read($fh, $buffer, $bufsize)) {
+                                    $file .= $buffer;
+                                    $bytes_retreived += $bufsize;
+                                }
+                                warn $fh . " is " .$bytes_retreived;
+                                warn length $file;
+                                use MIME::Base64;
+                                my $file64 = encode_base64($file);
+                                $create_data{"$p{$ak}"}{'bin'} = $file64;
+                            }else{
+                                warn "no file handel 4 U";
+                            }
+                        }else{
+                            warn $ak;
+                            $create_data{"$p{$ak}"}{'bin'} = $q->param($ak);  #NTS this isn't it
+                        }
                     }
-                #}else{ warn "$ak is not a valid vCard profile";
+                    #else{ warn "$ak is not a valid vCard profile";
                 }
-            }
-        }
-        if(%create_data){
+            } #/if-else
+        } #/foreach
 
-            # add the binmode data
-            
-            my $buffer; my $bytesread;
-            #my $file_handle = $self->query->upload('PHOTO'); warn Dumper($file_handle);
-            $q->close_upload_files(1);
-          { no strict 'refs';
-            if (my $file = $q->param('PHOTO')) {
-                #open (my $fh, '<', $q->{'.tmpfiles'}->{*$file}->{'PHOTO'}->as_string());
-                #open (my $fh, '<', $q->{'.tmpfiles'}->{*$file}->{'PHOTO'});
-                my $fh = $q->param('PHOTO');
-                if(defined $fh && ref($fh) && $fh ne ''){
-                    warn ref($fh);
-                    while ($bytesread = read($fh, $buffer, 1024)) {
-                        #$create_data{PIC} .= $bytesread;
-                        $create_data{PHOTO} .= $buffer;
-                    }
-                    warn '.tmpfiles: ' . Dumper($q->{'.tmpfiles'});
-                    #warn '.tmpfiles->*$file: ' . Dumper($q->{'.tmpfiles'}->{*$file});
-                    #warn Dumper($q->{'.tmpfiles'}->{*$file});
-                    #warn Dumper($q->{'.tmpfiles'}->{*$file}->{'name'});
-                    #warn Dumper($q->{'.tmpfiles'}->{*$file}->{'PHOTO'});
-                    #warn join('; ', keys %{ $q->{'.tmpfiles'}->{'Notice::C::Contacts::d70final.gif'} } );
-                    #warn 'Dqtf ' . Dumper($q->{'.tmpfiles'}->{*$file});
-                    #warn join('; ', keys %{ $q->{'.tmpfiles'}->{*$file} } );
-                }else{
-                    warn 'kqtf ' . join('; ', keys %{ $q->{'.tmpfiles'}->{*$file} } ) if $opt{D}>=20;
-                }
-            }else{
-                warn 'sq ' . join(', ', keys %{ $self->query }) if $opt{D}>=300;
-            }
-            if (my $file = $q->param('LOGO')) {
-                ##warn Dumper($q->{'.tmpfiles'}->{*$file});
-                warn '.tmpfiles:' . Dumper($q->{'.tmpfiles'}) if $opt{D}>=30;
-                foreach my $q_keys ( keys %{ $self->query }){
-                    if(ref($q->{$q_keys}) eq 'ARRAY'){
-                        warn ' array' . $q_keys . ':' . Dumper(\@{ $q->{$q_keys} }) if $opt{D}>=30;
-                    }elsif(ref($q->{$q_keys}) eq 'HASH'){
-                        warn 'HASH_' . $q_keys . ': ' . join('; ', keys %{ $q->{$q_keys} }) if $opt{D}>=30;
-                    }else{
-                        #warn "OTHER: q_keys: " . ref($q_keys) . " q->keys " . ref($q->{$q_keys});
-                    }
-                }
-                #warn 'LOGO-kqtf ' . join('; ', keys %{ $q->{'.tmpfiles'}->{*$file} } );
-            }
-          }
-        } # end no strict refs;
-
-          warn Dumper(\%create_data) if $opt{D}>=10;
+        warn Dumper(\%create_data) if $opt{D}>=10;
 
          # # search for an existing card
 
@@ -260,47 +264,69 @@ sub add: Runmode {
          # # we do an update?
          #}else{
           #add the data
-            my $enc_lang = 'en'; # we should probably set this dynamically
-            if(defined $self->param('i18n')){
-                $enc_lang = $self->param('i18n');
-            }
-            $card_id = $self->resultset('VCard')->create({ 
+        my $enc_lang = 'en'; # we should probably set this dynamically
+        if(defined $self->param('i18n')){
+            $enc_lang = $self->param('i18n');
+        }
+        $card_id = $self->resultset('VCard')->create({ 
                             card_peid => $pe_id,
                             card_acid => $ac_id,
                             card_language => $enc_lang,
                             card_created => \'NOW()', 
                             card_updated => \'NOW()' 
                         })->update->id;
-            #$create_data{vcd_card_id} = $card_id;
-    #warn "CREATED CARD";
-            if(defined $card_id && $card_id >= 1){
-                DATA_ROW: foreach my $prof (keys %create_data){
-                    my %new_data;
-                    %new_data = (
-                            vcd_card_id => $card_id,
-                            vcd_profile_id => $prof
-                    );
-                    if($create_data{$prof}{'detail'}){
-                        $new_data{'vcd_prof_detail'} = $create_data{$prof}{'detail'};
-                    }
-                    if($create_data{$prof}{'value'}){
-                        # even for binary we are going to store the filename in 'value'
-                        $new_data{'vcd_value'} = $create_data{$prof}{'value'};
-                      if($create_data{$prof}{'bin'}){
-                        $new_data{'vcd_bin'} = $create_data{$prof}{'bin'};
-                      }
-                    }else{
-                        warn "bad things in Contacts.pm::add";
-                        next DATA_ROW; # because we don't want to create partial rows
-                    }
-                    #warn "creating data:" . Dumper(\%new_data);
-                    my $data_added = $self->resultset('VCardData')->create({ %new_data })->update;
-               }
-            }else{
-                warn "Can't create vCard $@";
-            }
-         #}
+        if(defined $card_id && $card_id >= 1){
+            ADD_ROW: foreach my $vcd_row (keys %create_data){
 
+                if(ref($create_data{$vcd_row}) eq 'HASH'){
+                    my $sth = $self->resultset('VCardData')->search({ vcd_card_id => $card_id, vcd_profile_id => $vcd_row});
+                    if(defined $sth && $sth != 0){
+                        my %update;
+                        $update{vcd_value} = $create_data{$vcd_row}{value};
+                        if($create_data{$vcd_row}{bin} || $create_data{$vcd_row}{detail}){
+                            if($create_data{$vcd_row}{bin}){
+                                $update{vcd_bin} = $create_data{$vcd_row}{bin};
+                            }elsif( $create_data{$vcd_row}{detail} ){
+                                delete($create_data{$vcd_row}{detail});
+                                $update{vcd_bin} = '';
+                                $sth->delete;
+                                next ADD_ROW;
+                            }
+                        }
+                        $sth->update( \%update );
+                    }else{
+                        my %create = ( vcd_card_id => $card_id, vcd_profile_id => $vcd_row, vcd_value=> "$create_data{$vcd_row}{value}" );
+                        if($create_data{$vcd_row}{bin}){
+                            $create{vcd_bin} = $create_data{$vcd_row}{bin};
+                        }
+                        my $new_sth = $self->resultset('VCardData')->create( \%create );
+                    }
+                }elsif(ref($create_data{$vcd_row}) eq 'ARRAY'){
+                        # we have an array of hashes, (so more than one row for each profile_type)
+                        foreach my $cd_row (@{ $create_data{$vcd_row} }) {
+                            my $sth = $self->resultset('VCardData')->search({ 
+                                    vcd_card_id => $card_id, 
+                                    vcd_profile_id => $vcd_row, 
+                                    vcd_prof_detail => $cd_row->{detail}
+                                })->single;
+                            if(defined $sth && $sth != 0){
+                                $sth->update({ vcd_value=> "$cd_row->{value}" });
+                            }else{
+                               $self->resultset('VCardData')->create({ vcd_card_id => $card_id,      
+                                               vcd_profile_id => $vcd_row,     
+                                               vcd_prof_detail => $cd_row->{detail},     
+                                               vcd_value=> "$cd_row->{value}"     
+                                            });
+                            }
+                        }
+                 }else{
+                        # we have something else
+                        warn "ERROR: $vcd_row (" . ref($create_data{$vcd_row}) . ") = " . Dumper($create_data{$vcd_row});
+                 }
+             } #/foreach %create_data
+         }else{
+                warn "Can't create vCard $@"; # NO card_id
+         }
     #warn "DONE INSERT";
     }
 
@@ -317,9 +343,19 @@ sub add: Runmode {
                     }
                 });
             $self->tt_params({ card => \@cards });
-            $self->tt_params({ message => "Everything in card $card_id" });
+            my ($surl);
+            $url = ($self->query->url);
+            #$url =~s/\?.*$//; #strip any GET values
+            $self->tt_params({ message => "Card <a class=\"blue\" href=\"$url/Contacts/view/$card_id\">$card_id</a> added; Add another?" });
+            # By default we return them to a blank new card ready for fast data entry
+            #  but if they tick the show checkbox then we do that:
+            if($q->param('show')){ # then show the card that was just added
+                #return $self->redirect("view/$card_id");
+                $self->param(id => $card_id);
+                return $self->forward('view');
+            }
         }else{
-            $self->tt_params({ error => "The vCard is yet to be created." });
+            $self->tt_params({ error => "That vCard has not yet to be created." });
         }
     }elsif($q->param('Add')){
         $self->tt_params({ message => "Don't be evil" });
@@ -404,7 +440,7 @@ sub list: Runmode {
             $self->tt_params({ message => $message });
             #return $self->tt_process('Notice/C/Contacts/vCard.tmpl');
         }else{
-            $self->tt_params({ error => "The vCard is yet to be created." });
+            $self->tt_params({ error => "The vCard $card_id is yet to be created." });
         }
     }else{
         unless($card_id eq 'all' || $card_id=~m/^\d+$/){ $card_id = ''; }
@@ -426,9 +462,9 @@ sub view: Runmode {
     my ($self) = @_;
     my $url = $self->query->url;
     my $q = $self->query();
-    my $card_id;
-    if(defined $q->param('id')){ $card_id = $q->param('id'); }
-    elsif(defined $self->param('id')){ $card_id = $self->param('id'); }
+    my $card_id=0;
+    if(defined $q->param('id') && $q->param('id')=~m/^\d+$/){ $card_id = $q->param('id'); }
+    elsif(defined $self->param('id') && $self->param('id')=~m/^\d+$/){ $card_id = $self->param('id'); }
     my $pe_id = 0;
     my $ac_id = 0;
     $pe_id = $self->param('pe_id');
@@ -442,11 +478,10 @@ sub view: Runmode {
         $ac_id = $user_details->pe_acid;
     }
 
-    if(defined $q->{'param'} && $q->param('Update')){
+    #if(defined $q->{'param'} && $q->param('Update')){
+    if(defined $q->{'param'} && ( $q->param('Update') || $q->param('Add') ) ){
         my %p; # profile
-
-
-    warn "IN contact::view,UPDATE" if $opt{D}>=99;
+        #warn "IN contact::view,UPDATE" if $opt{D}>=99;
 
         my $profile_rs = $self->resultset('VCardProfile')->search();
         while( my $prid = $profile_rs->next){
@@ -460,16 +495,18 @@ sub view: Runmode {
         my %create_data;
         PROFILE: foreach my $ak (keys %{ $q->{'param'} } ){
             if($q->param($ak) eq ''){
-                #warn "$ak is blank";
+                # we need to know if this exists before we delete it
+                warn "$ak is blank" if $opt{D}>=9001;
+                # NTS maybe we are deleting ?
                 next PROFILE;
             }
             if($ak=~m/^(\w+)\.(\w+)/){
                 my $profile = $1;
                 my $sub_pro = $2;
                 if($p{$profile}){
-                    #warn $p{$profile};
+                    #warn "$ak $profile is $p{$profile}";
             
-                # we may have to have an array
+                    # we may have to have an array
                     
                     if(defined $create_data{"$p{$profile}"}){
                       if(ref($create_data{"$p{$profile}"}) eq 'HASH'){
@@ -488,32 +525,77 @@ sub view: Runmode {
                         $create_data{"$p{$profile}"}{'detail'} = $sub_pro;
                         $create_data{"$p{$profile}"}{'value'} = $q->param($ak);
                     }
-                }else{ warn "$profile is not a valid vCard profile";
+                }elsif($profile eq 'delete' && ( $sub_pro eq 'PHOTO' || $sub_pro eq 'LOGO') ){ 
+                    warn "DELETING IMAGE " . $sub_pro;
+                        $create_data{"$p{$sub_pro}"}{'detail'} = $sub_pro;
+                        $create_data{"$p{$sub_pro}"}{'value'} = '';
+                        $create_data{"$p{$sub_pro}"}{'bin'} = '';
+                }else{ 
+                    warn "$profile is not a valid vCard profile";
                 }
             }else{
                 
                if($ak eq 'ID'){
                     $card_id = $q->param($ak);
                }elsif($p{$ak}){
-                    #warn $p{$ak};
                     # we should check that this isn't a default that is being added to an existing array of hashes
                     if($p{'type'}{$ak} eq 'text'){
                         $create_data{"$p{$ak}"}{'value'} = $q->param($ak);
                     }elsif($p{'type'}{$ak} eq 'bin'){
                         $create_data{"$p{$ak}"}{'value'} = $q->param($ak);
                         # then we add the actual binary_data
-                        $create_data{"$p{$ak}"}{'bin'} = $q->param($ak);  #NTS this isn't it
+                        if($ak eq 'PHOTO' || $ak eq 'LOGO'){
+                            warn "Found a " . $ak;
+                            if(my $fh = $q->param($ak)){
+                                my $bufsize = 1024;
+                                my $bytes_retreived = 0;
+                                my $limit = $bufsize * 10240; # 10 MB limit
+                                my $buffer;
+                                my $file;
+                                while (($bytes_retreived <= $limit) && read($fh, $buffer, $bufsize)) {
+                                    $file .= $buffer;
+                                    $bytes_retreived += $bufsize;
+                                }
+                                warn $fh . " is " .$bytes_retreived;
+                                warn length $file;
+                                use MIME::Base64;
+                                my $file64 = encode_base64($file);
+                                $create_data{"$p{$ak}"}{'bin'} = $file64;
+                            }else{
+                                warn "no file handel 4 U";
+                            }
+                        }else{
+                            warn $ak;
+                            $create_data{"$p{$ak}"}{'bin'} = $q->param($ak);  #NTS this isn't it
+                        }
                     }
-                #}else{ warn "$ak is not a valid vCard profile";
+                    #else{ warn "$ak is not a valid vCard profile";
                 }
-            }
-        } 
-        #warn Dumper(\%create_data);
+            } #/if-else
+        } #/foreach
+        #warn Dumper(\%create_data) if $opt{D}>=10;
 
         warn "updating vCard $card_id" if $opt{D}>=10;
+        unless(defined $card_id){
+                    # we probably adding so lets do that
+                    my $enc_lang = 'en'; # we should probably set this dynamically
+                    if(defined $self->param('i18n')){
+                        $enc_lang = $self->param('i18n');
+                    }
+                    $card_id = $self->resultset('VCard')->create({
+                                    card_peid => $pe_id,
+                                    card_acid => $ac_id,
+                                    card_language => $enc_lang,
+                                    card_created => \'NOW()',
+                                    card_updated => \'NOW()'
+                                })->update->id;
+        }
+
         if(defined $card_id){
                 delete($create_data{as_date}); # this is the "created date" so we never updated it.
-                my $touch_update = $self->resultset('VCard')->update_or_create({ card_id => $card_id, card_updated => \'NOW()' });
+                #my $touch_update = $self->resultset('VCard')->update_or_create({ card_id => $card_id, card_updated => \'NOW()' });
+                my $touch_update = $self->resultset('VCard')->search({ card_id => $card_id});
+                $touch_update->update({ card_updated => \'NOW()' });
 
         #If we update the card_updated first then we /might/ fail to update vCard_data and then the first update seems silly
         #If we do it the other way round then we /might/ fail to update the card_updated. Of the two I prefere the first.
@@ -528,32 +610,60 @@ sub view: Runmode {
                # so from %create_data we extract the data that we use to find the row that we are interested
                # and the data that we need to update.
 
-            foreach my $vcd_row (keys %create_data){
+            UPDATE_ROW: foreach my $vcd_row (keys %create_data){
 
                 if(ref($create_data{$vcd_row}) eq 'HASH'){
+                    # we have one hash of data
+                   # warn "update vCard_data set vcd_value = \"$create_data{$vcd_row}{value}\" where vcd_card_id = $card_id and vcd_profile_id = $vcd_row";
              #we should use ->single to cover the case where the user DEMANDS to break the RFC and have more versions of a profile within a single card
                     my $sth = $self->resultset('VCardData')->search({ vcd_card_id => $card_id, vcd_profile_id => $vcd_row});
-                    if($sth){
-                        $sth->update_or_create({ vcd_card_id => $card_id, vcd_profile_id => $vcd_row, vcd_value=> "$create_data{$vcd_row}{value}" });
+                    if(defined $sth && $sth != 0){
+                       # warn "Yay we already have some data for vcd_card_id='".$card_id . "' and vcd_profile_id='". $vcd_row . "' " . $sth;
+                       # warn "Updating in Contact View a HASH";
+                        my %update;
+                        $update{vcd_value} = $create_data{$vcd_row}{value};
+                        if($create_data{$vcd_row}{bin} || $create_data{$vcd_row}{detail}){
+                            if($create_data{$vcd_row}{bin}){
+                                $update{vcd_bin} = $create_data{$vcd_row}{bin};
+                            }elsif( $create_data{$vcd_row}{detail} ){
+                                delete($create_data{$vcd_row}{detail});
+                                $update{vcd_bin} = '';
+                                $sth->delete;
+                                next UPDATE_ROW;
+                            }
+                        }
+                        #$sth->update({ vcd_value=> "$create_data{$vcd_row}{value}" });
+                        $sth->update( \%update );
                     }else{
-                        my $new_sth = $self->resultset('VCardData')->create({ vcd_card_id => $card_id, vcd_profile_id => $vcd_row, vcd_value=> "$create_data{$vcd_row}{value}" });
+                       # warn "NEW data in UPDATE view Contact";
+                        my %create = ( vcd_card_id => $card_id, vcd_profile_id => $vcd_row, vcd_value=> "$create_data{$vcd_row}{value}" );
+                        if($create_data{$vcd_row}{bin}){
+                                $create{vcd_bin} = $create_data{$vcd_row}{bin};
+                        }
+                        my $new_sth = $self->resultset('VCardData')->create( \%create );
+                        #my $new_sth = $self->resultset('VCardData')->create({ vcd_card_id => $card_id, vcd_profile_id => $vcd_row, vcd_value=> "$create_data{$vcd_row}{value}" });
                     }
                         
                 }elsif(ref($create_data{$vcd_row}) eq 'ARRAY'){
                     # we have an array of hashes, (so more than one row for each profile_type)
                     #warn "$vcd_row (" . ref($create_data{$vcd_row}) . ") = " . @{ $create_data{$vcd_row} };
                     foreach my $cd_row (@{ $create_data{$vcd_row} }) {
-                       # warn "UPDATE vCard_data SET vcd_value = \"$cd_row->{value}\" WHERE vcd_card_id = $card_id AND vcd_prof_detail = '$cd_row->{detail}'"; 
+                        #warn "UPDATE vCard_data SET vcd_value = \"$cd_row->{value}\" WHERE vcd_card_id = $card_id AND vcd_prof_detail = '$cd_row->{detail}'"; 
                         my $sth = $self->resultset('VCardData')->search({ 
                                 vcd_card_id => $card_id, 
                                 vcd_profile_id => $vcd_row, 
                                 vcd_prof_detail => $cd_row->{detail}
                             })->single;
-                        $sth->update_or_create({ vcd_card_id => $card_id, 
-                                                vcd_profile_id => $vcd_row, 
-                                                vcd_prof_detail => $cd_row->{detail}, 
-                                                vcd_value=> "$cd_row->{value}" 
-                                               });
+                        if(defined $sth && $sth != 0){
+                            #warn "STH" . $sth;
+                            $sth->update({ vcd_value=> "$cd_row->{value}" });
+                        }else{
+                           $self->resultset('VCardData')->create({ vcd_card_id => $card_id,      
+                                           vcd_profile_id => $vcd_row,     
+                                           vcd_prof_detail => $cd_row->{detail},     
+                                           vcd_value=> "$cd_row->{value}"     
+                                        });
+                        }
                     }
                 }else{
                     # we have something else
@@ -572,155 +682,9 @@ sub view: Runmode {
 
 # NTS the add logic works for adding, but it is flawed
 # You should only create a card if it does not exist
-# You should update_or_create so that 'Add' and 'Update' can be combined
-# which is what you are trying to do in the section above, (then merge in 'Add')
 #
 # then we can think about merging &add and &view
 
-    }elsif(defined $q->{'param'} && $q->param('Add')){
-
-        my %p; # profile
-
-        my $profile_rs = $self->resultset('VCardProfile')->search();
-        while( my $prid = $profile_rs->next){
-            my $pro_id = $prid->vcprofile_id;
-            my $pro_fet = $prid->vcprofile_feature;
-            $p{$pro_fet} = $pro_id;
-            $p{'type'}{$pro_fet} = $prid->vcprofile_type;
-        }
-
-        #warn "we are adding a card to account: $ac_id";
-        my %card;
-        my %create_data;
-        PROFILE: foreach my $ak (keys %{ $q->{'param'} } ){
-            if($q->param($ak) eq ''){
-                next PROFILE;
-            }
-            if($ak=~m/^(\w+)\.(\w+)/){
-                my $profile = $1;
-                my $sub_pro = $2;
-                if($p{$profile}){
-                    #warn $p{$profile};
-                    $create_data{"$p{$profile}"}{'detail'} = $sub_pro;
-                    $create_data{"$p{$profile}"}{'value'} = $q->param($ak);
-                #}else{ warn "$profile is not a valid vCard profile";
-                }
-            }else{
-               if($p{$ak}){
-                    #warn $p{$ak};
-                    if($p{'type'}{$ak} eq 'text'){
-                        $create_data{"$p{$ak}"}{'value'} = $q->param($ak);
-                    }elsif($p{'type'}{$ak} eq 'bin'){
-                        $create_data{"$p{$ak}"}{'value'} = $q->param($ak);
-                        # then we add the actual binary_data
-                        $create_data{"$p{$ak}"}{'bin'} = $q->param($ak);  #NTS this isn't it
-                    }
-                #}else{ warn "$ak is not a valid vCard profile";
-                }
-            }
-        }
-        if(%create_data){
-
-            # add the binmode data
-            
-            my $buffer; my $bytesread;
-            #my $file_handle = $self->query->upload('PHOTO'); warn Dumper($file_handle);
-            $q->close_upload_files(1);
-          { no strict 'refs';
-            if (my $file = $q->param('PHOTO')) {
-                #open (my $fh, '<', $q->{'.tmpfiles'}->{*$file}->{'PHOTO'}->as_string());
-                #open (my $fh, '<', $q->{'.tmpfiles'}->{*$file}->{'PHOTO'});
-                my $fh = $q->param('PHOTO');
-                if(defined $fh && ref($fh) && $fh ne ''){
-                    warn ref($fh);
-                    while ($bytesread = read($fh, $buffer, 1024)) {
-                        #$create_data{PIC} .= $bytesread;
-                        $create_data{PHOTO} .= $buffer;
-                    }
-                    warn '.tmpfiles: ' . Dumper($q->{'.tmpfiles'});
-                    #warn '.tmpfiles->*$file: ' . Dumper($q->{'.tmpfiles'}->{*$file});
-                    #warn Dumper($q->{'.tmpfiles'}->{*$file});
-                    #warn Dumper($q->{'.tmpfiles'}->{*$file}->{'name'});
-                    #warn Dumper($q->{'.tmpfiles'}->{*$file}->{'PHOTO'});
-                    #warn join('; ', keys %{ $q->{'.tmpfiles'}->{'Notice::C::Contacts::d70final.gif'} } );
-                    #warn 'Dqtf ' . Dumper($q->{'.tmpfiles'}->{*$file});
-                    #warn join('; ', keys %{ $q->{'.tmpfiles'}->{*$file} } );
-                }else{
-                    warn 'kqtf ' . join('; ', keys %{ $q->{'.tmpfiles'}->{*$file} } ) if $opt{D}>=20;
-                }
-            }else{
-                warn 'sq ' . join(', ', keys %{ $self->query }) if $opt{D}>=300;
-            }
-            if (my $file = $q->param('LOGO')) {
-                ##warn Dumper($q->{'.tmpfiles'}->{*$file});
-                warn '.tmpfiles:' . Dumper($q->{'.tmpfiles'}) if $opt{D}>=30;
-                foreach my $q_keys ( keys %{ $self->query }){
-                    if(ref($q->{$q_keys}) eq 'ARRAY'){
-                        warn ' array' . $q_keys . ':' . Dumper(\@{ $q->{$q_keys} }) if $opt{D}>=30;
-                    }elsif(ref($q->{$q_keys}) eq 'HASH'){
-                        warn 'HASH_' . $q_keys . ': ' . join('; ', keys %{ $q->{$q_keys} }) if $opt{D}>=30;
-                    }else{
-                        #warn "OTHER: q_keys: " . ref($q_keys) . " q->keys " . ref($q->{$q_keys});
-                    }
-                }
-                #warn 'LOGO-kqtf ' . join('; ', keys %{ $q->{'.tmpfiles'}->{*$file} } );
-            }
-          }
-        } # end no strict refs;
-
-          warn Dumper(\%create_data) if $opt{D}>=10;
-
-         # # search for an existing card
-
-         #my $card_rs = $self->resultset('VCardData')->search({ \%create_data });
-         #my $card_exists = $card_rs->count;
-         # # create a new card
-         #if($card_exists){
-         # # we do an update?
-         #}else{
-          #add the data
-            my $enc_lang = 'en'; # we should probably set this dynamically
-            if(defined $self->param('i18n')){
-                $enc_lang = $self->param('i18n');
-            }
-            $card_id = $self->resultset('VCard')->create({ 
-                            card_peid => $pe_id,
-                            card_acid => $ac_id,
-                            card_language => $enc_lang,
-                            card_created => \'NOW()', 
-                            card_updated => \'NOW()' 
-                        })->update->id;
-            #$create_data{vcd_card_id} = $card_id;
-    #warn "CREATED CARD";
-            if(defined $card_id && $card_id >= 1){
-                DATA_ROW: foreach my $prof (keys %create_data){
-                    my %new_data;
-                    %new_data = (
-                            vcd_card_id => $card_id,
-                            vcd_profile_id => $prof
-                    );
-                    if($create_data{$prof}{'detail'}){
-                        $new_data{'vcd_prof_detail'} = $create_data{$prof}{'detail'};
-                    }
-                    if($create_data{$prof}{'value'}){
-                        # even for binary we are going to store the filename in 'value'
-                        $new_data{'vcd_value'} = $create_data{$prof}{'value'};
-                      if($create_data{$prof}{'bin'}){
-                        $new_data{'vcd_bin'} = $create_data{$prof}{'bin'};
-                      }
-                    }else{
-                        warn "bad things in Contacts.pm::add";
-                        next DATA_ROW; # because we don't want to create partial rows
-                    }
-                    #warn "creating data:" . Dumper(\%new_data);
-                    my $data_added = $self->resultset('VCardData')->create({ %new_data })->update;
-               }
-            }else{
-                warn "Can't create vCard $@";
-            }
-         #}
-
-    #warn "DONE INSERT";
     }
 
     if($pe_id >= 1 && defined $card_id){
@@ -759,13 +723,41 @@ sub view: Runmode {
                 my $p_value = $vcd->vcd_value;
                 if($p_type eq 'bin'){
                     my $p_bin = $vcd->vcd_bin;
-                    $card{$p_feature}{'bin'} = $p_bin;
-                    my $img_type = $p_value;
-                    $img_type=~s/^.*\.//;
-                    $card{$p_feature}{'type'} = $img_type;
-                    $card{$p_feature}{'name'} = $p_value;
-                }elsif($p_detail){
-                    $card{$p_feature}{$p_detail} = $p_value;
+                    if($p_feature eq 'PHOTO' || $p_feature eq 'LOGO'){
+                        my $img_type = $p_value;
+                        $img_type=~s/^.*\.//;
+                        $card{$p_feature}{'type'} = $img_type;
+                        $card{$p_feature}{'name'} = $p_value;
+                        $card{$p_feature}{'bin'} = $p_bin;
+                    }elsif($p_bin && $p_bin ne ''){
+                        use MIME::Base64;
+                        my $p_base64 = decode_base64($p_bin);
+                        $card{$p_feature}{'bin'} = $p_base64;
+                        #warn $p_base64;
+                    }elsif($p_feature eq 'KEY' && ( !defined $p_bin || $p_bin eq '' ) ){
+                        $card{$p_feature} = $p_value;
+                        #warn "$p_feature = $p_value ";
+                    }else{
+                        warn "type: $p_type feature: $p_feature detail: $p_detail value: $p_value bin: $p_bin is BLANK";
+                    }
+                }elsif($p_detail && $p_detail ne ''){
+                    if(exists $card{$p_feature}){
+                        if(ref($card{$p_feature}) eq 'HASH'){
+                            $card{$p_feature}{$p_detail} = $p_value;
+                        }else{  # we have a scalar and we _should_ have a hash!
+                            my $string = $card{$p_feature};
+                            delete($card{$p_feature});
+                            $card{$p_feature}{$p_detail} = $p_value;
+                            if($p_detail eq 'work'){
+                                $card{$p_feature}{'home'} = $string;
+                            }else{
+                                $card{$p_feature}{'work'} = $string;
+                            }
+                        }
+                    }else{
+                        #$card{$p_feature} = {$p_detail => "$p_value"};
+                        $card{$p_feature}{$p_detail} = $p_value;
+                    }
                 }else{
                     $card{$p_feature} = $p_value;
                 }
@@ -774,7 +766,7 @@ sub view: Runmode {
             $self->tt_params({ cards => \@cards });
             $self->tt_params({ message => "Everything in card $card_id" });
         }else{
-            $self->tt_params({ error => "The vCard is yet to be created." });
+            $self->tt_params({ error => "vCard $card_id is yet to be created." });
         }
     }else{
         $self->tt_params({ message => "Don't be evil" });

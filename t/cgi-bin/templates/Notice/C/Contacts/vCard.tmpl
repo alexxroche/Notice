@@ -1,6 +1,7 @@
 [%- headmsg -%]
-<!--form method="post" action="" enctype="multipart/form-data"-->
-<form method="post" action="" enctype="multipart/mixed">
+[%- USE Dumper -%]
+<!--form method="post" action="" enctype="multipart/mixed"-->
+<form method="post" action="" enctype="multipart/form-data">
   <table border="2">
  <tr><td>
 
@@ -16,25 +17,30 @@
    <!--input size="5" id="upload_box" name="PHOTO" onchange="display_throbber(); this.form.submit()" title="Upload an image" type="file">
    <input style="display: none;" id="img_upload" value="picture" class="submit" type="submit"-->
    <input size="5" name="PHOTO" type="file" />
+[%- IF card.PHOTO -%] 
+     &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+    Delete photo from this Card?
+    <span class="del small red"> <input type="checkbox" name="delete.PHOTO" /> </span>
+[%- END # IF card.PHOTO -%]
 </td><td>
   <table>
   <tr>
     <th colspan="2">Profile</th>
   </tr>
   <tr>
-<td>Full Name</td><td><input title="Display Name" type="text" name="FN" value="[%- card.FN -%]" /></td>
+<td>Full Name</td><td><input title="Display Name" type="text" name="FN" value="[%- card.FN -%]" tabindex=10 /></td>
   </tr>
   <tr>
-<td>Name</td><td><input title="Family Name" type="text" name="N" value="[%- card.N -%]" /></td>
+<td>Name</td><td><input title="Family Name" type="text" name="N" value="[%- card.N -%]" tabindex=20 /></td>
   </tr>
   <tr>
-<td>Known as</td><td><input title="Known as" type="text" name="NICKNAME" value="[%- card.NICKNAME -%]" /></td>
+<td>Known as</td><td><input title="Known as" type="text" name="NICKNAME" value="[%- card.NICKNAME -%]" tabindex=30 /></td>
   </tr>
   <tr>
-<td>Sort-string</td><td><input title="Which of their names is key?" type="text" name="SORT-STRING" value="[%- ss = 'SORT-STRING'; card.$ss -%]" /></td>
+<td>Sort-string</td><td><input title="Which of their names is key?" type="text" name="SORT-STRING" value="[%- ss = 'SORT-STRING'; card.$ss -%]" tabindex=40 /></td>
   </tr>
   <tr>
-<td>Birthday</td><td><input title="Date of Birth or age in years" type="text" name="BDAY" value="[%- card.BDAY -%]" /></td>
+<td>Birthday</td><td><input title="Date of Birth or age in years" type="text" name="BDAY" value="[%- card.BDAY -%]" tabindex=50 /></td>
   </tr>
   <tr>
 <td>Pronunciation</td><td>
@@ -45,7 +51,7 @@ Your browser does not support the audio element.
 </audio>
 
 [%- ELSE -%]
-<input title="How to say their name" type="text" name="SOUND" value="[%- card.SOUND.name -%]" />
+<input title="How to say their name" type="text" name="SOUND.name" value="[%- card.SOUND.name -%]" />
 [%- END # IF card.PHOTO -%]
 </td>
   </tr>
@@ -58,7 +64,7 @@ Your browser does not support the audio element.
     <th colspan="2">Contact</th>
 </tr>
 <tr>
-    <td>Address</td><td><textarea title="address" name="ADR" value="[%- card.ADR -%]" />[%- card.ADR -%]</textarea></td>
+    <td>Address</td><td><textarea title="address" name="ADR.home">[%- card.ADR.home -%]</textarea></td>
 </tr>
 <tr>
     <td>Telephone</td><td><input title="phone number" type="text" name="TEL.home" value="[%- card.TEL.home -%]" /></td>
@@ -67,10 +73,10 @@ Your browser does not support the audio element.
     <td id="email">E-mail</td><td><input title="Elecronic mail address" type="text" name="EMAIL.home" value="[%- card.EMAIL.home -%]" /></td>
 </tr>
 <tr>
-    <td>Emergency Contact</td><td><input title="ICE" type="text" name="AGENT.home" value="[%- card.AGENT.home -%]" /></td>
+    <td>Emergency Contact</td><td><input title="ICE" type="text" name="AGENT.home" value="[%- card.AGENT.home -%]" tabindex="170" /></td>
 </tr>
 <tr>
-    <td>Class</td><td><select name="CLASS">
+    <td>Class</td><td><select name="CLASS" tabindex=180>
         <option name="CONFIDENTIAL">Confidential</option>
         <option name="PRIVATE">Private</option>
         <option name="PUBLIC">Public</option>
@@ -109,6 +115,12 @@ Your browser does not support the audio element.
            <!--input size="5" id="upload_box" name="LOGO" onchange="display_throbber(); this.form.submit()" title="Upload an image" type="file">
            <input style="display: none;" id="img_upload" value="LOGO" class="submit" type="submit"-->
            <input size="5" name="LOGO" title="Company Logo" type="file">
+[%- IF card.LOGO -%]
+     &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+    Delete Company Logo from this Card?
+    <span class="del small red"> <input type="checkbox" name="delete.LOGO" /> </span>
+[%- END # IF card.LOGO -%]
+
 </td><td>
 <table>
 <tr>
@@ -145,7 +157,7 @@ Your browser does not support the audio element.
     <th colspan="2">Work Contact</th>
 </tr>
 <tr>
-    <td>Address</td><td><textarea title="address" name="ADR" value="[%- card.ADR.work -%]" />[%- card.ADR.work -%]</textarea></td>
+    <td>Address</td><td><textarea title="address" name="ADR.work" tabindex=190>[%- card.ADR.work -%]</textarea></td>
 </tr>
 <tr>
     <td>Telephone</td><td><input title="phone number" type="text" name="TEL.work" value="[%- 
@@ -189,7 +201,7 @@ IF vcd.vcprofile_feature == 'TEL' AND vcd.vcd_prof_detail == 'work'; vcd.vcd_val
 <input type="submit" class="small green button" value="Add" name="Add" />
 [%- END -%]
 </td>
-<td>[%- IF card.REV; -%] Revision:[%- card.REV || '1995-10-31T22:27:10Z' -%] [%- END -%]</td>
+<td>[%- IF cards.0.card_updated; updated = cards.0.card_updated; updated = updated.replace('(.*) (.*)', '$1T$2Z'); END -%][%- IF card.REV OR updated -%] Revision:[%- card.REV || updated || '1995-10-31T22:27:10Z'; ELSE; 'Show after adding:<input type="checkbox" name="show" />'; END -%]</td>
 <td>vCard Version: [%- card.VERSION || '3.0 (rfc2426)' -%]<!-- this should be a select -->
 </td><td>
 [%- card.PRODID || 'Notice/Contact/version_'; c.VERSION; '/en_GB' -%]
