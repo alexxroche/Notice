@@ -7,6 +7,7 @@ Template development config file for CGI::Application::Structured apps.
 
 =cut 
 
+$CFG{installing}=0;
 $CFG{db_schema} = 'Notice::DB';
 $CFG{db_dsn} = "dbi:mysql:database=notice";
 $CFG{db_user} = "notice_adminuser";
@@ -26,13 +27,15 @@ $CFG{TEMPLATE_OPTIONS} = {
 
 $CFG{www_path} = "/var/www/sites/github/Notice/t/www"; #used by custom css
 $CFG{DOCUMENT_ROOT} = "templates";
-$CFG{using_tinyDNS} = 1;
+$CFG{using_tinyDNS} = 0;
 $CFG{tinyDNS_path} = '/var/www/sites/BytemarkDNS/data';
 $CFG{update_dns} = 'sudo /var/www/sites/BytemarkDNS/upload 1>/dev/null';
 $CFG{rebuild_dns} = 'sudo nsdc rebuild 1>/dev/null';
 $CFG{reload_dns} = 'sudo nsdc reload';
 $CFG{default_lang} = 'en_GB';
-#$CFG{session_expiry} = '+1000000h'; # just for development
-$CFG{session_timeout} = '+1h'; #just for dev
+$CFG{session_timeout} = '+1h';
+$CFG{key} = 'NoticeNoticeNoticeNotice_key1234';
+$CFG{iv} = '1234567890ABCDEF';
+$CFG{admin} = ['notice-dev@alexx.net','a@b.com'];
 
 return \%CFG;

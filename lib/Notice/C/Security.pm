@@ -2,7 +2,6 @@ package Notice::C::Security;
 
 use warnings;
 use strict;
-use lib 'lib';
 use base 'Notice';
 my %submenu = (
    '1.0' => [
@@ -53,7 +52,18 @@ sub main: StartRunmode {
     my $q = \%{ $self->query() };
     my ($username,$message,@sec_stats,@people,@acl);
        $username = $self->authen->username;
-    if($username && $username ne 'a@b.com'){
+    my $is_an_admin=0;
+    if(defined $self->cfg('admin')){
+        if( ref($self->cfg('admin')) eq 'ARRAY'){
+            ADMIN_SEARCH: foreach my $adm (@{ $self->cfg('admin') }){
+                if( $adm eq $username){
+                    $is_an_admin=1;
+                    last ADMIN_SEARCH;
+                }
+            }
+        }
+    }
+    unless($is_an_admin){
         $self->tt_params({ warning => 'I will not warn you again! You are not meant to be in here.' });
         return $self->tt_process('sec_error.tmpl');
     }

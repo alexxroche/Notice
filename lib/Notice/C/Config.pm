@@ -2,7 +2,6 @@ package Notice::C::Config;
 
 use warnings;
 use strict;
-use lib 'lib';
 use base 'Notice';
 use Data::Dumper;
 
@@ -10,6 +9,7 @@ use Data::Dumper;
 my %submenu = ( 
    '1.0' => [
         '1' => { peer => 1, name=> 'Modules', rm => 'modules', class=> 'navigation'},
+        '2' => { peer => 1, name=> 'Security', rm => 'security', class=> 'navigation'},
     ],
 );
 
@@ -41,32 +41,6 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 sub setup {
     my ($self) = @_;
     $self->authen->protected_runmodes(':all');
-    my $runmode;
-    $runmode = ($self->query->self_url);
-    $runmode =~s/\/$//;
-    if($self->param('rm')){ 
-        $runmode = $self->param('rm'); 
-    }
-    $runmode =~s/^.*\/(.+\/.+)$/$1/;
-    if($self->param('id')){
-        my $id = $self->param('id');
-        if($self->param('extra1')){
-            my $extra = $self->param('extra1');
-            $runmode =~s/\/$extra[^\/]*//;
-        }
-        if($self->param('sid')){
-            my $sid = $self->param('sid');
-            $runmode =~s/\/$sid[^\/]*//;
-        }
-        $runmode =~s/\/$id[^\/]*$//;
-    }
-    if($runmode=~m/\/.*[=].*/){
-        $runmode=~s/\/.*//;
-    }else{
-        $runmode=~s/.*\///;
-    }
-    $runmode=~s/.*\///;
-
 }
 
 =head2 RUN MODES
