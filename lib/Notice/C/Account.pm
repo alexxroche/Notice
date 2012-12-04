@@ -341,6 +341,22 @@ SELECT me.ac_id,CONCAT( REPEAT(' ', COUNT(p.ac_name) -1), me.ac_name) AS name,me
     return $self->tt_process();
 }
 
+
+=head3 delete
+
+Delete an account
+   
+=cut
+
+sub delete: Runmode {
+    my ($self) = @_;
+    my %search;
+    #my $q = $self->query;
+     $self->tt_params({ message => 'Account delete is being written', error => 'Not deleted' });
+    return $self->tt_process('Notice/C/Account/main.tmpl');
+}
+
+
 =head3 _ef_acid
 
 return the effective account ID
@@ -413,7 +429,7 @@ sub _list_children {
     $ac_parent = $self->param('ac_parent') if $self->param('ac_parent');
     my $ac_tree = $self->param('ac_tree');
     #warn "parent: $ac_parent, tree: $ac_tree";
-    $self->param(message => "ac_parent in _list_children is $ac_parent") if $self->param('debug') >=1;
+    $self->param(message => "ac_parent in _list_children is $ac_parent") if $self->param('debug') && $self->param('debug') >=1;
     #my @children = ('1'); #we should pull the default from the database?
     my @children = (); #we should pull the default from the database?
     if($ac_tree=~m/^\d+(\.\d+)*$/){

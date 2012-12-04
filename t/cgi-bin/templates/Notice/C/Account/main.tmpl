@@ -78,6 +78,8 @@ The main function here is to display a list of child accounts and enable a user 
 [%- IF change OR c.param('ef_acid') != pe_acid OR ef_acid != ac_id -%]
     <input type="submit" value="[%- change || 'Return to your account' -%]" name="back" class="edituser" onmouseover="this.className='edituser edituserhov'" onmouseout="this.className='edituser'" onclick="this.className='edituser'"/>
 [%- END #change back -%]
+    <a class="small orange button" href="[%- c.query.url -%]/Account/edit/[%- ef_acid -%]" />Edit</a>&nbsp;
+    <a class="small red button" href="[%- c.query.url -%]/Account/delete/[%- ef_acid -%]" />Delete</a>
 </td>
     </tr>
 
@@ -97,7 +99,7 @@ The main function here is to display a list of child accounts and enable a user 
     [%- END -%]
 </select> 
 account to account [%- ef_acid -%] called:</td>
-<td><input type="text" name="ac_name" /></td>
+<td><input type="text" name="ac_name" required /></td>
 <td><input class="small green button" type="submit" name="add" value="add" /></td>
 </tr>
 </table>
