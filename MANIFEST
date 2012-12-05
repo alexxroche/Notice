@@ -121,13 +121,11 @@ script/create_controller.pl
 script/create_dbic_schema.pl
 script/create_notice_db.pl
 script/create_whois_cdb.pl
-script/db.pl
 script/de-dupe_dump.sh
 script/dump_notice_db.pl
 script/git-add
 script/palm.pl
 script/patch_cgi_app_server
-script/PGPkeygen.pl
 script/pin
 script/prep_db.pl
 script/publish_zone.pl

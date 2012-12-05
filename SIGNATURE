@@ -14,9 +14,20 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAlC/X5kACgkQujtsKJWfyOlfMgCeLWo9g6fL05afSR3xMjOkA1C3
+2qIAoIMBWC73Usm1Y053mPYxwvhMVRDe
+=HyFD
+-----END PGP SIGNATURE-----
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
 SHA1 9fc744d1a76b93645a786aa70aab24c3e7971c0e ABOUT
 SHA1 d6149c7501ae89385513e7e0b4e0c4a75ca0243c Changes
-SHA1 7d4f48ea264f9f81560874a7b946c79794ebd8ac MANIFEST
+SHA1 9b65c252e757754afe9002027b07390b899b5ae3 MANIFEST
 SHA1 0d0bf2622b2befa98f1baad3b0686cbc8d407689 MANIFEST.SKIP
 SHA1 f45a89654b926fe753218eef91639df99b93d53d META.yml
 SHA1 bda6eaa6711c381b26f1159644bd12b5cb1d4b6f MYMETA.json
@@ -130,7 +141,6 @@ SHA1 94d5c2a2cd18324a638d04d6dad54b1363873fb6 lib/Notice/DB/Result/Whowhere.pm
 SHA1 a7aba233b7edc73e3f63b83a767ef8b4c4542001 lib/Notice/Dispatch.pm
 SHA1 5d9f1ccad4acaa0256cc2177ba2a503f2e15a247 lib/Notice/Security.pm
 SHA1 46da49e87eeb2996468a711f6a19756c9a9e810f main.diff
-SHA1 d3cd9732cce91271a7ff95a5282c39660a1ebbf9 script/PGPkeygen.pl
 SHA1 58d895e2733aed6d3af703d5ceb26c80cf4b17c1 script/broken_builddns.pl
 SHA1 560ba8b08c1cfa19a3407e43123c7ef0acece4e6 script/build_dns.pl
 SHA1 75ee859b1c514aa0b3812eb03612ade28adf7deb script/cdbdump.pl
@@ -138,7 +148,6 @@ SHA1 3dbef02d2b5c5a8641851c33fd4afa5e11f69589 script/create_controller.pl
 SHA1 750a32e398527c59dc353e88d969a9a781087dc4 script/create_dbic_schema.pl
 SHA1 65cb32598d54d2cc1a5632e7e16c7c9162da2f38 script/create_notice_db.pl
 SHA1 2c08e5da4cf7259baab0feccde97e9e1bc51c483 script/create_whois_cdb.pl
-SHA1 e09146dfa78015027092fdbe31f3fe6ba5840d76 script/db.pl
 SHA1 29558d09b6c6e9dca9f19d30ef4e5fb01a63fa82 script/de-dupe_dump.sh
 SHA1 fc870ee00cac00c55ffa1d3a07d89e992986f75c script/dump_notice_db.pl
 SHA1 f20661a381504b8952c02bc2a7233c09d8b7f2f4 script/git-add
@@ -314,7 +323,7 @@ SHA1 63657cbb7d7086c56b0cd4e5c6999bb683664868 t/www/robots.txt
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAlC/Xn0ACgkQAR68wSDJd67v/wCdEbRuOSGRIo+guwLhGQVXPZKq
-g4AAoIzGwAlTIRpSlChXB7MFptgVUxpz
-=q3D7
+iEYEARECAAYFAlC/X54ACgkQAR68wSDJd66RkwCgxMeb1TfD8DKMVDJC3fW4EM2+
+0N8An0Lv7/bakvEIj7TFmkJlHKUH+qfb
+=A1iI
 -----END PGP SIGNATURE-----
