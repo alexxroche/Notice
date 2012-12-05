@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.1.41, for debian-linux-gnu (i486)
+-- MySQL dump 10.13  Distrib 5.1.66, for debian-linux-gnu (i486)
 --
 -- Host: localhost    Database: notice
 -- ------------------------------------------------------
--- Server version	5.1.41-3ubuntu12.10-log
+-- Server version	5.1.66-0ubuntu0.10.04.1-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -94,15 +94,6 @@ CREATE TABLE `SSLhistory` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `SSLhistory`
---
-
-LOCK TABLES `SSLhistory` WRITE;
-/*!40000 ALTER TABLE `SSLhistory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `SSLhistory` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `account`
 --
 
@@ -120,7 +111,7 @@ CREATE TABLE `account` (
   `ac_max` int(255) DEFAULT NULL COMMENT 'within other accounts',
   PRIMARY KEY (`ac_id`),
   UNIQUE KEY `id` (`ac_id`,`ac_tree`)
-) ENGINE=MyISAM AUTO_INCREMENT=570 DEFAULT CHARSET=latin1 COMMENT='These are the companies, or family that people belong to';
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COMMENT='These are the companies, or family that people belong to';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -150,15 +141,6 @@ CREATE TABLE `achistory` (
   PRIMARY KEY (`ch_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='account history';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `achistory`
---
-
-LOCK TABLES `achistory` WRITE;
-/*!40000 ALTER TABLE `achistory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `achistory` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `activity_acl`
@@ -208,7 +190,7 @@ CREATE TABLE `activity_log` (
   `user` int(255) NOT NULL DEFAULT '0' COMMENT 'people.pe_id',
   `period` enum('S','M','H','d','w','m','y') COLLATE utf8_bin NOT NULL DEFAULT 'S',
   `tally` int(255) NOT NULL DEFAULT '1' COMMENT 'how many',
-  `action` enum('search','view','add','update','delete','loiter','afk','login','logout') COLLATE utf8_bin NOT NULL DEFAULT 'search' COMMENT 'what they did; loiter records mouse over',
+  `action` enum('search','view','add','update','delete','loiter','afk','login','logout','log') COLLATE utf8_bin NOT NULL DEFAULT 'search' COMMENT 'what they did; loiter records mouse over',
   `start` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `end` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `description` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
@@ -239,7 +221,7 @@ CREATE TABLE `address` (
   `ad_notes` mediumblob,
   PRIMARY KEY (`ad_id`),
   KEY `cu_id` (`ad_id`,`ad_adcity`,`ad_adpostcode`)
-) ENGINE=MyISAM AUTO_INCREMENT=449 DEFAULT CHARSET=latin1 COMMENT='Addresses';
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COMMENT='Addresses';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -273,7 +255,7 @@ CREATE TABLE `alhistory` (
   `al_what` mediumtext,
   `al_when` datetime DEFAULT NULL,
   PRIMARY KEY (`al_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=372 DEFAULT CHARSET=latin1 COMMENT='Email aliase History';
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COMMENT='Email aliase History';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -320,7 +302,7 @@ CREATE TABLE `aliases` (
   `ea_suspended` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`ea_id`),
   KEY `ea_userid` (`ea_userid`,`ea_doid`,`ea_touser`,`ea_at`)
-) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -332,6 +314,26 @@ LOCK TABLES `aliases` WRITE;
 INSERT INTO `aliases` VALUES (1,'abuse','roges','mailbox.net.uk',1,0);
 /*!40000 ALTER TABLE `aliases` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `asset_card`
+--
+
+DROP TABLE IF EXISTS `asset_card`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `asset_card` (
+  `card_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `card_asid` int(255) unsigned NOT NULL,
+  `card_user` int(255) DEFAULT '0' COMMENT 'added by',
+  `card_peid` int(255) DEFAULT '0' COMMENT 'about this person',
+  `card_created` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `card_modified` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+  `card_archive` enum('N','Y') NOT NULL DEFAULT 'N' COMMENT 'we keep ALL records, but some are less interesting with time',
+  PRIMARY KEY (`card_id`),
+  KEY `used` (`card_user`,`card_archive`)
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='asset record card';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `asset_cat_data`
@@ -443,6 +445,30 @@ LOCK TABLES `asset_location` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `asset_record`
+--
+
+DROP TABLE IF EXISTS `asset_record`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `asset_record` (
+  `ar_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `ar_card_id` int(255) unsigned NOT NULL COMMENT 'asset.as_id',
+  `ar_order` int(255) unsigned DEFAULT '0',
+  `ar_summary` char(128) NOT NULL DEFAULT '',
+  `ar_action` varchar(255) DEFAULT '',
+  `ar_image` blob COMMENT 'small base64 image',
+  `ar_match` tinyint(1) DEFAULT '0',
+  `ar_start` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'when this record was added',
+  `ar_end` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'when this record was actually closed',
+  `ar_due` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'when this record should have closed',
+  `ar_compleated` int(3) DEFAULT '0' COMMENT 'percent complete',
+  PRIMARY KEY (`ar_id`),
+  KEY `to` (`ar_card_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=utf8 COMMENT='asset record card record';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `assets`
 --
 
@@ -464,7 +490,6 @@ CREATE TABLE `assets` (
   UNIQUE KEY `as_id` (`as_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=74 DEFAULT CHARSET=latin1 COMMENT='a more specific group than the as_cid';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 
 --
 -- Table structure for table `calendar`
@@ -493,7 +518,6 @@ CREATE TABLE `calendar` (
 ) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COMMENT='CalDAV and CardDAV';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
 --
 -- Table structure for table `calendar_acl`
 --
@@ -515,7 +539,6 @@ CREATE TABLE `calendar_acl` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Calendar privileges';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
 --
 -- Table structure for table `conf_data`
 --
@@ -532,7 +555,7 @@ CREATE TABLE `conf_data` (
   `cfd_acid` int(255) DEFAULT NULL,
   `cfd_grid` int(255) DEFAULT NULL,
   PRIMARY KEY (`cfd_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=latin1 COMMENT='config data for the config table';
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COMMENT='config data for the config table';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -568,7 +591,7 @@ CREATE TABLE `config` (
 
 LOCK TABLES `config` WRITE;
 /*!40000 ALTER TABLE `config` DISABLE KEYS */;
-INSERT INTO `config` VALUES (12,'greeting',NULL,NULL,NULL),(13,'template',NULL,NULL,NULL);
+INSERT INTO `config` VALUES (1,'UUID',NULL,NULL,NULL),(2,'Constellation',NULL,NULL,NULL),(12,'greeting',NULL,NULL,NULL),(13,'template',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `config` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -652,15 +675,6 @@ CREATE TABLE `domain_modification` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `domain_modification`
---
-
-LOCK TABLES `domain_modification` WRITE;
-/*!40000 ALTER TABLE `domain_modification` DISABLE KEYS */;
-/*!40000 ALTER TABLE `domain_modification` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `domain_modification_history`
 --
 
@@ -680,15 +694,6 @@ CREATE TABLE `domain_modification_history` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `domain_modification_history`
---
-
-LOCK TABLES `domain_modification_history` WRITE;
-/*!40000 ALTER TABLE `domain_modification_history` DISABLE KEYS */;
-/*!40000 ALTER TABLE `domain_modification_history` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `domains`
 --
 
@@ -700,9 +705,9 @@ CREATE TABLE `domains` (
   `do_name` varchar(255) NOT NULL,
   `do_status` enum('disabled','suspended','enabled','migrating out','migrating in','registering','desired','disputed','remote') NOT NULL DEFAULT 'remote',
   `do_added` datetime NOT NULL,
-  `do_acid` varchar(255) DEFAULT NULL,
+  `do_acid` int(255) NOT NULL,
   `do_group` int(255) DEFAULT NULL,
-  `do_peid` int(255) DEFAULT NULL,
+  `do_peid` int(255) DEFAULT '0',
   `do_location` varchar(255) DEFAULT NULL,
   `do_masters` varchar(255) DEFAULT NULL COMMENT 'a ; delimited list of ip addresses',
   PRIMARY KEY (`do_id`)
@@ -739,15 +744,6 @@ CREATE TABLE `domains_history` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `domains_history`
---
-
-LOCK TABLES `domains_history` WRITE;
-/*!40000 ALTER TABLE `domains_history` DISABLE KEYS */;
-/*!40000 ALTER TABLE `domains_history` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `email_control`
 --
 
@@ -763,15 +759,6 @@ CREATE TABLE `email_control` (
   PRIMARY KEY (`ec_doid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `email_control`
---
-
-LOCK TABLES `email_control` WRITE;
-/*!40000 ALTER TABLE `email_control` DISABLE KEYS */;
-/*!40000 ALTER TABLE `email_control` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `finiki_wiki`
@@ -953,15 +940,6 @@ CREATE TABLE `ip` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `ip`
---
-
-LOCK TABLES `ip` WRITE;
-/*!40000 ALTER TABLE `ip` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ip` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `iphistory`
 --
 
@@ -978,15 +956,6 @@ CREATE TABLE `iphistory` (
   PRIMARY KEY (`ih_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1694 DEFAULT CHARSET=latin1 COMMENT='IP History';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `iphistory`
---
-
-LOCK TABLES `iphistory` WRITE;
-/*!40000 ALTER TABLE `iphistory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `iphistory` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `ipphistory`
@@ -1106,15 +1075,6 @@ CREATE TABLE `module_product_catagory` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `module_product_catagory`
---
-
-LOCK TABLES `module_product_catagory` WRITE;
-/*!40000 ALTER TABLE `module_product_catagory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `module_product_catagory` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `module_products`
 --
 
@@ -1131,15 +1091,6 @@ CREATE TABLE `module_products` (
   PRIMARY KEY (`mp_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='What each module brings to the table... to sell';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `module_products`
---
-
-LOCK TABLES `module_products` WRITE;
-/*!40000 ALTER TABLE `module_products` DISABLE KEYS */;
-/*!40000 ALTER TABLE `module_products` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `modules`
@@ -1166,7 +1117,7 @@ CREATE TABLE `modules` (
   `mo_user_use` enum('none','use','access','limited read','read','insert','update','admin_read','admin_write') DEFAULT 'none',
   `mo_notes` blob,
   PRIMARY KEY (`mo_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1 COMMENT='The modules';
+) ENGINE=MyISAM AUTO_INCREMENT=112 DEFAULT CHARSET=latin1 COMMENT='The modules';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1175,7 +1126,7 @@ CREATE TABLE `modules` (
 
 LOCK TABLES `modules` WRITE;
 /*!40000 ALTER TABLE `modules` DISABLE KEYS */;
-INSERT INTO `modules` VALUES (1,'Installer','','7CD530D6-4479-3FDA-AB42-8A37DDF99CEA','0',2,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/0/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/0/update','0.01','installer','',''),(2,'Checker','','D993E342-1735-32E2-805A-E8A69089CA91','0.1',4,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/0/0.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/0/0.1/update','0.01','checker','',''),(3,'Domains','Domain names','8cf15874-9cb8-11e0-beed-00188bba79ac','3',1,'notice-dev at alexx dot net','notice-dev at alexx dot net','1','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/update','0.03','domains','insert',''),(4,'base','','FC3B9074-135C-3E78-B412-5DD6FFCFA784','1',6,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/update','0.01','base','',''),(5,'Configuration','Define how it all works','12fdc608-4211-11e1-9b60-00188bba79ac','1.0',99,'notice-dev at alexx dot net','notice-dev at alexx dot net','','sysadmin','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.0/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.0/update','0.01','config','',''),(6,'Cookies','','BC6E8937-21EF-387A-8254-D17E7CC08CCB','1.0.1',8,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.0/1.0.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.0/1.0.1/update','0.01','cookies','',''),(7,'Search','','00886418-8DE1-38FE-A170-6F2EB159D839','1.1',10,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.1/update','0.01','search','',''),(8,'Help','','422371CD-F2AD-38FF-B080-A356358124B8','1.1.2.1',12,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.1/1.1.2/1.1.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.1/1.1.2/1.1.2.1/update','0.01','help','',''),(9,'Details','','1537E8D8-F107-3125-94D5-38BD7FC871F9','1.2',14,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/update','0.01','details','',''),(10,'dbSQLadmin','direct access to the DB','C5C9A2F2-03C2-3A10-84DE-33B409512DC7','1.2.4',16,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.4/update','0.01','dbsqladmin','',''),(11,'Logout','','C8BA2B02-A63A-375A-93C4-29CCADDF4F46','1.2.999',18,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.999/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.999/update','0.01','logout','',''),(12,'Modules','The Modules of Notice','a99976ee-3c6f-11e1-a234-00188bba79ac','1.2.3',1,'notice-dev at alexx dot net','notice-dev at alexx dot net','','base','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.3/update','0.01','modules','',''),(13,'Preferences','','09A7438C-D3CE-38DD-9200-4722F781E0FB','1.2.2',20,'notice-dev at alexx dot net','notice-dev at alexx dot net','1,1.2.1','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/update','0.01','prefs','',''),(14,'CSS','','28FAB916-AD86-3B4D-969B-D58B79DF02C9','1.2.2.1',22,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/1.2.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/1.2.2.1/update','0.01','css','',''),(15,'Menu','','38E2F4FD-46FD-36B5-A2E1-5FDC76D88BA8','1.2.2.2',24,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/1.2.2.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/1.2.2.2/update','0.01','menu','',''),(16,'Your Details','','2B0DC7F4-F940-3BA9-9AD9-4ACE4BE588BC','1.2.1',26,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.1/update','0.01','details','',''),(17,'Services','','4F39F1FC-129A-35A1-B3EB-A58D203276C6','1.3',28,'notice-dev at alexx dot net','notice-dev at alexx dot net','','category','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.3/update','0.01','services','',''),(18,'Groups','Group anything within Notice','EDFD9D0C-F658-3407-95F8-338B4E560D29','1.3.2.1',30,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.3/1.3.2/1.3.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.3/1.3.2/1.3.2.1/update','0.01','groups','',''),(19,'SysAdmin','','89BAD068-B530-3627-8921-A0C419C67D65','1.4',32,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/update','0.01','sysadmin','',''),(20,'Users','','1908DDD6-4E00-3509-87BB-AAA0A5BDF602','1.4.2',34,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.2/update','0.01','users','',''),(21,'Add Users','','529F6295-F89E-35D5-B0FB-52229F60FA2F','1.4.2.1',36,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.2/1.4.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.2/1.4.2.1/update','0.01','add_users','',''),(22,'Accounts','Accounts','8B020C28-79AD-3E2E-933F-6DB2E8F6A8AD','1.4.1',38,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.1/update','0.01','account','',''),(23,'Addresses','Addresses','A90ADD06-98D3-3529-89E0-A6027E5804D8','2',40,'notice-dev at alexx dot net','notice-dev at alexx dot net','','base','https://raw.github.com/alexxroche/Notice/master/t/www/modules/2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/2/update','0.01','addresses','',''),(24,'DNS','','4C9F4938-E691-3312-81F6-04E4748A924E','3.0',42,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.0/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.0/update','0.01','dns','',''),(25,'Email','','16268bac-3c71-11e1-9f6f-00188bba79ac','3.1',2,'notice-dev at alexx dot net','notice-dev at alexx dot net','1,2','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/update','0.01','email','',''),(26,'Aliases','','FBA114B9-7A57-3EBD-AC6B-F56F92BDFDFE','3.1.2',44,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.2/update','0.01','aliases','',''),(27,'SMTP','','1936FBDD-53B6-3F91-ACAB-E194F8A5560C','3.1.3',46,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.3/update','0.01','smtp','',''),(28,'IMAP/POP3','Storage for email messages; An email account','e13a9120-de9a-4ec1-877d-34c4f719b538','3.1.1',1,'notice-dev at alexx dot net','notice-dev at alexx dot net','0,1,3','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.1/update','0.03','imap','insert',''),(29,'Websites','','597AAFAE-1437-3E4C-98B1-2B7E92219E65','3.2',48,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.2/update','0.01','websites','',''),(30,'Apache Config','','39E16214-9317-35C5-8FB5-BEA5C6C566B3','3.2.1',50,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.2/3.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.2/3.2.1/update','0.01','apache_config','',''),(31,'Internet Protocol','','DEBFC2F9-82E2-35A5-B9D4-C701A5FF4B3B','4',52,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/update','0.01','internet_protocol','',''),(32,'IP database','','F8F7B13C-AB9E-3565-A6C7-7F6CCB8C6C58','4.1',54,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/update','0.01','ip_database','',''),(33,'History','','AAC35B0B-3041-3831-B2EF-43F863BD0C10','4.1.8',56,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.8/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.8/update','0.01','history','',''),(34,'R.I.R.','','9678313A-7B15-3CE3-B502-EB8527EB4DAA','4.1.7',58,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.7/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.7/update','0.01','r.i.r.','',''),(35,'Search','','5B938260-269A-3FA4-A43E-5D45B89955D2','4.1.2',60,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.2/update','0.01','search','',''),(36,'Networks','','14891FDA-B825-3684-929B-5E82E2C01842','4.1.5',62,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.5/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.5/update','0.01','networks','',''),(37,'Assigned to','','31C9B52C-24B5-3E29-9D70-BCCA675D8AB3','4.1.6',64,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.6/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.6/update','0.01','assigned_to','',''),(38,'Allocator','','D919BD55-26C7-3576-908E-C7BC50595466','4.1.1',66,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.1/update','0.01','allocator','',''),(39,'Blocks','','BC24B02D-B56F-30FD-B8FA-B48733CC8146','4.1.3',68,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.3/update','0.01','blocks','',''),(40,'VLAN','','3F7E634B-ADA4-3DDE-8431-8CDFF1495ABA','4.1.4',70,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.4/update','0.01','vlan','',''),(41,'SSL Certs','','042C273E-E323-31AB-B449-27A2AEECA80C','5',72,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/update','0.01','ssl_certs','',''),(42,'SSL Checker','','FFCD2FFE-2D3C-3AAA-87BD-72D27B7DC567','5.1',74,'notice-dev at alexx dot net','notice-dev at alexx dot net','3.2','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.1/update','0.01','ssl_checker','',''),(43,'Certificate Authority','','E6626D80-2B2E-3C13-AB88-D4274D9A6815','5.2',76,'notice-dev at alexx dot net','notice-dev at alexx dot net','5.1','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.2/update','0.01','certificate_authority','',''),(44,'CA Checker','','8C8B7539-50AB-3B45-B552-018F68AFC65B','5.2.1',78,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.2/5.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.2/5.2.1/update','0.01','ca_checker','',''),(45,'Convergence.io server','','47104671-F492-39BC-B763-6E3A27D81786','5.3',80,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.3/update','0.01','convergence.io_server','',''),(46,'HumanResources','','F27F5CDE-BEB2-34EB-9EB5-06B7301BE6CB','6',82,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/update','0.01','humanresources','',''),(47,'Interviews','','7ECC9D42-4F33-31C3-B289-4A77FF62D074','6.1.3',84,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.3/update','0.01','interviews','',''),(48,'Events','','D2113903-8387-310E-9F8F-393A029DE18D','6.1.4',86,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.4/update','0.01','events','',''),(49,'Attendance','','73E7ECA6-96CD-3C1F-8FDB-16F666A0D5F5','6.1.2',88,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.2/update','0.01','attendance','',''),(50,'Holiday','','FA6B43B7-14E4-3DEA-ABCF-11299224D41F','6.1.1',90,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.1/update','0.01','holiday','',''),(51,'PGP','','94B07D87-FD2C-3C18-B1B8-68D6EEA327CA','7',92,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/update','0.01','pgp','',''),(52,'RESERVED for alexx','','98fdc608-4211-11e1-9b60-00188bba79ac','7.1',94,'notice-dev at alexx dot net','notice-dev at alexx dot net','0,1,3.1,7','base','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.1/update','0.03','','',''),(53,'INX - Inter Notice Exchange','','140DEC47-0A19-3B88-8B4A-E14A99DA283F','7.2',96,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.2/update','0.01','inx_-_inter_notice_exchange','',''),(54,'jsonINX - INX','','26B18C8B-7906-34A2-BADC-8A4A8AFC01F5','7.2.1',98,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.2/7.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.2/7.2.1/update','0.01','jsoninx_-_inter_notice_exchange','',''),(55,'approval signing','','2A6E82D2-879A-3D84-9892-C5EB39654533','7.3',100,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.3/update','0.01','approval_signing','',''),(56,'Key server','','6DEC2857-09A9-3CBA-B221-BFC975F6657C','7.4',102,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.4/update','0.01','key_server','',''),(57,'Assets','Asset inventory and manangement','756b67a0-9cb6-11e0-aedf-00188bba79ac','8',3,'notice-dev at alexx dot net','notice-dev at alexx dot net','1','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/8/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/8/update','0.02','assets','insert',''),(58,'SSH','','6B1F9DE7-4AD1-3960-BDB4-234B9EF2E10A','9',104,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/9/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/9/update','0.01','ssh','',''),(59,'Billing','','C8D31F04-FCFE-3276-B0E5-B2E84E2C63B4','10',106,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/update','0.01','billing','',''),(60,'Invoices','','94B3492F-3883-350B-B073-78E1C3D448D6','10.1',108,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.1/update','0.01','invoices','',''),(61,'Price List','','CC6B55EB-0961-39B5-A641-278A2E6430E7','10.2',110,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.2/update','0.01','price_list','',''),(62,'Promotions','','4369098F-7B39-3C8B-B0C5-D2419150E6FF','10.3',112,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.3/update','0.01','promotions','',''),(63,'History','','7F70CEAC-1FA5-3E8C-8E12-0B08A108C23B','10.4',114,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.4/update','0.01','history','',''),(64,'Radius','','4D7FE77A-2DDB-3277-883E-2B76DB7E1946','11',116,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/11/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/11/update','0.01','radius','',''),(65,'LDAP','','EC6A83E6-8EC3-36AF-AC9C-A80B20C9323C','12',118,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/12/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/12/update','0.01','ldap','',''),(66,'Connections','','72A2D823-2435-34D5-BAAA-F03AE622F417','13',120,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/update','0.01','connections','',''),(67,'Dial up','','E6EF8BCD-DF0D-3333-8FEE-551086F60F7E','13.1',122,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.1/update','0.01','dial_up','',''),(68,'ADSL','','542B1BE1-6BCB-317C-866E-7E363BD05EDB','13.2',124,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.2/update','0.01','adsl','',''),(69,'Leased Lines','','61C7EB21-7C77-3348-B893-F6160C2A900C','13.3',126,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.3/update','0.01','leased_lines','',''),(70,'Databases','','EB46C0DC-93B6-3B69-83B0-9B1D0372C97B','14',128,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/update','0.01','databases','',''),(71,'mysql','','32E8EDEB-3662-38C3-B859-635CDA6969B5','14.1',130,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.1/update','0.01','mysql','',''),(72,'postgresql','','C8857AE1-A99C-3FA0-9005-7DBCE1DD64F1','14.2',132,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.2/update','0.01','postgresql','',''),(73,'sqlite','','9E08F29C-4413-3356-AD0D-BB2767F16EAC','14.3',134,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.3/update','0.01','sqlite','',''),(74,'CRM','','DC489F35-18D5-3641-A3B5-7E0215ABFB2B','15',136,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/15/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/15/update','0.01','crm','',''),(75,'FTP','','B57A66B5-5538-31CC-A692-256B62968C5E','16',138,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/16/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/16/update','0.01','ftp','',''),(76,'Genealogy','','9D6F223E-D739-3867-A684-E13260A1595E','17',140,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/17/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/17/update','0.01','genealogy','',''),(77,'Virtual Currency','','65BCF505-E0BA-3E33-90FD-C99B22F2C116','18',142,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/18/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/18/update','0.01','virtual_currency','',''),(78,'Karma','','5EF02186-0E42-3B49-9DDF-5BB0C359336F','18.1',144,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/18/18.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/18/18.1/update','0.01','karma','',''),(79,'XMPP','','A936F99F-F16C-30AA-AC5F-52B16B97C23A','19',146,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/update','0.01','xmpp','',''),(80,'XMPP Server','','F166C4AB-CA03-3CC6-A024-4E2149CCC91B','19.1',148,'notice-dev at alexx dot net','notice-dev at alexx dot net','7','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/19.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/19.1/update','0.01','xmpp_server','',''),(81,'INX XMPP API','','4BC10B8C-3532-3758-975E-3B50E0DFAD39','19.2',150,'notice-dev at alexx dot net','notice-dev at alexx dot net','7','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/19.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/19.2/update','0.01','inx_xmpp_api','',''),(82,'SOAP::API','','9C82F7C9-C62B-344B-8633-0A8735B83DAC','20',152,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/20/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/20/update','0.01','soap::api','',''),(83,'Bookmarks','','FCA55D9D-3160-3006-8461-B32EAAF1FD3E','21',154,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/21/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/21/update','0.01','bookmarks','',''),(84,'Firefox Sync server','','ACC6642C-9DAA-38B3-87AB-DCE2F98DE83C','21.1',156,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/21/21.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/21/21.1/update','0.01','firefox_sync_server','',''),(85,'BugTrack','','914EDBE0-FB51-340B-BC5B-A50E0E9FC340','22',158,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/update','0.01','bugtrack','',''),(86,'RT request Tracker','','EEFC608E-10E7-3851-8D44-E040018C1309','22.1',160,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/22.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/22.1/update','0.01','rt_request_tracker','',''),(87,'bugzilla','','7D2CDBAF-717C-39EB-AA88-DEB29A18115E','22.2',162,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/22.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/22.2/update','0.01','bugzilla','',''),(88,'Documents','Document Store','7AD4C69C-D66F-39D2-89E6-216431D8522C','23',11,'notice-dev at alexx dot net','notice-dev at alexx dot net','1','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/update','0.01','docs','',''),(89,'Syndication','','47BDD385-C33C-3DD4-8E17-EE6FC5B551CF','23.1',164,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/update','0.01','syndication','',''),(90,'Atom server','Atom 1.0','C700D3CB-AD09-33CA-BD93-4BD107BEE8D9','23.1.2',166,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/23.1.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/23.1.2/update','0.01','atom_server','',''),(91,'RSS server','RSS 2.0','DB08A6B3-4206-3FCF-BACD-BCA981EE754C','23.1.1',168,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/23.1.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/23.1.1/update','0.01','rss_server','',''),(92,'OpenID','','1AD2C34C-D66F-39D2-89E6-216431D8522C','24',170,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/24/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/24/update','0.01','openid','',''),(93,'Intellectual Property','','9AD8C76C-D66F-39D2-89E6-216431D8522C','25',172,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/25/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/25/update','0.01','internectual_property','',''),(94,'Report','','3cb603d4-acdc-11e1-9b44-00188bba79ac','26',174,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/26/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/26/update','0.01','report','',''),(95,'Report graphs','','60ad2722-acdc-11e1-81af-00188bba79ac','26.1',176,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/26/26.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/26/26.1/update','0.01','report_graphs','',''),(96,'i18n','i10n Internationalisation','7713a115-1594-1155-9411-557A15059115','27',178,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/27/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/27/update','0.01','i18n','',''),(97,'Security','','72579BC1-5E11-30D6-B044-47874BA19EC8','30',180,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/30/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/30/update','0.01','security','',''),(98,'Calendar','Calendar','ADC80536-E33A-3AE8-AA49-36DF92377DC4','31',182,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/31/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/31/update','0.01','calendar','',''),(99,'CalDAV server','','87D21124-CAA4-3992-931A-AAF54F7CADCD','31.1',184,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/31/31.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/31/31.1/update','0.01','caldav_server','',''),(100,'Contacts','','1B4346E9-C29D-3DBD-9123-CAA335D09AA7','32',186,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/32/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/32/update','0.01','contacts','',''),(101,'CardDAV server','','AD7AB55E-C5AF-3C71-BB75-849BBE59BC83','32.1',188,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/32/32.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/32/32.1/update','0.01','carddav_server','',''),(102,'Sales','Sales','0F079FF0-62F1-3782-B52B-685A203EF501','33',4,'notice-dev at alexx dot net','notice-dev at alexx dot net','','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/33/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/33/update','0.01','sales','',''),(103,'Subscriptions','','54CE721F-173E-374B-B245-1ABB4D5621F2','40',190,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/update','0.01','subscriptions','',''),(104,'Trolly','','1C888B19-E197-32B3-BBBF-649D3B1B8EE8','40.1',192,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.1/update','0.01','trolly','',''),(105,'Payment','','02472949-31EF-3AF7-B69A-EBC2E68DC751','40.2',194,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.2/update','0.01','payment','',''),(106,'Statement','','0AC27D37-A249-30FE-B6B7-3051E7549119','40.3',196,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.3/update','0.01','statement','',''),(107,'Direct services','Things that Notice can let people do','A2776FBF-E9E9-3F06-A1DA-8C5956A6E61B','50',198,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/50/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/50/update','0.01','direct_services','',''),(108,'DEDC','Desired Exit Door Codes - how to use the Underground more efficiently','F070F90F-261F-7328-5BB2-865A02E3510F','51',4,'notice-dev at alexx dot net','notice-dev at alexx dot net','','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/51/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/51/update','0.01','sales','',''),(109,'Adendum','Edit books and documents','12379BC9-BE11-03D6-0B44-48774AB1E98C','52',200,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/52/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/52/update','0.01','adendum','',''),(110,'Beekeeping','Record and manage beehives','BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB0','53',202,'notice-dev at alexx dot net','notice-dev at alexx dot net','','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/53/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/53/update','0.01','beekeeping','',''),(111,'Yabe','Reverse auction','b0e75ba0-acfe-11e1-84b2-00188bba79ac','54',204,'notice-dev at alexx dot net','notice-dev at alexx dot net','','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/54/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/54/update','0.01','yabe','','');
+INSERT INTO `modules` VALUES (1,'Installer','','7CD530D6-4479-3FDA-AB42-8A37DDF99CEA','0',2,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/0/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/0/update','0.01','installer','',''),(2,'Checker','','D993E342-1735-32E2-805A-E8A69089CA91','0.1',4,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/0/0.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/0/0.1/update','0.01','checker','',''),(3,'Domains','Domain names','8cf15874-9cb8-11e0-beed-00188bba79ac','3',1,'notice-dev at alexx dot net','notice-dev at alexx dot net','1','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/update','0.03','domains','insert',''),(4,'base','','FC3B9074-135C-3E78-B412-5DD6FFCFA784','1',6,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/update','0.01','base','',''),(5,'Configuration','Define how it all works','12fdc608-4211-11e1-9b60-00188bba79ac','1.0',99,'notice-dev at alexx dot net','notice-dev at alexx dot net','','sysadmin','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.0/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.0/update','0.01','config','',''),(6,'Cookies','','BC6E8937-21EF-387A-8254-D17E7CC08CCB','1.0.1',8,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.0/1.0.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.0/1.0.1/update','0.01','cookies','',''),(7,'Search','','00886418-8DE1-38FE-A170-6F2EB159D839','1.1',10,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.1/update','0.01','search','',''),(8,'Help','','422371CD-F2AD-38FF-B080-A356358124B8','1.1.2.1',12,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.1/1.1.2/1.1.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.1/1.1.2/1.1.2.1/update','0.01','help','',''),(9,'Details','','1537E8D8-F107-3125-94D5-38BD7FC871F9','1.2',14,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/update','0.01','details','',''),(10,'dbSQLadmin','direct access to the DB','C5C9A2F2-03C2-3A10-84DE-33B409512DC7','1.2.4',16,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.4/update','0.01','dbsqladmin','',''),(11,'Logout','','C8BA2B02-A63A-375A-93C4-29CCADDF4F46','1.2.999',18,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.999/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.999/update','0.01','logout','',''),(12,'Modules','The Modules of Notice','a99976ee-3c6f-11e1-a234-00188bba79ac','1.2.3',1,'notice-dev at alexx dot net','notice-dev at alexx dot net','','base','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.3/update','0.01','modules','',''),(13,'Preferences','','09A7438C-D3CE-38DD-9200-4722F781E0FB','1.2.2',20,'notice-dev at alexx dot net','notice-dev at alexx dot net','1,1.2.1','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/update','0.01','prefs','',''),(14,'CSS','','28FAB916-AD86-3B4D-969B-D58B79DF02C9','1.2.2.1',22,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/1.2.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/1.2.2.1/update','0.01','css','',''),(15,'Menu','','38E2F4FD-46FD-36B5-A2E1-5FDC76D88BA8','1.2.2.2',24,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/1.2.2.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.2/1.2.2.2/update','0.01','menu','',''),(16,'Your Details','','2B0DC7F4-F940-3BA9-9AD9-4ACE4BE588BC','1.2.1',26,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.2/1.2.1/update','0.01','details','',''),(17,'Services','','4F39F1FC-129A-35A1-B3EB-A58D203276C6','1.3',28,'notice-dev at alexx dot net','notice-dev at alexx dot net','','category','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.3/update','0.01','services','',''),(18,'Groups','Group anything within Notice','EDFD9D0C-F658-3407-95F8-338B4E560D29','1.3.2.1',30,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.3/1.3.2/1.3.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.3/1.3.2/1.3.2.1/update','0.01','groups','',''),(19,'SysAdmin','','89BAD068-B530-3627-8921-A0C419C67D65','1.4',32,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/update','0.01','sysadmin','',''),(20,'Users','','1908DDD6-4E00-3509-87BB-AAA0A5BDF602','1.4.2',34,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.2/update','0.01','users','',''),(21,'Add Users','','529F6295-F89E-35D5-B0FB-52229F60FA2F','1.4.2.1',36,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.2/1.4.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.2/1.4.2.1/update','0.01','add_users','',''),(22,'Accounts','Accounts','8B020C28-79AD-3E2E-933F-6DB2E8F6A8AD','1.4.1',38,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/1/1.4/1.4.1/update','0.01','account','',''),(23,'Addresses','Addresses','A90ADD06-98D3-3529-89E0-A6027E5804D8','2',40,'notice-dev at alexx dot net','notice-dev at alexx dot net','','base','https://raw.github.com/alexxroche/Notice/master/t/www/modules/2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/2/update','0.01','addresses','',''),(24,'DNS','','4C9F4938-E691-3312-81F6-04E4748A924E','3.0',42,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.0/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.0/update','0.01','dns','',''),(25,'Email','','16268bac-3c71-11e1-9f6f-00188bba79ac','3.1',2,'notice-dev at alexx dot net','notice-dev at alexx dot net','1,2','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/update','0.01','email','',''),(26,'Aliases','','FBA114B9-7A57-3EBD-AC6B-F56F92BDFDFE','3.1.2',44,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.2/update','0.01','aliases','',''),(27,'SMTP','','1936FBDD-53B6-3F91-ACAB-E194F8A5560C','3.1.3',46,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.3/update','0.01','smtp','',''),(28,'IMAP/POP3','Storage for email messages; An email account','e13a9120-de9a-4ec1-877d-34c4f719b538','3.1.1',1,'notice-dev at alexx dot net','notice-dev at alexx dot net','0,1,3','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.1/3.1.1/update','0.03','imap','insert',''),(29,'Websites','','597AAFAE-1437-3E4C-98B1-2B7E92219E65','3.2',48,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.2/update','0.01','websites','',''),(30,'Apache Config','','39E16214-9317-35C5-8FB5-BEA5C6C566B3','3.2.1',50,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.2/3.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/3/3.2/3.2.1/update','0.01','apache_config','',''),(31,'Internet Protocol','','DEBFC2F9-82E2-35A5-B9D4-C701A5FF4B3B','4',52,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/update','0.01','internet_protocol','',''),(32,'IP database','','F8F7B13C-AB9E-3565-A6C7-7F6CCB8C6C58','4.1',54,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/update','0.01','ip_database','',''),(33,'History','','AAC35B0B-3041-3831-B2EF-43F863BD0C10','4.1.8',56,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.8/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.8/update','0.01','history','',''),(34,'R.I.R.','','9678313A-7B15-3CE3-B502-EB8527EB4DAA','4.1.7',58,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.7/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.7/update','0.01','r.i.r.','',''),(35,'Search','','5B938260-269A-3FA4-A43E-5D45B89955D2','4.1.2',60,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.2/update','0.01','search','',''),(36,'Networks','','14891FDA-B825-3684-929B-5E82E2C01842','4.1.5',62,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.5/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.5/update','0.01','networks','',''),(37,'Assigned to','','31C9B52C-24B5-3E29-9D70-BCCA675D8AB3','4.1.6',64,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.6/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.6/update','0.01','assigned_to','',''),(38,'Allocator','','D919BD55-26C7-3576-908E-C7BC50595466','4.1.1',66,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.1/update','0.01','allocator','',''),(39,'Blocks','','BC24B02D-B56F-30FD-B8FA-B48733CC8146','4.1.3',68,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.3/update','0.01','blocks','',''),(40,'VLAN','','3F7E634B-ADA4-3DDE-8431-8CDFF1495ABA','4.1.4',70,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/4/4.1/4.1.4/update','0.01','vlan','',''),(41,'SSL Certs','','042C273E-E323-31AB-B449-27A2AEECA80C','5',72,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/update','0.01','ssl_certs','',''),(42,'SSL Checker','','FFCD2FFE-2D3C-3AAA-87BD-72D27B7DC567','5.1',74,'notice-dev at alexx dot net','notice-dev at alexx dot net','3.2','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.1/update','0.01','ssl_checker','',''),(43,'Certificate Authority','','E6626D80-2B2E-3C13-AB88-D4274D9A6815','5.2',76,'notice-dev at alexx dot net','notice-dev at alexx dot net','5.1','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.2/update','0.01','certificate_authority','',''),(44,'CA Checker','','8C8B7539-50AB-3B45-B552-018F68AFC65B','5.2.1',78,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.2/5.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.2/5.2.1/update','0.01','ca_checker','',''),(45,'Convergence.io server','','47104671-F492-39BC-B763-6E3A27D81786','5.3',80,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/5/5.3/update','0.01','convergence.io_server','',''),(46,'HumanResources','','F27F5CDE-BEB2-34EB-9EB5-06B7301BE6CB','6',82,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/update','0.01','humanresources','',''),(47,'Interviews','','7ECC9D42-4F33-31C3-B289-4A77FF62D074','6.1.3',84,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.3/update','0.01','interviews','',''),(48,'Events','','D2113903-8387-310E-9F8F-393A029DE18D','6.1.4',86,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.4/update','0.01','events','',''),(49,'Attendance','','73E7ECA6-96CD-3C1F-8FDB-16F666A0D5F5','6.1.2',88,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.2/update','0.01','attendance','',''),(50,'Holiday','','FA6B43B7-14E4-3DEA-ABCF-11299224D41F','6.1.1',90,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/6/6.1/6.1.1/update','0.01','holiday','',''),(51,'PGP','','94B07D87-FD2C-3C18-B1B8-68D6EEA327CA','7',92,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/update','0.01','pgp','',''),(52,'RESERVED for alexx','','98fdc608-4211-11e1-9b60-00188bba79ac','7.1',94,'notice-dev at alexx dot net','notice-dev at alexx dot net','0,1,3.1,7','base','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.1/update','0.03','','',''),(53,'INX - Inter Notice Exchange','','140DEC47-0A19-3B88-8B4A-E14A99DA283F','7.2',96,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.2/update','0.01','inx_-_inter_notice_exchange','',''),(54,'jsonINX - INX','','26B18C8B-7906-34A2-BADC-8A4A8AFC01F5','7.2.1',98,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.2/7.2.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.2/7.2.1/update','0.01','jsoninx_-_inter_notice_exchange','',''),(55,'approval signing','','2A6E82D2-879A-3D84-9892-C5EB39654533','7.3',100,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.3/update','0.01','approval_signing','',''),(56,'Key server','','6DEC2857-09A9-3CBA-B221-BFC975F6657C','7.4',102,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/7/7.4/update','0.01','key_server','',''),(57,'Assets','Asset inventory and manangement','756b67a0-9cb6-11e0-aedf-00188bba79ac','8',3,'notice-dev at alexx dot net','notice-dev at alexx dot net','1','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/8/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/8/update','0.02','assets','insert',''),(58,'SSH','','6B1F9DE7-4AD1-3960-BDB4-234B9EF2E10A','9',104,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/9/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/9/update','0.01','ssh','',''),(59,'Billing','','C8D31F04-FCFE-3276-B0E5-B2E84E2C63B4','10',106,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/update','0.01','billing','',''),(60,'Invoices','','94B3492F-3883-350B-B073-78E1C3D448D6','10.1',108,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.1/update','0.01','invoices','',''),(61,'Price List','','CC6B55EB-0961-39B5-A641-278A2E6430E7','10.2',110,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.2/update','0.01','price_list','',''),(62,'Promotions','','4369098F-7B39-3C8B-B0C5-D2419150E6FF','10.3',112,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.3/update','0.01','promotions','',''),(63,'History','','7F70CEAC-1FA5-3E8C-8E12-0B08A108C23B','10.4',114,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.4/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/10/10.4/update','0.01','history','',''),(64,'Radius','','4D7FE77A-2DDB-3277-883E-2B76DB7E1946','11',116,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/11/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/11/update','0.01','radius','',''),(65,'LDAP','','EC6A83E6-8EC3-36AF-AC9C-A80B20C9323C','12',118,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/12/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/12/update','0.01','ldap','',''),(66,'Connections','','72A2D823-2435-34D5-BAAA-F03AE622F417','13',120,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/update','0.01','connections','',''),(67,'Dial up','','E6EF8BCD-DF0D-3333-8FEE-551086F60F7E','13.1',122,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.1/update','0.01','dial_up','',''),(68,'ADSL','','542B1BE1-6BCB-317C-866E-7E363BD05EDB','13.2',124,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.2/update','0.01','adsl','',''),(69,'Leased Lines','','61C7EB21-7C77-3348-B893-F6160C2A900C','13.3',126,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/13/13.3/update','0.01','leased_lines','',''),(70,'Databases','','EB46C0DC-93B6-3B69-83B0-9B1D0372C97B','14',128,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/update','0.01','databases','',''),(71,'mysql','','32E8EDEB-3662-38C3-B859-635CDA6969B5','14.1',130,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.1/update','0.01','mysql','',''),(72,'postgresql','','C8857AE1-A99C-3FA0-9005-7DBCE1DD64F1','14.2',132,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.2/update','0.01','postgresql','',''),(73,'sqlite','','9E08F29C-4413-3356-AD0D-BB2767F16EAC','14.3',134,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/14/14.3/update','0.01','sqlite','',''),(74,'CRM','','DC489F35-18D5-3641-A3B5-7E0215ABFB2B','15',136,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/15/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/15/update','0.01','crm','',''),(75,'FTP','','B57A66B5-5538-31CC-A692-256B62968C5E','16',138,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/16/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/16/update','0.01','ftp','',''),(76,'Genealogy','','9D6F223E-D739-3867-A684-E13260A1595E','17',140,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/17/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/17/update','0.01','genealogy','',''),(77,'Virtual Currency','','65BCF505-E0BA-3E33-90FD-C99B22F2C116','18',142,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/18/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/18/update','0.01','virtual_currency','',''),(78,'Karma','','5EF02186-0E42-3B49-9DDF-5BB0C359336F','18.1',144,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/18/18.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/18/18.1/update','0.01','karma','',''),(79,'XMPP','','A936F99F-F16C-30AA-AC5F-52B16B97C23A','19',146,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/update','0.01','xmpp','',''),(80,'XMPP Server','','F166C4AB-CA03-3CC6-A024-4E2149CCC91B','19.1',148,'notice-dev at alexx dot net','notice-dev at alexx dot net','7','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/19.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/19.1/update','0.01','xmpp_server','',''),(81,'INX XMPP API','','4BC10B8C-3532-3758-975E-3B50E0DFAD39','19.2',150,'notice-dev at alexx dot net','notice-dev at alexx dot net','7','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/19.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/19/19.2/update','0.01','inx_xmpp_api','',''),(82,'SOAP::API','','9C82F7C9-C62B-344B-8633-0A8735B83DAC','20',152,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/20/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/20/update','0.01','soap::api','',''),(83,'Bookmarks','','FCA55D9D-3160-3006-8461-B32EAAF1FD3E','21',154,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/21/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/21/update','0.01','bookmarks','',''),(84,'Firefox Sync server','','ACC6642C-9DAA-38B3-87AB-DCE2F98DE83C','21.1',156,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/21/21.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/21/21.1/update','0.01','firefox_sync_server','',''),(85,'BugTrack','','914EDBE0-FB51-340B-BC5B-A50E0E9FC340','22',158,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/update','0.01','bugtrack','',''),(86,'RT request Tracker','','EEFC608E-10E7-3851-8D44-E040018C1309','22.1',160,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/22.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/22.1/update','0.01','rt_request_tracker','',''),(87,'bugzilla','','7D2CDBAF-717C-39EB-AA88-DEB29A18115E','22.2',162,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/22.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/22/22.2/update','0.01','bugzilla','',''),(88,'Documents','Document Store','7AD4C69C-D66F-39D2-89E6-216431D8522C','23',11,'notice-dev at alexx dot net','notice-dev at alexx dot net','1','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/update','0.01','docs','',''),(89,'Syndication','','47BDD385-C33C-3DD4-8E17-EE6FC5B551CF','23.1',164,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/update','0.01','syndication','',''),(90,'Atom server','Atom 1.0','C700D3CB-AD09-33CA-BD93-4BD107BEE8D9','23.1.2',166,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/23.1.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/23.1.2/update','0.01','atom_server','',''),(91,'RSS server','RSS 2.0','DB08A6B3-4206-3FCF-BACD-BCA981EE754C','23.1.1',168,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/23.1.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/23/23.1/23.1.1/update','0.01','rss_server','',''),(92,'OpenID','','1AD2C34C-D66F-39D2-89E6-216431D8522C','24',170,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/24/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/24/update','0.01','openid','',''),(93,'Intellectual Property','','9AD8C76C-D66F-39D2-89E6-216431D8522C','25',172,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/25/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/25/update','0.01','internectual_property','',''),(94,'Report','','3cb603d4-acdc-11e1-9b44-00188bba79ac','26',174,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/26/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/26/update','0.01','report','',''),(95,'Report graphs','','60ad2722-acdc-11e1-81af-00188bba79ac','26.1',176,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/26/26.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/26/26.1/update','0.01','report_graphs','',''),(96,'i18n','i10n Internationalisation','7713a115-1594-1155-9411-557A15059115','27',178,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/27/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/27/update','0.01','i18n','',''),(97,'Security','','72579BC1-5E11-30D6-B044-47874BA19EC8','30',180,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/30/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/30/update','0.01','security','',''),(98,'Calendar','Calendar','ADC80536-E33A-3AE8-AA49-36DF92377DC4','31',182,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/31/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/31/update','0.01','calendar','',''),(99,'CalDAV server','','87D21124-CAA4-3992-931A-AAF54F7CADCD','31.1',184,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/31/31.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/31/31.1/update','0.01','caldav_server','',''),(100,'Contacts','','1B4346E9-C29D-3DBD-9123-CAA335D09AA7','32',186,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/32/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/32/update','0.01','contacts','',''),(101,'CardDAV server','','AD7AB55E-C5AF-3C71-BB75-849BBE59BC83','32.1',188,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/32/32.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/32/32.1/update','0.01','carddav_server','',''),(102,'Sales','Sales','0F079FF0-62F1-3782-B52B-685A203EF501','33',4,'notice-dev at alexx dot net','notice-dev at alexx dot net','','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/33/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/33/update','0.01','sales','',''),(103,'Subscriptions','','54CE721F-173E-374B-B245-1ABB4D5621F2','40',190,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/update','0.01','subscriptions','',''),(104,'Trolly','','1C888B19-E197-32B3-BBBF-649D3B1B8EE8','40.1',192,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.1/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.1/update','0.01','trolly','',''),(105,'Payment','','02472949-31EF-3AF7-B69A-EBC2E68DC751','40.2',194,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.2/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.2/update','0.01','payment','',''),(106,'Statement','','0AC27D37-A249-30FE-B6B7-3051E7549119','40.3',196,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.3/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/40/40.3/update','0.01','statement','',''),(107,'Direct services','Things that Notice can let people do','A2776FBF-E9E9-3F06-A1DA-8C5956A6E61B','50',198,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/50/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/50/update','0.01','direct_services','',''),(108,'DEDC','Desired Exit Door Codes - how to use the Underground more efficiently','F070F90F-261F-7328-5BB2-865A02E3510F','51',4,'notice-dev at alexx dot net','notice-dev at alexx dot net','','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/51/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/51/update','0.01','sales','',''),(109,'Addendum','Edit books and documents','12379BC9-BE11-03D6-0B44-48774AB1E98C','52',200,'notice-dev at alexx dot net','notice-dev at alexx dot net','','','https://raw.github.com/alexxroche/Notice/master/t/www/modules/52/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/52/update','0.02','Addendum','',''),(110,'Beekeeping','Record and manage beehives','BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB0','53',202,'notice-dev at alexx dot net','notice-dev at alexx dot net','','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/53/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/53/update','0.01','beekeeping','',''),(111,'Yabe','Reverse auction','b0e75ba0-acfe-11e1-84b2-00188bba79ac','54',204,'notice-dev at alexx dot net','notice-dev at alexx dot net','','service','https://raw.github.com/alexxroche/Notice/master/t/www/modules/54/src','https://raw.github.com/alexxroche/Notice/master/t/www/modules/54/update','0.01','yabe','','');
 /*!40000 ALTER TABLE `modules` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1198,15 +1149,6 @@ CREATE TABLE `pehistory` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `pehistory`
---
-
-LOCK TABLES `pehistory` WRITE;
-/*!40000 ALTER TABLE `pehistory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `pehistory` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `people`
 --
 
@@ -1226,13 +1168,13 @@ CREATE TABLE `people` (
   `pe_dod` datetime DEFAULT NULL,
   `pe_mobile` tinytext,
   `pe_email` varchar(128) DEFAULT NULL,
-  `pe_password` varchar(32) DEFAULT NULL,
-  `pe_acid` varchar(255) DEFAULT NULL,
+  `pe_password` varchar(255) DEFAULT NULL,
+  `pe_acid` int(255) NOT NULL DEFAULT '1',
   `pe_level` int(11) DEFAULT NULL,
   `pe_loggedin` varchar(90) DEFAULT NULL,
   `pe_menu` varchar(512) DEFAULT '1',
   `pe_confirmed` varchar(100) DEFAULT NULL,
-  `pe_passwd` varchar(256) DEFAULT NULL,
+  `pe_passwd` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`pe_id`),
   UNIQUE KEY `pe_id` (`pe_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
@@ -1264,15 +1206,6 @@ CREATE TABLE `people_openids` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `people_openids`
---
-
-LOCK TABLES `people_openids` WRITE;
-/*!40000 ALTER TABLE `people_openids` DISABLE KEYS */;
-/*!40000 ALTER TABLE `people_openids` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `permission`
 --
 
@@ -1291,15 +1224,6 @@ CREATE TABLE `permission` (
   UNIQUE KEY `mi_id` (`mi_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `permission`
---
-
-LOCK TABLES `permission` WRITE;
-/*!40000 ALTER TABLE `permission` DISABLE KEYS */;
-/*!40000 ALTER TABLE `permission` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `price_list`
@@ -1322,15 +1246,6 @@ CREATE TABLE `price_list` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `price_list`
---
-
-LOCK TABLES `price_list` WRITE;
-/*!40000 ALTER TABLE `price_list` DISABLE KEYS */;
-/*!40000 ALTER TABLE `price_list` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `promotion`
 --
 
@@ -1349,15 +1264,6 @@ CREATE TABLE `promotion` (
   PRIMARY KEY (`promo_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='-20% off! limited time only';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `promotion`
---
-
-LOCK TABLES `promotion` WRITE;
-/*!40000 ALTER TABLE `promotion` DISABLE KEYS */;
-/*!40000 ALTER TABLE `promotion` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `ranks`
@@ -1414,15 +1320,6 @@ CREATE TABLE `rental` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `rental`
---
-
-LOCK TABLES `rental` WRITE;
-/*!40000 ALTER TABLE `rental` DISABLE KEYS */;
-/*!40000 ALTER TABLE `rental` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `sessions`
 --
 
@@ -1435,6 +1332,10 @@ CREATE TABLE `sessions` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `titles`
+--
 
 DROP TABLE IF EXISTS `titles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -1479,15 +1380,6 @@ CREATE TABLE `trolly` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `trolly`
---
-
-LOCK TABLES `trolly` WRITE;
-/*!40000 ALTER TABLE `trolly` DISABLE KEYS */;
-/*!40000 ALTER TABLE `trolly` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `trolly_items`
 --
 
@@ -1506,13 +1398,57 @@ CREATE TABLE `trolly_items` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `trolly_items`
+-- Table structure for table `vCard_data`
 --
 
-LOCK TABLES `trolly_items` WRITE;
-/*!40000 ALTER TABLE `trolly_items` DISABLE KEYS */;
-/*!40000 ALTER TABLE `trolly_items` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `vCard_data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vCard_data` (
+  `vcd_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `vcd_card_id` int(255) NOT NULL,
+  `vcd_profile_id` int(255) NOT NULL,
+  `vcd_prof_detail` varchar(255) DEFAULT NULL COMMENT 'work,home,preferred,order for e.g. multiple email addresses',
+  `vcd_value` varchar(255) DEFAULT NULL,
+  `vcd_bin` blob COMMENT 'for when varchar(255) is too small',
+  PRIMARY KEY (`vcd_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=211 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `vCard_profile`
+--
+
+DROP TABLE IF EXISTS `vCard_profile`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vCard_profile` (
+  `vcprofile_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `vcprofile_version` enum('rfc2426') DEFAULT 'rfc2426' COMMENT 'defaults to vCard 3.0',
+  `vcprofile_feature` char(16) DEFAULT NULL COMMENT 'FN to CATEGORIES',
+  `vcprofile_type` enum('text','bin') DEFAULT 'text' COMMENT 'if it is too large for vcd_value then user vcd_bin',
+  PRIMARY KEY (`vcprofile_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=latin1 COMMENT='These are the valid types of card entry';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `vCards`
+--
+
+DROP TABLE IF EXISTS `vCards`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `vCards` (
+  `card_id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `card_peid` int(255) DEFAULT NULL COMMENT 'added by ',
+  `card_acid` int(255) DEFAULT NULL COMMENT 'ef_acid',
+  `card_language` varchar(5) DEFAULT NULL COMMENT 'en en_GB',
+  `card_encoding` varchar(32) DEFAULT 'UTF-8' COMMENT 'why use anything else?',
+  `card_created` datetime NOT NULL,
+  `card_updated` datetime NOT NULL,
+  PRIMARY KEY (`card_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=54 DEFAULT CHARSET=latin1 COMMENT='These are the contact cards';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `weblogins`
@@ -1530,15 +1466,6 @@ CREATE TABLE `weblogins` (
   `notes` blob
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `weblogins`
---
-
-LOCK TABLES `weblogins` WRITE;
-/*!40000 ALTER TABLE `weblogins` DISABLE KEYS */;
-/*!40000 ALTER TABLE `weblogins` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -1549,4 +1476,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-02-02 17:21:12
+-- Dump completed on 2012-12-05 15:25:12
