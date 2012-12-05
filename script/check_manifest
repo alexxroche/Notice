@@ -1,0 +1,15 @@
+#!/bin/sh
+
+FILE_LIST='.git_files'
+FILE='MANIFEST' 
+if [ $1 ]
+then
+    FILE=$1
+fi
+
+git ls-files > $FILE_LIST
+while read line
+do 
+    grep -q "$line" $FILE_LIST || if [ ! $(echo "$line"|grep -q '^MANIFEST' && echo 1) ]; then change=$(echo $line|sed 's/\//\\\//g'); echo "sed -i 's/^$change$//' $FILE"; fi
+done < $FILE
+rm -f $FILE_LIST

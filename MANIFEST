@@ -104,19 +104,17 @@ lib/Notice/DB/Result/Weblogin.pm
 lib/Notice/DB/Result/Whowhere.pm
 lib/Notice/Dispatch.pm
 lib/Notice/Security.pm
-main.diff
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
-MYMETA.json
-MYMETA.yml
 README
 README.hackers
 README.whois
 script/broken_builddns.pl
 script/build_dns.pl
 script/cdbdump.pl
+script/check_manifest
 script/create_controller.pl
 script/create_dbic_schema.pl
 script/create_notice_db.pl
@@ -151,7 +149,6 @@ t/cgi-bin/i18n/potest.pm
 t/cgi-bin/i18n/README
 t/cgi-bin/i18n/test.html
 t/cgi-bin/index.cgi
-t/cgi-bin/log.debug
 t/cgi-bin/templates/default.html
 t/cgi-bin/templates/error.tmpl
 t/cgi-bin/templates/error_wrapper.tmpl
