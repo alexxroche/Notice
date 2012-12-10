@@ -78,6 +78,13 @@ sub main: StartRunmode {
     $message .=qq |In this section you can: <br/>
                  add,view,edit the details of this copy of Notice, (and its associated network.)<br/>
 |;
+
+    $message .= _ajax()
+      . $q->div({-id=>'box1'},'This is div1<br /><br />')
+      . $q->div({-id=>'box2'},'Another div, div2')
+      . $q->button(-id=>'b1', -value=>'Alter div1')
+      . $q->button(-id=>'b2', -value=>'Alter div2');
+
     
     $self->tt_params({
     action  => "$surl/aliases",
@@ -87,6 +94,71 @@ sub main: StartRunmode {
     body    => $body
 		  });
     return $self->tt_process();
+}
+
+=head3 ajax_alter_div1
+
+runmodes called via ajax
+- we are able to prevent users from accessing these directly
+
+=cut
+
+sub ajax_alter_div1 : Runmode {
+  my $self = shift;
+  if($self->param('id')){
+    # foreach my $sp ( $self->param ){ warn "$sp = " . $self->param($sp); } #debug
+    return $self->redirect($self->query->url . '/' . $self->param('mod'));
+  }else{
+    scalar localtime . $self->query->p('Ajax example, (Look Ma, no page reload!)');
+  }
+    
+}
+
+=head3 ajax_alter_div2
+
+How specific do these have to be?
+It would be nice to abstract them;
+sub ajax_verb_id : Runmode {
+}
+
+=cut
+
+sub ajax_alter_div2 : Runmode {
+  my $self = shift;
+  reverse $self->query->param('some_text');
+}
+
+=head3 _ajax
+
+We are going to generalise this where possible so that every module 
+ can have access to ajax for any function that will improve the user experience.
+
+=cut
+
+sub _ajax {
+   my $rm = shift;
+   if($rm){ warn $rm; }
+  return '<style type="text/css">
+      body { background-color: #eee }
+      #box1, #box2 { border: 1px solid gray; width: 200px; height: 80px; padding: 4px; margin: 10px; }
+      #box2, #b2   { border: 1px solid blue; }
+  </style>
+  <script type="text/javascript">
+    $(function(){
+      $("#b1").click(function() {
+          $("#box1").load(
+              "config",
+              { "rm": "ajax_alter_div1" }
+              )
+      });
+      $("#b2").click(function() {
+          $("#box2").load(
+              "config",
+              { "rm": "ajax_alter_div2", some_text: $("#box2").text() }
+              )
+      });
+    });
+    </script>';
 }
 
 
