@@ -6,7 +6,7 @@ our %opt; # nice to have them
 $opt{D}=0;
 use lib 'lib';
 
-our $VERSION = 3.10;
+our $VERSION = 3.11;
 
 use Notice::DB;
 our $page_load_time = time;
@@ -158,6 +158,24 @@ sub cgiapp_init {
 #    },
   );
 
+
+sub sha512_filter {
+    my $param = lc shift || 'base64';
+    my $plain = shift;
+    my $salt = shift || $CFG{'iv'} || $CFG{'salt'} || 'salt4life';
+    
+    Digest::SHA->require || die "Digest::SHA is required to check SHA passwords";
+    if ( $param eq 'hex' ) {
+        return Digest::SHA::sha512_hex($plain);
+    } elsif ( $param eq 'base64' ) {
+        return Digest::SHA::sha512_base64($plain);
+        #return Digest::SHA::sha512_base64( ( $plain . $salt ) . $salt, '');
+    } elsif ( $param eq 'binary' ) {
+        return Digest::SHA::sha512($plain);
+    }
+    die "Unknown SHA format $param";
+}
+
   # configure authentication parameters
   $self->authen->config(
     DRIVER => [ 'DBI',
@@ -166,7 +184,9 @@ sub cgiapp_init {
       CONSTRAINTS => {
 	'people.pe_email'      => '__CREDENTIAL_1__',
         'MD5:people.pe_passwd' => '__CREDENTIAL_2__'
+        #'sha512:people.pe_passwd' => '__CREDENTIAL_2__'
       },
+      FILTERS => { sha512 => \&sha512_filter },
     ],
 
     STORE                => 'Session',
