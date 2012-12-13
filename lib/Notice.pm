@@ -6,7 +6,7 @@ our %opt; # nice to have them
 $opt{D}=0;
 use lib 'lib';
 
-our $VERSION = 3.11;
+our $VERSION = 3.12;
 
 use Notice::DB;
 our $page_load_time = time;
@@ -374,6 +374,8 @@ sub sha512_filter {
                     $self->session->param(menu_order => \@menu_order);
                     $self->tt_params({menu_order => \@menu_order});
                     $self->tt_params({menu => \%menu});
+                    # we might like:
+                    #if($CFG{'default_lang'} && !$self->param('i18n')){ $self->param('i18n' => $CFG{'default_lang'}); }
                 }else{
                     warn "$self->param('pe_id') is undef so we can't search for menu items";
                 }
@@ -828,6 +830,89 @@ $result
 <div id="footer">Copyright (c) 2007-2012 Alexx Roche<span class=pageLoadTime>(Took $plt ms)</span></div>
 </body>
 </html>|;
+}
+
+=head3 _page
+
+pagination; turn a forest into pages.
+
+Called from any module using something like:
+
+    my $rows_per_page = 10;      
+    my $page =
+      defined $q->param('page') && $q->param('page') && $q->param('page')=~m/^\d+$/
+      ? $q->param('page')
+      : 1;
+
+    # This has to be changed to match your search
+    my $total_rows = $self->resultset('Module')->search->count;
+
+    # Normally you would have
+    my $rs = $self->resultset('Module')->search( \%search, { page => $page, rows => $rows_per_page });
+    my $total_rows = $rs->count; 
+ 
+    if($total_rows > $rows_per_page){
+        my $pagination = $self->_page($page,$rows_per_page,$total_rows);
+    }
+    
+=cut
+    
+sub _page {
+    my ($self,$offset,$limit,$rows) = @_;
+    if(defined $limit && $limit >= 1){
+        my $q = $self->query;
+        use Data::Page;
+        my $pager = Data::Page->new();
+        $pager->total_entries($rows);
+        $pager->entries_per_page($limit);
+        $pager->current_page($offset);
+        my $first = $pager->first;
+        my $last  = $pager->last;
+         my $message;
+         $message = "<p>Now viewing entries $first through $last</p>" if $q->param('debug');
+         $message .= q{<span id="pager" class="pagination">};
+
+        unless ( $offset eq $pager->first_page ) {
+            $q->param( 'page', $offset - $offset );
+            $message .= q{<a class="blue" title="first page" href="} . $q->self_url . q{">&lt;&lt;</a> };
+            $q->param( 'page', $offset - 1 );
+            $message .= q{<a class="blue" title="previous page" href="} . $q->self_url . q{">&lt;</a> };
+        }
+
+        # we don't want the pagination to be too long so first, .. $page +/- 5 ... last_page
+        my $reach = 5;
+
+        for ( 1 .. $pager->last_page ) {
+            my $this_page = $_;
+          if( $this_page == $pager->first_page ||
+              ( $this_page >= ( $offset - $reach ) && $this_page <= $offset  ) ||
+              ( $this_page <= ( $offset + $reach ) && $this_page >= $offset ) ||
+              $this_page == $pager->last_page ){
+            $q->param( 'page', $this_page );
+            my ($phf,$phl) = ('','');
+            $message .= q{ <a class="};
+            if($_ == $offset){ $message .= 'black orange'; $phf = '['; $phl = ']'; }
+            else{ $message .= 'blue'; }
+            $message .= q{" href="} . $q->self_url . q{">} . $phf . $this_page . $phl . "</a> ";
+          } else {
+            $message .= '.';
+          }
+        }
+
+        # Stop the pagination getting too long - we could control this with a count in the for loop
+        $message=~s/\.{$reach}/./g;
+
+        unless ( $offset eq $pager->last_page ) {
+            $q->param( 'page', $offset + 1 );
+            $message .= q{ <a class="blue" title="next page" href="} . $q->self_url . q{">&gt;</a> };
+            $q->param( 'page', $pager->last_page );
+            $message .= q{ <a class="blue" title="last page" href="} . $q->self_url . q{">&gt;&gt;</a>};
+        }
+
+        $message .= '</span>';
+        return $message;
+    }
+
 }
 
 1;
