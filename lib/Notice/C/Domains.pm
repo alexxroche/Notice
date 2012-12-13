@@ -51,7 +51,6 @@ sub setup {
         $runmode =~s/\/$id[^\/]*$//;
     }
     $runmode=~s/.*\///;
-
     $self->param(runmode => $runmode);
     $self->tt_params(runmode => $runmode);
 
@@ -132,14 +131,35 @@ sub main: StartRunmode {
     }
 	my $ac_id;
 	my @domains;
+
+    my $rows_per_page = 
+        defined $q->param('rpp') && $q->param('rpp') && $q->param('rpp')=~m/^\d{1,3}$/ && $q->param('rpp') <= 100
+      ? $q->param('rpp')
+       : 10;      
+
+    my $page =
+      defined $q->param('page') && $q->param('page') && $q->param('page')=~m/^\d+$/
+      ? $q->param('page')
+      : 1;
+   
 	if($self->param('ef_acid')){ $ac_id = $self->param('ef_acid'); }
 	elsif($self->param('ac_id')){ $ac_id = $self->param('ac_id'); }
 	if($ac_id){
+        # There must be a way to do these two searches with only one hit to the DB
+		my $total_rows = $self->resultset('Domain')->search({ do_acid=>"$ac_id"})->count;
+        # Lets bypass pagination is the results are few
+        if($total_rows <= $rows_per_page){ $page = 1; } 
 		@domains = $self->resultset('Domain')->search({
 			do_acid=>{'=',"$ac_id"}
 		     },{
+            page => $page, rows => $rows_per_page
 		});
-	$message .= @domains . " domains found in this account";
+	$message .= $total_rows . " domains found in this account";
+    if($total_rows > $rows_per_page){
+        my $pagination = $self->_page($page,$rows_per_page,$total_rows);
+        $message .= $pagination;
+    }
+
 
 	} else {
 		$message = Dumper(@domains);
@@ -172,7 +192,6 @@ sub edit: Runmode{
     unless($dest=~m/domains/){ $dest .= '/domains'; }
     my $q = $self->query;
     my $type; #of domain 
-    #my $q = $self->query(); #DOES NOT WORK with  my $self = shift; 
     if( $q->param('id') || $q->param('domain') || $q->param('name') ){
         my %find_domain = ();
 
@@ -185,19 +204,41 @@ sub edit: Runmode{
         }
 
         # have to limit this search to domains in their account
+        # or change their ef_acid if we have to
         my $ef_acid;
-        if($self->param('ef_acid')){
-            $ef_acid = $self->param('ef_acid');
+        if($self->session->param('ef_acid')){
+            $ef_acid = $self->session->param('ef_acid');
         }
 
-        my $acrs = $self->resultset('Account')->search({
-                        'ac_id' => { '=', "$ef_acid"},
-                    },{});
-        while( my $ac = $acrs->next){
-            my $ac_tree = $ac->ac_tree;
-            $self->param(ac_tree => $ac_tree);
-            $self->session->param(ac_tree => $ac_tree);
+        my $efacrs = $self->resultset('Account')->search({
+                        'ac_id' => "$ef_acid",
+                    },{
+                        columns => ['ac_tree'],
+                    });
+        my $ef_tree = '';
+        while( my $ac = $efacrs->next){
+            $ef_tree = $ac->ac_tree;
         }
+        my $ac_tree = $ef_tree;
+
+        # we need to find the ac_tree for this domain 
+        # so that we can write the zone file in the correct location
+        my $frs = $self->resultset('Domain')->search( \%find_domain )->first;
+        my $acrs = $self->resultset('Account')->search({
+                    'ac_id' => $frs->do_acid,
+                },{
+                    columns => ['ac_tree'],
+                });
+        while( my $ac = $acrs->next){
+            $ac_tree = $ac->ac_tree;
+            my $ses_actree = $self->session->param('ac_tree');
+            if($ac_tree=~m/^$ses_actree/ || $ac_tree=~m/^$ef_tree/){
+                $self->param(ac_tree => $ac_tree);
+                $self->session->param("ef_acid => $frs->do_acid");
+                $find_domain{do_acid} = $frs->do_acid;
+            }
+        }
+        #$find_domain{do_acid} = $q->param('ef_acid');
 
         if($q->param('Change')){
             if($q->param('do_acid') == $ef_acid){
@@ -229,24 +270,7 @@ sub edit: Runmode{
             }
         }
 
-        if(%find_domain && $ef_acid){
-            my $acrs = $self->resultset('Account')->search({
-                        'ac_id' => { '=', "$ef_acid"},
-                    },{
-                        colums => ['ac_tree'],
-                    });
-            while( my $ac = $acrs->next){
-                my $ac_tree = $ac->ac_tree;
-                my $ses_actree = $self->session->param('ac_tree');
-                my $par_actree = $self->param('ac_tree');
-                unless($ses_actree eq $ac_tree || $par_actree eq $ac_tree){
-                        $self->param(ac_tree => $ac_tree);
-                        $self->session->param(ac_tree => $ac_tree);
-                }
-            }
-            #$find_domain{do_acid} = $q->param('ef_acid');
-            $find_domain{do_acid} = $ef_acid;
-        }else{
+        unless(%find_domain && $ef_acid){
             $message .= "Domain not found in this account";
             if($ef_acid && $ef_acid=~m/^\d+$/){ $message .= "($ef_acid)"; }
             $message .= Dumper( $q->param ) if $self->param('debug')>=12;
@@ -254,17 +278,27 @@ sub edit: Runmode{
             $self->tt_params({message => $message});
             return $self->tt_process();
         }
+
         #my $frs = $self->resultset('Domain')->search( \%find_domain );
         my $rows = $self->resultset('Domain')->search( \%find_domain )->count;
 
         unless($rows==1){
             $self->param(no_display => 1);
-            $self->tt_params({domain => $find_domain{'do_name'}});
+            $self->tt_params({domain => $find_domain{'do_name'}}); #NOTE is XSS getting in here?
             $self->tt_params({no_display=> '1'});
             return $self->tt_process();
             exit;
         }
         my $domain_details = $self->resultset('Domain')->search( \%find_domain )->first;
+    
+
+        # change the users ef_acid to match this account
+        eval {
+            if($domain_details->do_acid){
+                $self->session->param(ef_acid => $domain_details->do_acid);
+            }
+        };
+
         #my $domain_details = $self->resultset('Domain')->search( \%find_domain )->single;
 
         #while( my $f = $frs->next){
@@ -360,6 +394,7 @@ sub edit: Runmode{
                     $is_subzone=1;
             }
             
+            # um, what if they upload XSS javascript? We should "clean" the user input A.LOT!
  
             open(NEWZONE, ">", "$zone_file$$");
             #print NEWZONE $q->param('zone');

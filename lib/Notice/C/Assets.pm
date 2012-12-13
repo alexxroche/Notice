@@ -117,19 +117,31 @@ sub main: StartRunmode {
 
     if(defined $user_msg){ $page .=qq ( $user_msg; <br /> ); }
 
-    $page .=qq (<h4><strike>Edit Asset Category Data (especially delete an entry)</strike></h4>
-    <h4><strike>Search</strike></h4>
-    <p>
-    <h4> List </h4>
-    <a class="navigation" href="/cgi-bin/index.cgi/assets/list/cid/19">list all trees</a> in the asset database or
-    <a class="navigation" href="/cgi-bin/index.cgi/assets/list/cid/20">all the fields on the farm</a>;
-    <a class="navigation" href="/cgi-bin/index.cgi/assets/list">list all</a> Assets; 
-    <a class="navigation" href="$surl/list/18">or just one</a> (the layout for just one is without the module wrapper, for later AJAX development)
-    <br /><br /> or add/edit the Data for an asset <a class="navigation" href="/cgi-bin/index.cgi/assets/data/20/18/">e.g. Asset 18</a>
-    </p>
+    # Find an example asset
 
-    <br />
-    <br />);
+
+    if($self->resultset('Asset')->search()->count >= 1){
+      my %example;
+      my $exas_rs = $self->resultset('Asset')->search();
+      while(my $ex=$exas_rs->next){
+        $example{as_id} = $ex->as_id;
+        $example{as_cid} = $ex->as_cid;
+      }
+        $page .=qq (<h4><strike>Edit Asset Category Data (especially delete an entry)</strike></h4>
+        <h4><strike>Search</strike></h4>
+        <p>
+        <h4> List </h4>
+        <a class="navigation" href="/cgi-bin/index.cgi/assets/list/cid/$example{as_cid}">list all of Category $example{as_cid}</a> in the asset database or
+        <a class="navigation" href="/cgi-bin/index.cgi/assets/list">list all</a> Assets; 
+        <a class="navigation" href="$surl/list/$example{as_id}">or just one</a> (the layout for just one is without the module wrapper, for later AJAX development)
+        <br /><br /> or add/edit the Data for an asset <a class="navigation" href="/cgi-bin/index.cgi/assets/data/$example{as_cid}/$example{as_id}/">e.g. Asset $example{as_id}</a>
+        </p>
+
+        <br />
+        <br />);
+    }else{
+        $page .=qq |Once you add an asset this page can use it as an example|;
+    }
 
 =head2 Tables
 
@@ -151,16 +163,16 @@ sub main: StartRunmode {
 +--------+---------+---------------------------------+-----------+----------+---------------------+----------+
 | acd_id | acd_cid | acd_name                        | acd_order | acd_type | acd_regexp          | acd_grid |
 +--------+---------+---------------------------------+-----------+----------+---------------------+----------+
-|     27 |      19 | Planting date                   |         2 | text     | \\d{4}.?\\d{2}.?\\d{2} |  NULL | 
-|     29 |      19 | Height                          |         3 | text     | \\w+                 |    NULL | 
-|     30 |      19 | Common Name                     |         1 | select   | \\w+                 |      10 | 
-|     31 |      19 | Planting Ref                    |         4 | text     | \\w+                 |    NULL | 
-|     32 |      19 | Cause of Death                  |        12 | text     | \\w+                 |    NULL | 
-|     33 |      19 | Date of Death                   |        11 | text     | \\w+                 |    NULL | 
-|     37 |      19 | GPS Location                    |         8 | text     | \\w+                 |    NULL | 
-|     35 |      19 | Trunk Circumpherence at Ground  |         6 | text     | \\w+                 |    NULL | 
-|     36 |      19 | Trunk Circumpherence at 1 Meter |         7 | text     | \\w+                 |    NULL | 
-|     54 |      19 | Leaf Colour                     |         5 | text     | \\w*                 |    NULL | 
+|     27 |      19 | Planting date                   |         2 | text     | \\d{4}.?\\d{2}.?\\d{2} |  NULL |
+|     29 |      19 | Height                          |         3 | text     | \\w+                 |    NULL |
+|     30 |      19 | Common Name                     |         1 | select   | \\w+                 |      10 |
+|     31 |      19 | Planting Ref                    |         4 | text     | \\w+                 |    NULL |
+|     32 |      19 | Cause of Death                  |        12 | text     | \\w+                 |    NULL |
+|     33 |      19 | Date of Death                   |        11 | text     | \\w+                 |    NULL |
+|     37 |      19 | GPS Location                    |         8 | text     | \\w+                 |    NULL |
+|     35 |      19 | Trunk Circumpherence at Ground  |         6 | text     | \\w+                 |    NULL |
+|     36 |      19 | Trunk Circumpherence at 1 Meter |         7 | text     | \\w+                 |    NULL |
+|     54 |      19 | Leaf Colour                     |         5 | text     | \\w*                 |    NULL |
 +--------+---------+---------------------------------+-----------+----------+---------------------+----------+
 </span>
     );
@@ -327,7 +339,7 @@ sub details: Runmode{
           # might be better to pull this from an array, but there must be a
           # better DBIx::Class way to know which collums we are looking for
           if(
-            $ak eq 'cid' || 
+            $ak eq 'cid' ||
             $ak eq 'acid' ||
             $ak eq 'owner' ||
             $ak eq 'user' ||
@@ -804,9 +816,11 @@ sub search: Runmode{
 
 sub list: Runmode{
     my ($self) = @_;
+    my $message;
     my $as_id = $self->param('id')=~m/^\d+$/ ? $self->param('id') : '%';
     my (%Asset_search,%AssetData_search,%AssetCatData_search, %AssetCatData_search_orderby);
-    my $q = \%{ $self->query() };
+    #my $q = \%{ $self->query() }; # WORKS
+    my $q = $self->query;
     if(defined($q->param('sid'))){ $self->param('sid' => $q->param('sid')); }
     if(defined($self->param('id')) && $self->param('id') eq 'cid' && $self->param('sid')=~m/^(\d+)$/){ 
         %AssetData_search = ('asd_cid' => { '=', "$1"});
@@ -815,21 +829,42 @@ sub list: Runmode{
         %AssetCatData_search_orderby=(order_by => 'acd_order');
     }
 
-    my @assets = $self->resultset('Asset')->search(
-                { 'as_id' => { 'LIKE', "$as_id"}, %Asset_search
-        },
-        {
-    join     => 'category',
-    #prefetch => 'category',
-        }
-        );
+     my $rows_per_page =
+        defined $q->param('rpp') && $q->param('rpp') && $q->param('rpp')=~m/^\d{1,3}$/ && $q->param('rpp') <= 100
+      ? $q->param('rpp')
+       : 10;
+
+    my $page =
+      defined $q->param('page') && $q->param('page') && $q->param('page')=~m/^\d+$/
+      ? $q->param('page')
+      : 1;
+
+     # There must be a way to do these two searches with only one hit to the DB
+    my $total_rows = $self->resultset('Asset')->search({ 'as_id' => { 'LIKE', "$as_id"}, %Asset_search })->count;
+    $message .= $total_rows . " assets found in this account<br />";
+     # Lets bypass pagination is the results are few
+    if($total_rows <= $rows_per_page){ $page = 1; }
+    my @assets = $self->resultset('Asset')->search({ 
+                        'as_id' => { 'LIKE', "$as_id"}, %Asset_search
+                    },{
+                        join     => 'category',
+                        page    => $page,
+                        rows    => $rows_per_page,
+                        #prefetch => 'category',
+                    });
+
+    if($total_rows > $rows_per_page){
+        my $pagination = $self->_page($page,$rows_per_page,$total_rows);
+        $message .= $pagination;
+    }
+
+
 
     unless(@assets){
         $self->tt_params( title => 'Error - no such asset', message => "Can't seem to see that asset", error => '1');
         return $self->tt_process();
     }
     
-    my $message;
     my %asd;
     my %ac;
     my %type;
