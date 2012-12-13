@@ -1,12 +1,29 @@
 Notice
 
-Notice - A MVC (DBIC,TT,CAS) CGI::Application Customer Resource and Account Manager inspired by C:A:Structured
+Notice - An MVC (DBIC,TT,CGI::Application) Customer Resource and Account Manager, (and more).
 
-C:A:S got a lot of things right but I prefer not to name my runmodes after perl functions. i.e. 
+FEATURES
+
+    Sign-up; Login; Remember me; Passphrase recovery, (Forgotten Password?); Logout
+    Optional client-side AES encryption for functions; SSL isn't as good as SSH, and why tempt the DBadmin?
+            (see http://localhost:8060/cgi-bin/index.cgi/email/edit_alias/forwarding@example.com )
+    Page load time - how long it took for the page to load
+    Pagination - You can page through data using the _page function in Noitce.pm
+    Security - Access to modules and areas of the site can be monitored and controlled.
+                If a user is having problems with a module or function, then it can be
+                highlighted. This also enabled the site admin to limit a 
+                    data leak from a flood to a trickle;
+               no more taking the customer database with you when you leave.
+    Anything you want or need - Notice can easily be extended, though it already has many many additional features.
+                    (see http://localhost:8060/cgi-bin/index.cgi/modules )
+
+INTRODUCTION
+
+CGI:Application:Structured got a lot of things right but I prefer not to name my runmodes after perl functions. i.e. 
 sub main: StartRunmode{ } #seems better than the default of sub index: StartRunmode{ }
 
 I had a hard time getting sessions; authentication; dispatch; query (the cgi query) all working at
-the same time with C:A:S. That said I'm very greatful for C:A:S in my transition from Catalyst to CGI:App
+the same time with C:A:S. That said I'm very grateful to C:A:S in my transition from Catalyst to CGI:App
 
 Is it $self or $c ? I've chosen $self
 
@@ -14,7 +31,7 @@ If you have just cloned this from github then you might have to install the deps
 
     sudo cpanm --installdeps .  
 
-If you have that installed or 
+if you have cpanm installed, or 
 
     for i in `grep :: Makefile.PL|grep -v '>='|sed -e 's/^use //g' -e "s/^\s*'//g" -e "s/'.*//g" -e 's/;$//'`;do sudo perl -MCPAN -e "install $i"; done
 
@@ -46,6 +63,7 @@ If you forgot to change the db_pw in config:
 CHANGE the password in ~www/cgi-bin/config/config.pl and in the the db to match:
     mysql -p mysql
     mysql> update user set password=PASSWORD('NEW-PASSWORD') where User='notice_adminuser';
+
 
 BUGS and LIMITATIONS
 
@@ -89,7 +107,7 @@ Alexx Roche, C<alexx@cpan.org>
 
 LICENSE AND COPYRIGHT
 
-Copyright (C) 2011-2012 Alexx Roche
+Copyright (C) 2011-2013 Alexx Roche
 
 This program is free software; you can redistribute it and/or modify it
 under the following license: Eclipse Public License, Version 1.0

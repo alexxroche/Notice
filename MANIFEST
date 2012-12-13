@@ -5,7 +5,6 @@ config/notice.mysql
 config/notice.sqlite
 config/README
 debug.sh
-index.html
 lib/Notice.pm
 lib/Notice/C/Account.pm
 lib/Notice/C/Addresses.pm
