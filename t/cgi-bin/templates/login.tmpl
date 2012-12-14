@@ -1,31 +1,30 @@
-<html>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
 <head>
-<title>Log In</title>
-</head>
-<body onLoad="document.loginform.authen_username.focus();">
-<h2>Please login:</h2>
-<TMPL_IF ERROR>
-  <p style="color:red">ERROR - Please try again.</p>
-</TMPL_IF>
-<p> </p>
-<form name="loginform" method=POST action="<TMPL_VAR MYURL>/mustlogin" >
-<table>
-  <tr>
-    <td align="right">Email address or User name:</td>
-    <td><input type="text" name="authen_username" size="20" autofocus required /> (probably an email address)</td>
-  </tr>
-  <tr>
-    <td align="right">Password:</td>
-    <td><input type="password" name="authen_password" size="20" required /></td>
-  </tr>
-  <tr>
-    <td> &nbsp; </td>
-    <td><input type="submit" name="submit" value="Submit" /></td>
-  </tr>
+<title>[% title or template.title or "Notice CRaAM" %]</title>
+<link rel="stylesheet" media="all" type="text/css" href="/css/notice.css" />
+<meta name="description" content="Notice CRaAM" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta name="keywords" content="extended, customer, resource, management, system, for, internet, companies" />
+<script type="text/javascript">
+<!-- //
+function setFocus( field ) {
+ document.loginform.authen_username.focus();
+}
+// --></script></head>
+<body class="nomenunotice" onload="setFocus('authen_username')">
+<br />
+<table class="nomenunotice" id="login_form">
+<tr>
+<!-- did have this next td commented out but I don't remember why -->
+<td class="nomenuleft"></td>
+<td class="nomenuright">
+<!-- Main page -->
+[% INCLUDE login_form.tmpl %]
+</td>
+</tr>
 </table>
-<input type="hidden" name="destination" value="<TMPL_VAR DESTINATION>" />
-</form>
-<hr/>
+ [% content %]
 </body>
 </html>
-
