@@ -43,6 +43,7 @@ sub setup {
     if($self->param('i18n') && $self->param('debug')){ 
         $self->tt_params({warning => '<span class="small lang i18n">Lang:' . $self->param('i18n') . '</span>'}); 
     }
+    $self->run_modes( "AUTOLOAD" => \&main);
 }
 
 =head2 RUN MODES
@@ -57,13 +58,20 @@ sub setup {
 
 sub main: StartRunmode {
     my ($self) = @_;
+    my $relative_path = '/docs/';
+    my $path = '';
+    my $q = $self->query();
+    if($q->param('path')){
+        $path = $q->param('path') . '/';
+        $relative_path .= $q->param('path');
+    }
     use Cwd;
     my $dir = getcwd;
-    my $fullpath = $dir . "/docs";
+    my $fullpath = $dir . $relative_path;
 	my $message = '';
     if($self->param('id')){ $message = "You are trying to download " . $self->param('id'); }
     my $no_wrapper = 1;
-    my $q = $self->query();
+    
     if($self->authen->is_authenticated){
         $no_wrapper = 0;
     }else{
@@ -111,9 +119,28 @@ sub main: StartRunmode {
         }
 
         if(@files){ $message .= "<ul>"; }
+        if($path){
+            $path=~s/^\/*//;
+            $path=~s/\/\//\//g;
+            my $parent= $path;
+            if( length($path) <= 1 || $path=~m/^\/*$/){ 
+                $path='';
+            }elsif($path=~m/^\/*[^\/]+\/*$/){ 
+                #$parent=~s/\/[^\/]+\/*$//; 
+                $message .= qq |<li><a class="blue green" href="/cgi-bin/index.cgi/Docs">..</a><br /></li>|;
+            }elsif($path=~m/^\/*([^\/]+\/)+\/*$/){ 
+                $parent=~s/\/*[^\/]+\/*$//;
+                $message .= qq |<li><a class="blue green" href="/cgi-bin/index.cgi/Docs?path=$parent">..</a><br /></li>|;
+            }
+           # else($path=~m/.+\//){ $parent=~s/\/[^\/]+\/*$//; }
+        }
         foreach my $file (sort @files) {
             chomp($file);
-            $message .=qq |<li><a class="black" href="/cgi-bin/index.cgi/Docs/$file">$file</a><br /></li>|;
+            if( -d "$fullpath/$file"){
+                $message .=qq |<li><a class="blue green" href="/cgi-bin/index.cgi/Docs?path=$path$file">$file</a><br /></li>|;
+            }else{
+                $message .=qq |<li><a class="black" href="/cgi-bin/index.cgi/Docs/download/$path$file">$file</a><br /></li>|;
+            }
         }
         if(@files){ $message .= "</ul>"; }
 
@@ -130,28 +157,6 @@ sub main: StartRunmode {
         $ef_acid = $self->session->param('ef_acid');
     }
 
-# This is where we try to download the file
-
-my $downloadfile = $self->param('id');
-# we should also check $q->param('id');
-my $fullpathdownloadfile = "$fullpath/$downloadfile";
-my $output = '';
-my $buffer = '';
-open my $fh, '<', $fullpathdownloadfile
-  or return $self->tt_process( { error => "Error: Failed to download file <b>$downloadfile</b>:<br />$!<br />$fullpathdownloadfile
-" });
-while (my $bytesread = read($fh, $buffer, 1024)) { $output .= $buffer; }
-close $fh
-  or return $self->tt_process( { error => "Error: Failed <b>$downloadfile<b>:<br>$!<br>"} );
-my  $downloadfilesize = (stat($fullpathdownloadfile))[7]
-  or return $self->tt_process( { error => "Error: Failed to get file size for <b>$downloadfile<b>:<br>$!<br>"} );
-$self->header_props(
-                    '-type'                => 'application/x-download',
-                    '-content-disposition' => "attachment;filename=$downloadfile",
-                    '-content_length'      => $downloadfilesize,
-                   );
-return $output;
-
 # Should not get here, but just in case...
 $message .= "<br />We have no bananas today<br />";
     $self->tt_params({
@@ -164,15 +169,55 @@ $message .= "<br />We have no bananas today<br />";
     
 }
 
+sub download: Runmode {
+   my ($self) = @_;
+    use Cwd;
+    my $dir = getcwd;
+    my $fullpath = $dir . "/docs";
+    my $path = '';
+    my $downloadfile = $self->param('id');
+    if(defined $self->param('fid') || defined $self->param('eid') || defined $self->param('did') || defined $self->param('sid') ){
+        if( defined $self->param('id') ){ $path ='/'. $self->param('id'); $downloadfile = $self->param('id'); }
+        if( defined $self->param('sid')){ $path .='/'.$self->param('sid'); $downloadfile = $self->param('sid'); }
+        if( defined $self->param('did')){ $path .='/'.$self->param('did'); $downloadfile = $self->param('did'); }
+        if( defined $self->param('eid')){ $path .='/'.$self->param('eid'); $downloadfile = $self->param('eid'); }
+        if( defined $self->param('fid')){ $path .='/'.$self->param('fid');
+                $downloadfile = $self->param('fid'); 
+                $downloadfile =~s/^.*\///;
+        }
+        $path=~s/$downloadfile$//;
+        $fullpath .= $path;
+    }else{
+        $downloadfile = $self->param('id');
+    }
+# we should also check $q->param('id');
+my $fullpathdownloadfile = "$fullpath/$downloadfile";
+my $output = '';
+my $buffer = '';
+open my $fh, '<', $fullpathdownloadfile
+  or return $self->tt_process('error.tmpl', { error => "Error: Failed to download file <b>$downloadfile</b>:<br />$!<br />$fullpathdownloadfile
+"});
+while (my $bytesread = read($fh, $buffer, 1024)) { $output .= $buffer; }
+close $fh
+  or return $self->tt_process('error.tmpl', { error => "Error: Failed <b>$downloadfile<b>:<br>$!<br>"});
+my  $downloadfilesize = (stat($fullpathdownloadfile))[7]
+  or return $self->tt_process('error.tmpl', { error => "Error: Failed to get file size for <b>$downloadfile<b>:<br>$!<br>"});
+$self->header_props(
+                    '-type'                => 'application/x-download',
+                    '-content-disposition' => "attachment;filename=$downloadfile",
+                    '-content_length'      => $downloadfilesize,
+                   );
+return $output;
+}
+
+
 1;
 
 __END__
 
 =head1 BUGS AND LIMITATIONS
 
-There are no known problems with this module.
-Please fix any bugs or add any features you need. 
-You can report them through GitHub or CPAN.
+If the download request has multiple // then it breaks - we should just deal with that
 
 =head1 SEE ALSO
 
