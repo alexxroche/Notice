@@ -6,6 +6,18 @@
  With the ability to upload csv, (and eventually other formats. (The upload-code will make guesses at your csv mapping and ask for confirmation before importing.)
     
  [%- USE Dumper -%]
+ <script type="text/javascript">
+    $(document).ready(function() {
+         $('input:checkbox','#sales_table').click(function() {
+             $('tr #' + $(this).attr('id')).fadeOut();
+             //this is a better way, that I found on stackexchange
+             // it uses the data-id attr which can be a csv array!
+             //var checked = $(this).prop('checked');
+             //$.each($(this).data("id").toString().split(","), function(index, value) { (checked) ? $('tr #' + value).fadeOut():''; });
+         });
+    });
+ </script>
+<div id="sales_table">
  <table>
     <caption><img src="[%- card.image -%]" /></caption>
   <tr>
@@ -30,12 +42,12 @@
         [%- END -%]
     [%- END # FOREACH vcd -%]
     [%- #NEXT UNLESS contact.defined OR phone.defined -%]
-   <tr[%- IF loop.COUNT AND loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
+   <tr id="[%- card.card_id -%]"[%- IF loop.COUNT AND loop.COUNT mod 2 == 0; ' class="even"'; ELSE; ' class="odd"'; END -%]>
     <td><a class="blue" href="[%- c.query.url -%]/contacts/view/[%- card.card_id -%]/&id=[%- card.card_id -%]&1=Edit">[%- 
         IF contact.defined; contact.join(', '); ELSE; card.card_id; contact; END -%]</a></td>
     <td><a class="blue" href="[%- c.query.url -%]/contacts/view/[%- card.card_id -%]/&id=[%- card.card_id -%]&1=Edit">[%- phone || $this_id -%]</a></td>
     <td><a class="blue" href="[%- c.query.url -%]/contacts/view/[%- card.card_id -%]/&id=[%- card.card_id -%]&1=Edit">[%- card.card_updated -%]</a></td>
-    <td><form action="#"><input title="this will be a jQuery row hide" type="checkbox"></form></td>
+    <td><form action="#"><input id="[%- card.card_id -%]" data-id="[%- card.card_id -%]" type="checkbox" /></form></td>
   </tr>
   [%- END #foreach -%]
 
@@ -73,5 +85,6 @@
 [%- END # IF 1==2 -%]
 
  </table>
+</div>
 
 [% END %]
