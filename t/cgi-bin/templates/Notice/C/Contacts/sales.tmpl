@@ -11,9 +11,9 @@
          $('input:checkbox','#sales_table').click(function() {
              $('tr #' + $(this).attr('id')).fadeOut();
              //this is a better way, that I found on stackexchange
-             // it uses the data-id attr which can be a csv array!
-             //var checked = $(this).prop('checked');
-             //$.each($(this).data("id").toString().split(","), function(index, value) { (checked) ? $('tr #' + value).fadeOut():''; });
+             // it uses the data-id attr which can be a csv array
+             var checked = $(this).prop('checked');
+             $.each($(this).data("id").toString().split(","), function(index, value) { (checked) ? $('tr #' + value).fadeOut():''; });
          });
     });
  </script>
