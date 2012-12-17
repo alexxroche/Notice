@@ -195,7 +195,7 @@ CREATE TABLE `activity_log` (
   `end` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `description` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`alid`)
-) ENGINE=MyISAM AUTO_INCREMENT=71 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Notice internal log';
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Notice internal log';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -255,7 +255,7 @@ CREATE TABLE `alhistory` (
   `al_what` mediumtext,
   `al_when` datetime DEFAULT NULL,
   PRIMARY KEY (`al_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COMMENT='Email aliase History';
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 COMMENT='Email aliase History';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -311,7 +311,7 @@ CREATE TABLE `aliases` (
 
 LOCK TABLES `aliases` WRITE;
 /*!40000 ALTER TABLE `aliases` DISABLE KEYS */;
-INSERT INTO `aliases` VALUES (1,'abuse','roges','mailbox.net.uk',1,0),(2,'forwarding','your_real','example.com',1,0);
+INSERT INTO `aliases` VALUES (1,'abuse','admin','example.com',1,0),(2,'forwarding','your_real','example.com',1,0);
 /*!40000 ALTER TABLE `aliases` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1412,7 +1412,7 @@ CREATE TABLE `vCard_data` (
   `vcd_value` varchar(255) DEFAULT NULL,
   `vcd_bin` blob COMMENT 'for when varchar(255) is too small',
   PRIMARY KEY (`vcd_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=211 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1430,6 +1430,16 @@ CREATE TABLE `vCard_profile` (
   PRIMARY KEY (`vcprofile_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=latin1 COMMENT='These are the valid types of card entry';
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `vCard_profile`
+--
+
+LOCK TABLES `vCard_profile` WRITE;
+/*!40000 ALTER TABLE `vCard_profile` DISABLE KEYS */;
+INSERT INTO `vCard_profile` VALUES (1,'rfc2426','FN','text'),(2,'rfc2426','N','text'),(3,'rfc2426','NICKNAME','text'),(4,'rfc2426','PHOTO','bin'),(5,'rfc2426','BDAY','text'),(6,'rfc2426','ADR','text'),(7,'rfc2426','LABEL','text'),(8,'rfc2426','TEL','text'),(9,'rfc2426','EMAIL','text'),(10,'rfc2426','MAILER','text'),(11,'rfc2426','TZ','text'),(12,'rfc2426','GEO','text'),(13,'rfc2426','TITLE','text'),(14,'rfc2426','ROLE','text'),(15,'rfc2426','LOGO','bin'),(16,'rfc2426','AGENT','text'),(17,'rfc2426','ORG','text'),(18,'rfc2426','CATEGORIES','text'),(19,'rfc2426','NOTE','text'),(20,'rfc2426','PRODID','text'),(21,'rfc2426','REV','text'),(22,'rfc2426','SORT-STRING','text'),(23,'rfc2426','SOUND','bin'),(24,'rfc2426','UID','text'),(25,'rfc2426','URL','text'),(26,'rfc2426','VERSION','text'),(27,'rfc2426','CLASS','text'),(28,'rfc2426','KEY','bin');
+/*!40000 ALTER TABLE `vCard_profile` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `vCards`
