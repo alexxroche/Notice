@@ -1,0 +1,19 @@
+{
+    "_comment": "cut-n-paste the one for your system, then GLOBAL",
+    "_logic": "It is better to use the perl modules provided by your distro so that they are updated with your system - discuss?",
+    "yum/CentOS": [
+        "sudo yum -y install perl-CGI-Application perl-DBIx-Class-Schema perl-DBIx-Class-Schema-Loader perl-Date-Calc perl-Crypt-CBC perl-Crypt-Rijndael perl-HTML-Clean",
+        "cpan CGI::Application::Plugin::AutoRunmode CGI::Application::Plugin::DBH CGI::Application::Plugin::Session CGI::Application::Plugin::Authentication CGI::Application::Plugin::Redirect CGI::Application::Plugin::DBIC::Schema CGI::Application::Plugin::Forward CGI::Application::Plugin::TTCGI::Application::Plugin::ConfigAuto Data::UUID MIME::Base64 Template::Multilingual Template::Plugin::Calendar::Simple CGI::Application::Dispatch",
+        "rsync --progress -tvprogul t/cgi-bin/templates config /var/www/cgi-bin/",
+        "rsync --progress -tvprogul t/www/* /var/www/html/",
+    ],
+    "debian/ubuntu": [
+        "sudo apt-get install libcgi-fast-perl libfcgi-perl libfcgi-procmanager-perl",
+        "rsync --progress -tvprogul t/cgi-bin/templates config /usr/lib/cgi-bin/",
+        "rsync --progress -tvprogul t/www/* /var/www/",
+    ],
+    "GLOBAL": [
+        "./script/create_notice_db.pl",
+        "perl Makefile.PL && make |grep -v ^Skip && make test; sudo make install"
+    ],
+}

@@ -30,11 +30,11 @@ I had a hard time getting sessions; authentication; dispatch; query (the cgi que
 
 Is it $self or $c ? I've chosen $self
 
-If you have just cloned this from github then you might have to install the deps; You can do this with
+If you have just cloned this from github then you might have to install the deps; You can do this, (if you have cpanm installed) with
 
     sudo cpanm --installdeps .  
 
-if you have cpanm installed, or 
+or you can use this shell one liner:
 
     for i in `grep :: Makefile.PL|grep -v '>='|sed -e 's/^use //g' -e "s/^\s*'//g" -e "s/'.*//g" -e 's/;$//'`;do sudo perl -MCPAN -e "install $i"; done
 
@@ -43,7 +43,7 @@ INSTALLATION
 
 CHANGE the default password in config/config.pl
     
-Create the database:
+Create the database: (there is a script that will do that for you)
 
     ./script/create_notice_db.pl
 
@@ -66,13 +66,16 @@ Check the install (default login is with a@b.com with a password of 123Abc).
 If you forgot to change the db_pw in config:
 
 CHANGE the password in ~www/cgi-bin/config/config.pl and in the the db to match:
-    mysql -p mysql
+    mysql -p mysql  #on some systems you don't need the -p if you are root
     mysql> update user set password=PASSWORD('NEW-PASSWORD') where User='notice_adminuser';
 
 
 BUGS and LIMITATIONS
 
 Notice should check for a valid DB and offer to install via https if $CFG{installing}=1;
+(Anyone feel like writing that?)
+Notice has only been tested with mySQL and SQLite, though because of DBIx::Class it should
+work with postgres and other even comercial systems.
 
 DONATIONS
 

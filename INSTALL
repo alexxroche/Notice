@@ -1,0 +1,105 @@
+#!/bin/bash
+
+config_hash='6d70fa72f36014c62cf9708e313f9db7'
+
+# check that they have configured the database
+
+echo -n 'Have you edited the config/config.pl file? '
+read nod
+case $nod in
+    [yY] | [yY][eE][sS] ) 
+        hash_check=`md5sum config/config.pl|awk '{print \$1}'` # It's not that I don't trust you..
+        if [ "$hash_check" == "$config_hash" ]
+        then
+            echo "Liar liar pants on fire"; exit
+        fi
+        echo "if you are happy with it"
+        ;;
+    [nN] | [nN][oO] ) echo 'Honest _is_ the best policy. At least change the db passphrase'; exit
+        ;;
+    * ) echo "Expected [y[es]]|[n[o] - nothing done." 
+        ;;
+esac
+    
+
+distro=$(echo $(for i in `ls /etc/*-version /etc/*-release /etc/issue 2>/dev/null`; do [ $(grep ID $i) ] || cat $i|sed "s/ .*//" || [ $(grep ID $i) ] && grep ID $i|sed "s/.*=//"; done)|sed -e "s/ .*//g" -e "s/Ubuntu/Debian/")
+
+if [ "$distro" == 'CentOS' ]
+then
+    echo -n "Do you want to install Notice on this computer? "
+    read yn
+    case $yn in
+        [yY] | [yY][eE][sS] ) sudo yum -y install \
+    perl-CGI-Application \
+    perl-DBIx-Class-Schema \
+    perl-DBIx-Class-Schema-Loader \
+    perl-Date-Calc \
+    perl-Crypt-CBC \
+    perl-Crypt-Rijndael \
+    perl-HTML-Clean
+
+ cpan CGI::Application::Plugin::AutoRunmode
+ cpan CGI::Application::Plugin::DBH
+ cpan CGI::Application::Plugin::Session
+ cpan CGI::Application::Plugin::Authentication
+ cpan CGI::Application::Plugin::Redirect
+ cpan CGI::Application::Plugin::DBIC::Schema
+ cpan CGI::Application::Plugin::Forward
+ cpan CGI::Application::Plugin::TT
+ cpan CGI::Application::Plugin::ConfigAuto
+ cpan Data::UUID
+ cpan MIME::Base64
+ cpan Template::Multilingual
+ cpan Template::Plugin::Calendar::Simple
+ cpan CGI::Application::Dispatch
+ ./script/create_notice_db.pl
+  perl Makefile.PL && make |grep -v ^Skip && make test; sudo make install
+    ;;
+    [nN] | [nN][oO] ) echo 'You need sudo anyway';;
+        * ) echo "Expected [y[es]]|[n[o] - nothing done." ;&
+    esac
+
+elif [ "$distro" == 'Debian' ]
+then
+    echo -n "Do you want to install Notice on this computer? "
+    read yn
+    case $yn in
+        [yY] | [yY][eE][sS] ) sudo apt-get install libcgi-fast-perl libfcgi-perl libfcgi-procmanager-perl 
+
+        echo -n "Is your cgi-bin located at /usr/lib/cgi-bin/? "
+        read cgi_loc
+        case $cgi_loc in 
+            [yY] | [yY][eE][sS] ) 
+                rsync --progress -tvprogul t/cgi-bin/templates/ /usr/lib/cgi-bin/templates/
+            ;;
+            [nN] | [nN][oO] ) 
+                echo 'rsync --progress -tvprogul t/cgi-bin/templates/ $path_to_your_cgi-bin'
+            ;;
+            * ) 
+                echo "Expected [y[es]]|[n[o] - You will have to do this yourself." 
+            ;;
+
+        echo -n "Is your htdocs located at /var/www/ ? "
+        read www_loc
+        case $www_loc in 
+            [yY] | [yY][eE][sS] ) 
+                rsync --progress -tvprogul t/www/ /var/www/
+            ;;
+            [nN] | [nN][oO] ) 
+                    echo 'rsync --progress -tvprogul t/www/ $path_to_your_htdocs'
+            ;;
+            * ) echo "Expected [y[es]]|[n[o] - You will have to do this yourself." 
+            ;;
+
+
+        perl Makefile.PL && make |grep -v ^Skip && make test; sudo make install
+        ;;
+        [nN] | [nN][oO] ) echo 'You need sudo anyway'
+        ;;
+        * ) echo "Expected [y[es]]|[n[o] - nothing done." 
+        ;;
+    esac
+
+else
+    echo "Maybe you would like to add $distro to this script? (Then request-pull)"
+fi
