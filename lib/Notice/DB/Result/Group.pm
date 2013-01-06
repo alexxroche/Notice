@@ -91,6 +91,5 @@ __PACKAGE__->add_unique_constraint("gr_id", ["gr_id"]);
 # Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-24 17:01:30
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GXImIPSdV5ftUo2sKYSdVg
 
-
-# You can replace this text with custom code or comments, and it will be preserved on regeneration
+__PACKAGE__->has_many('members' => 'Notice::DB::Result::GroupMember', {'foreign.gg_grid' => 'self.gr_id'});
 1;
