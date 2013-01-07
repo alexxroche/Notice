@@ -75,11 +75,10 @@ journalist group can add and edit pages.
 
 main page:
     Show which pages are stubs
-    Add a page delete button for editors
-    Add an un-publish button for editors
 
 editor:
     prune tags - right now that does not happen! (but you can delete them all and start again)
+    make tags unique (each page can only have "menu,15" once, not "menu,15;menu,12;menu;menu,inc"
 
 templates:
     Write and edit templates
@@ -164,6 +163,20 @@ sub main: StartRunmode {
     }else{
         $self->tt_params({ dest => 'Addendum', authen_login => 'main'});
     }
+
+
+    if(defined $self->session->param('message')){
+        #$self->tt_params({message => $self->session->param('message') });
+        $message .= $self->session->param('message');
+        $self->session->param('message' => '');
+    }
+    if(defined $self->session->param('error')){
+        $self->tt_params({error => $self->session->param('error') });
+        $self->session->param('error' => '');
+    }
+
+
+
     $self->tt_params({
         page => 'Here you can mange the static part of the site - the public part. This is a CMS for Notice<br />'
 		  });
@@ -195,8 +208,23 @@ sub main: StartRunmode {
         $self->tt_params({ pagination => $pagination });
     }
     if(@pages){
-        $self->tt_params({ pages => \@pages, message => $message });
+        $self->tt_params({ pages => \@pages });
     }
+    if($message){
+        $self->tt_params({ message => $message });
+    }
+
+
+    # If we hit the DB just one more we can find all of the pages that are stubbs
+    my %stubs;
+    my $find_stub = $self->resultset('PageTag')->search({ pt_inc => 1 });
+    TAG: while( my $s = $find_stub->next){
+        if(my $this_paid = $s->pt_paid){
+            $stubs{$this_paid} =  1;
+        }
+    }
+    $self->tt_params({ stubs => \%stubs });
+
     return $self->tt_process();
     #return $self->tt_process('default.tmpl');
     
@@ -306,6 +334,10 @@ sub edit: Runmode {
         }elsif( $self->session->param('pe_id') ){
                 $create_data{'pa_owner'} = $self->session->param('pe_id')
         }
+        if( $is_an_admin && $q->param('publish') && $q->param('publish') eq "Publish" ){
+                #$create_data{'pa_published'} = $self->param('pe_id') ? $self->param('pe_id') : 1 ;
+                $create_data{'pa_published'} = 1;
+        }
         #$self->tt_params({ body => Dumper(\%create_data) });
         # NOTE how do we split long pages into seperate pages and let readers paginate through them, 
         #       AND give them the option to view it as one long page?
@@ -360,11 +392,13 @@ sub edit: Runmode {
                         my @tags = split(/;/, $tag_string);
                         foreach my $tag_couplet (@tags){
                             my ($tag,$order) = split(/,/, $tag_couplet);
+                        warn "we have tag:{$tag_couplet}:couplet which is : $tag [comma] or:{$order}der";
                            # push @create_tags, {pt_paid => $pa_id, pt_added => $now, pt_ag => "$tag", pt_order => "$order"};
                             my %tag_data = ( pt_paid => $pa_id, pt_ag => "$tag");
                             if($order){
                                 $tag_data{'pt_order'} = $order;
                                 if($order=~m/\D/){
+                warn "\t \t because $order has a non-number we presume this is a stub";
                                     $tag_data{'pt_inc'} = 1;
                                     $tag_data{'pt_order'}=~s/\D//g;
                                     #warn ".. so order is really " . $tag_data{'pt_order'} . " and inc is " . $tag_data{'pt_inc'};
@@ -385,6 +419,7 @@ sub edit: Runmode {
                             if($tag_rc){ # update the tags
                                     $tag_rc->update( \%tag_data );
                             }else{
+                                warn 'created ' . Dumper(\%tag_data) . ' for $pa_id';
                                 my $pt_id = $self->resultset('PageTag')->create(
                                 \%tag_data
                                 #{pt_paid => $pa_id, pt_ag => "$tag", pt_order => "$order"}
@@ -413,15 +448,26 @@ sub edit: Runmode {
                 if($pa_id && $q->param('tags') ne ''){
                     my $tag_string = $q->param('tags');
                     $tag_string =~s/\n//g;
-                    $tag_string =~s/;\s*//g;
+                    $tag_string =~s/;\s*/;/g;
                     my @tags = split(/;/, $tag_string);
-                    foreach my $tag_couplet (@tags){
+                    my %tag_seen;
+                CREATE_TAG: foreach my $tag_couplet (@tags){
                         my ($tag,$order) = split(/,/, $tag_couplet);
+                         if($tag_seen{$tag}){
+                            #warn "already have this tag";
+                            next CREATE_TAG;
+                        }
+                        $tag_seen{$tag} = 1;
+                       # warn "we CREATE from tag:{$tag_couplet}:couplet which is : $tag [comma] or:{$order}der";
                        # push @create_tags, {pt_paid => $pa_id, pt_added => $now, pt_ag => "$tag", pt_order => "$order"};
-                        my %tag_data = ( pt_paid => $pa_id, pt_ag => "$tag", pt_order => "$order");
+                        my %tag_data = ( pt_paid => $pa_id, pt_ag => "$tag");
                         if($order=~m/\D/){
-                            $tag_data{'pt_inc'} = 1;
-                            $tag_data{'pt_order'}=~s/\D//g;
+                             $tag_data{'pt_order'} = $order;
+                             $tag_data{'pt_inc'} = 1;
+                             $tag_data{'pt_order'}=~s/\D//g;
+                         }else{
+                             $tag_data{'pt_inc'} = 0;
+                             $tag_data{'pt_order'} = 0;
                          }
                             
                         my $pt_id = $self->resultset('PageTag')->create( 
@@ -430,6 +476,7 @@ sub edit: Runmode {
                         )->update;
                         #my $pt_id = $self->resultset('PageTags')->create( \@create_tags )->update->id;
                     }
+                    #delete %tag_seen;
                 }elsif( $q->param('tags') ne ''){
                    warn "We don't have the page ID for these tags!";
                 }
@@ -481,10 +528,16 @@ sub edit: Runmode {
         # we know where, so check that it exists and that we can write to it
         if( ( -d "$www_path" ) && ( ( -e "$www_path/$filename" && -w "$www_path/$filename" ) || ( -w "$www_path") ) ){
             # NTS YOU ARE HERE
-            my $page_html = $self->view;
+            my $page_html;
+            $page_html = $self->view;
             open(HTML,">$www_path/$filename") or do { $self->tt_params({ error => 'failed to open file' }); return $self->tt_process(); };
             print HTML $page_html;
             close(HTML);
+
+            my $going_live = $self->resultset('Page')->search({ pa_id => $pa_id })->first;
+                #$create_data{'pa_published'} = $self->param('pe_id') ? $self->param('pe_id') : 1 ;
+            $going_live->update({ pa_published => 1 });
+    
             $self->tt_params({ message => 'Page ' . $filename . ' published <a href="' . $html_path . '/' . $filename . '"><span class="warning">LIVE</span> to ' . $filename . '</a>'});
         }else{
             my $message = 'We seem to have a write premission problem - no right ';
@@ -772,8 +825,10 @@ sub view: Runmode {
                 my $copyright_date = $tree->look_down('id' => qr/^copyright$/);
                     $copyright_date->push_content($cpyrtd);
                 if($opt{publishing}){
+                  { no warnings; 
                     $tree->look_down('id' => qr/^foot(er)?$/)->look_down( 
                         sub { $_[0]->attr('class') eq 'container' })->push_content($published);
+                  }
                 }else{
                     #$tree->look_down('id' => qr/^foot(er)?$/)->look_down(
                     #    sub { $_[0]->attr('class') eq 'container' })->push_content($published);
@@ -885,6 +940,195 @@ sub template: Runmode {
     return 'This will be a template creation/editing page<br />(Took ' . $self->plt . ' ms)';
 }
 
+=head3 unpublish
+
+  remove the live page, (but leave the page in the DB)
+
+=cut
+
+sub unpublish: Runmode {
+    my ($self,$del) = @_;
+    my $q = $self->query();
+    my $pa_id;
+    if($self->param('id') && $self->param('id')=~m/^(\d+)$/ ){
+        $pa_id = $1;
+    }elsif($self->param('sid') && $self->param('sid')=~m/^(\d+)$/){
+        $pa_id = $1;
+    }
+
+    #find the page
+    my $rc = $self->resultset('Page')->search({ pa_id => $pa_id })->first;
+    if($rc && $rc->pa_name){
+
+        my $www_path = '';
+            if(defined $self->cfg('www_path')){
+                if( ref($self->cfg('www_path')) eq 'ARRAY'){ # not sure why we would have an array
+                    PATH_SEARCH: foreach my $wpath (@{ $self->cfg('www_path') }){
+                            $www_path = $wpath; # I'm just using the first one
+                            last PATH_SEARCH;
+                            # maybe you want to store the path split into an array, for some reason
+                            $www_path .= '/' . $wpath;
+                    }
+                }elsif( $self->cfg('www_path') ne ''){
+                        $www_path = $self->cfg('www_path');
+                }
+                #else{ $www_path = '/var/www/html'; } # not sure this is a good idea
+            }else{
+                $www_path = '/var/www/htdoc/site';
+            }   
+            my $filename; # lets build it
+            $filename = $rc->pa_name ? $rc->pa_name . '.html' : 'index.html';
+            $filename =~s/\s+/ /g;
+            $filename =~s/ /_/g;
+
+
+            my $html_path;
+            if($filename=~m/$dir_delim/){
+                my @full_path = split (/$dir_delim/, $filename);
+                $html_path .= join('\/', @full_path);
+                $www_path .= $html_path;
+                $filename = $full_path[ @full_path -1 ];
+                $www_path=~s/\/?$filename\/?$//;
+            }   
+
+            # we know where, so check that it exists and that we can write to it
+            if( -d "$www_path" && -e "$www_path/$filename" && -w "$www_path/$filename" ){
+                unlink("$www_path/$filename") or do { $self->tt_params({ error => 'failed to delete live page' }); return $self->tt_process('default.tmpl'); };
+
+                my $going_live = $self->resultset('Page')->search({ pa_id => $pa_id })->first;
+                $going_live->update({ pa_published => 0 }) unless $del; # if we are doing a delete this is pointless
+                return 0 if $del;
+                #$self->session->param('message' => 'Page Un-published ');
+                $self->session->param('error' => ' Page Un-published; but can be re-published when it is ready');
+                  my $url;
+                $url = ($self->query->url);
+                return $self->redirect("$url/Pages/");
+            }else{
+              if( $del ){
+                    return 'file not found';
+              }else{
+                $self->tt_params({ error => 'failed to find page to un-publish' }); 
+                return $self->tt_process('default.tmpl');
+              }
+            }
+
+    }else{
+        if( $del ){
+            return 'page does NOT exists';
+        }else{
+            return 'No page with an ID of ' . $pa_id . ' found. <br />(Took ' . $self->plt . ' ms)';
+        }
+    }
+    return 'This will remove the live page <br />(Took ' . $self->plt . ' ms)';
+    #return $self->tt_process('');
+
+}
+
+=head3 delete
+
+  remove the page from the database AND unpublish it!
+
+=cut
+
+sub delete: Runmode {
+    my ($self) = @_;
+    if( ! $self->in_group('Editor',$self->param('pe_id')) ){
+        return 'and what does your Editor think of this BOLD move? (see you get font puns as punishment.)';
+        # if they are messing about they don't deserve a properly rendered page
+    }
+
+    my $q = $self->query();
+    my $pa_id;
+    if($self->param('id') && $self->param('id')=~m/^(\d+)$/ ){
+        $pa_id = $1;
+    }elsif($self->param('sid') && $self->param('sid')=~m/^(\d+)$/){
+        $pa_id = $1;
+    }
+
+    my $inkless;
+    my $going_away = $self->resultset('Page')->search({ pa_id => $pa_id })->first;
+    
+    my $message = 'Page ';
+    if($going_away && $going_away->pa_published){
+        $inkless = $self->unpublish('delete');
+        $message .= '"' . $going_away->pa_name . '" Un-published and ';
+    }elsif(! $going_away){
+        return 'We were unable FIND this page in the database, to delete it<br />(Took ' . $self->plt . ' ms)';
+    }elsif($going_away && $going_away->pa_name){
+        $message .= '"' . $going_away->pa_name . '"';
+    }
+    
+    if($inkless){
+        return 'We were unable to un-publish this page, Error: ' . $inkless . '<br />(Took ' . $self->plt . ' ms)';
+    }else{
+         $going_away->delete;
+         $message .=  ' deleted';
+         my $tag_clear = $self->resultset('PageTag')->search({ pt_paid => $pa_id });
+         # $tag_clear->delete;
+         if($tag_clear && $tag_clear->count){
+            DETAGGED: while( my $t = $tag_clear->next){
+                $t->delete;
+            }
+            $message .= " (and tags cleared)";
+         }
+         $self->session->param('message' => $message );
+         my $url;
+         $url = ($self->query->url);
+         return $self->redirect("$url/Pages/");
+    }
+        
+    #return $self->tt_process('');
+    return 'This will deleted the live page <br />' . $inkless . '<br />(Took ' . $self->plt . ' ms)';
+}
+
+
+sub ex: Runmode {
+    my ($self) = @_;
+
+my $ex = '<!DOCTYPE html><html><head><style type="text/css">
+body,td,th {font:13px/1.6em "Helvetica Neue", Helvetica, Arial, sans-serif; color: #ccc;}
+body {background:#585855; margin:0; padding:0;}
+
+h3{color:#ff9827;}
+.clear{clear:both; display:block; height:0px; width:100%;}
+ul#aspects{margin:100px auto 100px; padding:0; list-style:none; list-style-position:inside; width:660px;}
+ ul#aspects li{margin:0; padding:0 10px 10px; width:200px; float:left;}/* total width=witdh+padding=220px*/
+</style>
+<meta name="description" content="Example table using CSS div and ul">
+<meta name="application-url" content="http://www.talkphp.com/xhtml-html-css/3734-how-make-into-table-format-using-css.html#post20436">
+</head><body>
+
+<ul id="aspects">
+    <li>
+        <h3>Security</h3>
+        <p>With the increased levels of website penetration that exists today I am up to date with the latest techniques to guard against such attacks and allowing clients to stay at ease knowing their confidential account information is safely guarded.</p>
+    </li>
+    <li>
+        <h3>Search Engine Optimization</h3>
+        <p>the competition grows it becomes harder for clients have their websites rank higher in popular search engines such as google, yahoo, and many more. But with my experienced techniques in which i have learned through trial and error i found ways to rank a clients website so that it can gain the popularity with the required</p>
+    </li>
+    <li>
+        <h3>W3C Compliancy</h3>
+        <p>After i am completed with a project i verify the website against W3C\'s requirements to assure the website is running as clean as possible with or witout errors which allows the domain to rank higher than other domains that relate to the website.</p>
+    </li>
+    <div class="clear"></div>
+    <li>
+        <h3>Handicap Friendly</h3>
+        <p>It is important not only to me but a majority of the audience for a website to be handycap friendly. a handicap friendly website is one that can be used by people who have a disability who would not be able to use the website through the normal way and can be used thourgh the special way.</p>
+    </li>
+    <li>
+        <h3>table-less design</h3>
+        <p>Text goes here.</p>
+    </li>
+    <li>
+        <h3>Cross-Browser Compliant</h3>
+        <p>All designs and programming that is produced through me are verified against popular and non-popular browser and made sure that they are rendered the same way for everyone no matter what browser they are using.</p>
+    </li>
+    <div class="clear"></div>
+</ul></body></html>';
+
+  return $ex;
+}
 
 1;
 

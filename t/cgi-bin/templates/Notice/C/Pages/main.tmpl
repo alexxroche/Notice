@@ -1,0 +1,93 @@
+[%- IF username -%]
+ [% WRAPPER 'site_wrapper.tmpl' -%]
+ <a class="small green button" href="[% c.query.url -%]/Pages/edit/">add a Page</a><br>
+  [% IF ! pages -%]
+    <br />
+  [%- page -%]
+ So to start off with you should <a class="bold green" href="[% c.query.url -%]/Pages/edit/">add a Page</a>.<br>
+ [%- ELSE -%]
+<style type="text/css">
+.page_list {
+    /*
+    min-height: 10px; //clear float
+    border: 1px solid #000;
+    margin: 2em;
+    width: 10em;
+    padding: 5px;
+    */
+    display: block;
+}
+
+.width_padless {
+    width: 159px;
+    display: inline-block;
+}
+.width_pad {
+    width: 200px;
+    display: inline-block;
+}
+
+.page_list li {
+    display: inline;
+    /*
+    display: block;
+    float: left;
+    width: 50%;
+    */
+
+
+}
+</style>
+[%- #USE Dumper; Dumper.dump(stubs) -%]
+<ul class="page_list">
+    [% FOREACH p = pages; id = p.pa_id -%]
+    [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+
+        <li>
+            <ul class="[%- stripe -%]">
+                <li class="width_pad [%- stripe -%]">
+            <a class="width_pad[%- IF stubs.$id; 'less'; END -%] blue" href="[% c.query.url -%]/Pages/view/[%- p.pa_id -%]">[%- p.pa_link || p.pa_name || p.pa_title || p.pa_id -%]</a>
+            [%- IF stubs.$id; '(stub)'; ELSE; '&nbsp'; END -%] 
+            </li><li class="[%- stripe -%]">
+            <a class="small orange button" href="[% c.query.url -%]/Pages/edit/[%- p.pa_id -%]">Edit</a> 
+            </li><li class="[%- stripe -%]">
+            <a title="
+              [%- IF p.pa_published -%]
+                remove the live page
+              [%- ELSE -%]
+                This page is not live yet
+              [%- END -%]
+              " 
+              class="small 
+              [%- IF p.pa_published -%]
+                blue 
+              [%- ELSE -%]
+                white
+              [%- END -%]
+            button" href="
+              [%- IF p.pa_published -%]
+                [% c.query.url -%]/Pages/unpublish/[%- p.pa_id -%]
+              [%- ELSE -%]
+                #
+              [%- END -%]
+            "><span class="
+              [%- IF p.pa_published -%]
+                white
+              [%- ELSE -%]
+                grey
+              [%- END -%]
+            ">Un-publish</span></a> 
+            </li><li class="[%- stripe -%]">
+            <a class="small red button" href="[% c.query.url -%]/Pages/delete/[%- p.pa_id -%]">Delete</a> 
+                </li>
+            </ul>
+        </li>
+    [%- END -%]
+</ul>
+    <br />NTS We should mark which pages are stubs
+    [%- pagination -%]
+  [% END # IF -%]
+ [% END # wrapper -%]
+[% ELSE %]
+ 404 Page not found.. maybe you want to <a class="black" href="[% c.query.url -%]/Login">Login</a>?
+[% END %]
