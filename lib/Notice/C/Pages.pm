@@ -383,7 +383,7 @@ sub edit: Runmode {
                     $self->tt_params({ error => 'Page already saved' }) unless $q->param('publish') eq 'Publish';
                 }
                 # This can be independent of the Pages table (though we should probably touch Pages.pa_updated WHERE pa_id = $pa_id)
-                if($q->param('tags') ne $tags ){
+                if($q->param('tags') ne "$tags" ){
                      if($pa_id && $q->param('tags') ne ''){
                         my $tag_string = $q->param('tags');
                         $tag_string =~s/\n//g;
@@ -1062,7 +1062,7 @@ sub delete: Runmode {
         return 'We were unable to un-publish this page, Error: ' . $inkless . '<br />(Took ' . $self->plt . ' ms)';
     }else{
          $going_away->delete;
-         $message .=  ' deleted';
+         $message .=  ' deleted - ';
          my $tag_clear = $self->resultset('PageTag')->search({ pt_paid => $pa_id });
          # $tag_clear->delete;
          if($tag_clear && $tag_clear->count){
