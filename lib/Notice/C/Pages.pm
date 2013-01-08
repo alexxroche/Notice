@@ -515,7 +515,6 @@ sub edit: Runmode {
         $filename =~s/\s+/ /g;
         $filename =~s/ /_/g;
 
-
         my $html_path;
         if($filename=~m/$dir_delim/){
             my @full_path = split (/$dir_delim/, $filename);
@@ -537,8 +536,12 @@ sub edit: Runmode {
             my $going_live = $self->resultset('Page')->search({ pa_id => $pa_id })->first;
                 #$create_data{'pa_published'} = $self->param('pe_id') ? $self->param('pe_id') : 1 ;
             $going_live->update({ pa_published => 1 });
-    
-            $self->tt_params({ message => 'Page ' . $filename . ' published <a href="' . $html_path . '/' . $filename . '"><span class="warning">LIVE</span> to ' . $filename . '</a>'});
+            
+            if($html_path!~m/^\/$/){
+                $html_path .= '/';
+            }
+            $html_path .= $filename;
+            $self->tt_params({message=>'Page '.$filename.' published <a href="'.$html_path.'"><span class="warning">LIVE</span> to '.$filename.'</a>'});
         }else{
             my $message = 'We seem to have a write premission problem - no right ';
             if( ! -d "$www_path" ){
@@ -744,7 +747,21 @@ sub view: Runmode {
                                              pa_id => $t->pt_paid,
                                     },{ 'columns' => ['pa_name','pa_link'] })->first;
                                     if($opt{publishing}){
-                                        $content .= '<a href="' . $base_url . '/' . $rc->pa_name . '.html">' . $rc->pa_link . '</a>';
+                                        my $filename = $rc->pa_name;
+                                        my $html_path = $base_url;
+                                        if($filename=~m/$dir_delim/){
+                                            my @full_path = split (/$dir_delim/, $filename);
+                                            $html_path .= join('\/', @full_path);
+                                            $filename = $full_path[ @full_path -1 ];
+                                        }else{
+                                            if($html_path!~m/^\/$/){
+                                                $html_path .= '/';
+                                            }
+                                            $html_path .= $filename . '.html';
+                                        }
+                                        
+                                        $content .= '<a href="' . $html_path . '">' . $rc->pa_link . '</a>';
+                                        #$content .= '<a href="' . $base_url . $rc->pa_name . '.html">' . $rc->pa_link . '</a>';
                                     }else{
                                         $content .= '<a href="' . $surl . '/' . $t->pt_paid . '">' . $rc->pa_link . '</a>';
                                     }
