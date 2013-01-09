@@ -1,6 +1,6 @@
-[% IF no_wrapper OR template.no_wrapper %] [% content %] [% ELSE %]
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+[%- IF no_wrapper OR template.no_wrapper %] [% content %] [% ELSE %]
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
 <head><title>[% title OR 'Notice CRaAM' %] </title>
 
 <meta name="description" content="IP database" />
@@ -22,5 +22,6 @@
     [% END #of IF warning %]
 <center>
 [% content %]
+</center>
 </body></html>
 [% END # no_wrapper %]

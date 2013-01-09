@@ -1,4 +1,4 @@
-[% WRAPPER Notice/C/Signup/wrapper.tmpl %]
+[%- WRAPPER Notice/C/Signup/wrapper.tmpl -%]
 [% USE Dumper %]
 [% IF no_page %]
 [% message %]
@@ -8,19 +8,23 @@
 [% #Dumper.dump(form); %]
 Please first create an account so that we know who you are... and then click the Add button at the bottom of this page.
 
+[%- #IF c.session.param('module'); '<span class="light-grey">You are from: '; c.session.param('module'); '</span>'; END -%]  
+
 <form method="post" action="[% IF no_js; '?debug=1'; END %]" name="form">
 <table id="signup_table" class="stripe">
 
     <thead>
+       <tr>
         <th colspan="2"> New User
         </th>
+       </tr>
     </thead>
     <tbody>
       <tr>
                 <td class="edit">Title</td>
                 <td class="edit"><select name="pw_raid">
 [% FOREACH rank = ranks %]
-<option value="[% rank.ra_id %]"[% UNLESS rank.ra_name; 'selected="selected"'; END%]>[% rank.ra_name or '&lt;optional&gt;' %]</option>
+<option value="[%- rank.ra_id -%]" [% UNLESS rank.ra_name; 'selected="selected"'; END%]>[% rank.ra_name or '&lt;optional&gt;' %]</option>
 [% END # foreach rank %]
 </select></td>
         </tr>
@@ -61,7 +65,9 @@ Please first create an account so that we know who you are... and then click the
                 <td class="edit">Likes to be know as</td>
                 <td class="edit"><input type="text" name="pw_goesby" value=""/></td>
         </tr-->
+      <tr>
         <th colspan="2"> Account Details</th>
+      </tr>
         <tr>
                 <td class="edit">Account </td>
                 [% #Dumper.dump(accounts) %]
@@ -70,12 +76,12 @@ Please first create an account so that we know who you are... and then click the
 [% IF accounts.size == 0 %]
 <option value="" selected="selected">Create new account</option>
 [% ELSE %]
-[% IF new_account AND new_account >= 1 %]
-<option value="" selected="selected">Create new account</option>
-[% END # IF new_account %]
-[% FOREACH ac = accounts %]
-<option value="[% ac.ac_id %]" [% IF accounts.size == 0 OR ac_selected == ac.ac_name; 'selected="selected"'; END %]>[% ac.ac_name or 'Create new account' %]</option>
-[% END # foreach rank %]
+    [% FOREACH ac = accounts %]
+    <option value="[% ac.ac_id %]" [% IF accounts.size == 0 OR ac_selected == ac.ac_name OR ac_selected == ac.ac_id; 'selected="selected"'; END %]>[% ac.ac_name or 'Create new account' %]</option>
+    [% END # foreach rank %]
+    [% IF new_account AND new_account >= 1 %]
+    <option value="" [%- IF new_account > 1; 'selected="selected"'; END -%]>Create new account</option>
+    [% END # IF new_account %]
 [% END # if accounts.size == 0 %]
 </select></td>
         </tr>
@@ -93,7 +99,6 @@ Please first create an account so that we know who you are... and then click the
      <tr class="ac_ad">
     <td class="address">Name or Number of House<br />or Building</td>
     <td><input type="text" name="ad_adname" size="12" maxlength="30" value="[% form.param('ad_adname') %]" /></td>
-     </tr>
      </tr>
      <tr class="ac_ad">
 
@@ -139,9 +144,9 @@ Please first create an account so that we know who you are... and then click the
      <option value="5" [% UNLESS form.param('ac_ad'); 'selected="selected"'; END %]>billing</option>
      <option value="7" [% IF form.param('ac_ad') == 'other'; 'selected="selected"'; END %]>other</option>
      <option value="6" [% IF form.param('ac_ad') == 'satellite'; 'selected="selected"'; END %]>satellite</option>
-    </select></td-->
+    </select></td>
 
-     </tr>
+     </tr-->
      <!--tr class="ac_ad">
         <td class="address">Notes</td>
     <td><textarea name="ad_notes" cols="20" rows="3">[% form.param('ad_notes') %]</textarea></td>
@@ -170,6 +175,5 @@ Please first create an account so that we know who you are... and then click the
 
 <font color="#ff0000">&#42;</font> Required field<!--span><font color="#00ff00">&#42;</font>One of these is required </span -->
 </form>
-</center>
 [% END #no_page %]
 [% END #wrapper %]

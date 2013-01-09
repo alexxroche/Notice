@@ -795,8 +795,9 @@ sub login : Runmode {
 
   my $user = $self->authen->username;
   if ($user) {
-    $url=~s/\/login$//;
-    return $self->redirect("$url/$dest");
+    if($dest){ $url .= '/' . $dest; }
+    $url=~s/\/login\/?$//g;
+    return $self->redirect("$url");
     exit;
   } else {
     my $authen_username = '';
@@ -836,7 +837,7 @@ sub logout : Runmode {
   my $self = shift;
   if ($self->authen->username) {
     $self->authen->logout;
-    $self->session_delete;
+    $self->session_delete or warn "session deleted";
   }
   $self->param(message => 'You are no longer logged in');
   return $self->redirect($self->query->url);
