@@ -25,6 +25,7 @@
             branch = branch - 3;
             # pop ac_parent
             ac_sibling_max = ac_sibling_max + 1;
+            #'branch: '; branch; 'depth: '; depth;
             '</li></ul>'; 
         END;
       END; #IF ac.ac_tree.length > branch
@@ -51,19 +52,6 @@
             ; ' class="red"'; END; '>';
             ac.ac_max; '</span>';
         -%]
-        [%- IF people.size; stripe = 'stripe' -%]
-            <table>
-            [%- FOREACH p = people -%]
-             [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
-             [%- IF p.pe_acid == ac.ac_id -%]
-                <tr class="[%- stripe -%]"><td>[<a class="black" href="[%- c.query.url; '/Users/edit/'; p.pe_id; '">'; p.pe_id; '</a>' -%]]</td>
-                    <td>[%- p.pe_fname; ' '; p.pe_lname -%]</td>
-                    <td>[%- p.pe_email -%]</td>
-                </tr>
-             [%- END # IF right account -%]
-            [%- END -%]
-            </table>
-        [%- END -%]
         [%- 
             ac_sibling_max = ac.ac_max;
             ac_previous_max = ac.ac_max;
@@ -75,10 +63,9 @@
 </form>
 <p>
 <span name="key">
-People id [pe_id] &lt; square brackets<br />
 Account id (ac_id) &lt; brackets<br />
 Account tree {ac_tree} &lt; curly braces<br />
-Account min - max &lt; number - bigger number <br />
+Account min - max &lt; number - bigger number (this is Nested sets)<br />
 </span>
 </p>
  [%- ELSE #IF ! accounts.size -%]

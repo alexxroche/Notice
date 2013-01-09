@@ -11,11 +11,12 @@ use base 'Notice';
 use Data::Dumper;
 our %opt;
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 
 my %submenu = (
    '1.4.1' => [
         '1' => { name=> 'Tree', rm => 'tree', class=> 'navigation'},
+        '2' => { name=> 'List', rm => 'list', class=> 'navigation'},
     ],
 );
 
@@ -67,6 +68,18 @@ sub main: StartRunmode {
     my $q = $self->query;
     my $surl;
        $surl = ($self->query->self_url);
+
+    # We might be comming from the delete function so lets catch their message
+
+    if(defined $self->session->param('message')){
+        $self->tt_params({message => $self->session->param('message') });
+        $self->session->param('message' => '');
+    }
+    if(defined $self->session->param('error')){
+        $self->tt_params({error => $self->session->param('error') });
+        $self->session->param('error' => '');
+    }
+
     our $pe_id;
     our $ud_rs;
     our $ac_id;
@@ -84,6 +97,9 @@ sub main: StartRunmode {
             $ac_id = $who_rs->pe_acid;
         };
     }
+    my $ef_acid = $ac_id;
+    if(defined $self->param('ef_acid')){ $ef_acid = $self->param('ef_acid'); }
+    elsif(defined $self->session->param('ef_acid')){ $ef_acid = $self->session->param('ef_acid'); }
 
     #if($q->param('Change') eq 'Change Account'){
     if($q->param('Change')){
@@ -91,35 +107,44 @@ sub main: StartRunmode {
         #warn Dumper($new_ac);
         if($q->param('Change') eq 'back'){
             $self->param('ef_acid' => $ac_id);
+            $self->tt_params('ef_acid' => $ac_id);
             $self->session->param('ef_acid' => $ac_id);
         }elsif($new_ac=~m/^\d+$/){
             $self->param('ef_acid' => $new_ac);
+            $self->tt_params({ ef_acid => $new_ac });
             $self->session->param('ef_acid' => $new_ac);
             $self->tt_params({ change => 'Back to your account' }) unless($ac_id == $new_ac);
+            $ef_acid = $new_ac;
         }
         #$pe_id = 1;
     }elsif($q->param('add')){
         warn "We are adding an account!";
         #$test .= \%{ $q->{'param'} };
-        $test = "Added a " . $q->param('what') . " account to " . $self->param('ef_acid') . " called '" . $q->param('ac_name') . "'";
-        #warn keys %{ $q->{'param'} };
-        warn join(', ', keys %{ $q->{'param'} });
+        $test = "Added a " . $q->param('what') . " account to " . $ef_acid . " called '" . $q->param('ac_name') . "'";
+        ##warn keys %{ $q->{'param'} };
+        #warn join(', ', keys %{ $q->{'param'} }); #useful debug
 
-        $self->param('ac_parent' => $self->param('ef_acid'));
-        $self->param('ac_name' => $self->param('ac_name'));
+        $self->param('ac_parent' => $ef_acid);
+        $self->param('ac_name' => $q->param('ac_name'));
         my $ac_tree;
         my $new_ac;
+        # Other modules can...
         #use Notice::C::Account;
         #($new_ac,$ac_tree) = Notice::C::Account::_new_child($self);
         ($new_ac,$ac_tree) = _new_child($self);
         warn "New account created: " . $new_ac . ' with tree:' . $ac_tree;
         $test .= " - added account $new_ac, with tree: $ac_tree" if $new_ac =~m/^\d+$/;
     }else{
-        $test =  keys %{ $q->{'param'} };
+        #$test = 'Query: ' .  keys %{ $q->{'param'} } if $opt{D}>=1;
         if($q->param('back')){
+    warn "Going back";
+            $self->param('pe_acid' => $ac_id);
             $self->param('ef_acid' => $ac_id);
+            $ef_acid = $ac_id;
             $self->session->param('ef_acid' => $ac_id);
+            $self->tt_params({ ef_acid => $ef_acid });
         }else{
+    warn "Going forward?";
             #warn keys %{ $q->{'param'} };
             if($self->param('ef_peid')){ $pe_id = $self->param('ef_peid'); }
             elsif($self->param('pe_id')){ $pe_id = $self->param('pe_id'); }
@@ -127,9 +152,10 @@ sub main: StartRunmode {
     }
     
     $self->tt_params({ 
-            ef_acid => $self->param('ef_acid'),
+            ef_acid => $ef_acid,
             ac_id => $ac_id
     });
+    #warn " ef_acid => $ef_acid, ac_id => $ac_id";
 
 =pod
 
@@ -155,17 +181,22 @@ sub main: StartRunmode {
         ],
         },{ 'columns'   => ['ac_id','ac_name'], order_by => {-asc =>['ac_id+0','ac_id']}
     });
-    $self->param('ac_parent' => $ac_id);
-    my @child_list = $self->_list_children($ac_id);
+    
+    #warn "looking for children of $ef_acid";
+    #$self->param('ac_parent' => $ef_acid);
+    my @child_list = $self->_list_children($ef_acid,'NO TREE');
     my $csl;
     foreach my $cld (@child_list){
        $csl .= " ac_tree = '$cld' OR";
     }
-    $csl=~s/OR$//;
+    if(defined $csl){ $csl=~s/OR$// };
     #my $csl = {'-or' => [ $csl ]};
     my @children = $self->resultset('Account')->search({
         -or => [ \$csl ]
-        },{ 'columns'   => ['ac_id','ac_name','ac_tree'], order_by => {-asc =>['ac_id+0','ac_id']}
+        },{ 
+            'columns'   => ['ac_id','ac_name','ac_tree'], 
+            order_by => {-asc =>['ac_min','ac_id']}
+            #order_by => {-asc =>['ac_id+0','ac_id']}
     });
     if($self->param('pe_acid')){
         warn "settin TT_params for pe_acid";
@@ -173,10 +204,12 @@ sub main: StartRunmode {
     }else{
         $self->tt_params({ pe_acid => $ac_id});
     }
+    $self->tt_params({ ef_acid => $ef_acid });
+    $self->tt_params({ ef_acid => $ac_id });
 
     $self->tt_params({
     accounts => \@accounts,
-    #children => \@{ $self->_list_children($ac_id) },
+    #children => \@{ $self->_list_children($ef_acid) },
     children => \@children,
     test => $test,
 	message => $message
@@ -293,26 +326,59 @@ sub edit: Runmode {
     return $self->tt_process();
 }
 
-
 =head3 tree
 
-a tree of accounts
+the new tree (the old one is now called trees
+and can probably be deleted
 
 =cut
 
 sub tree: Runmode {
     my ($self) = @_;
+    my @rd = $self->resultset('People')->search->all;
+    $self->tt_params({ people => \@rd });
+    return $self->forward('list');
+}
+
+=head3 trees
+
+a tree of accounts
+
+=cut
+
+sub trees: Runmode {
+    my ($self) = @_;
     my %search;
     #my $q = $self->query;
-    if($self->param('id') && $self->param('id')=~m/^(\d+)$/){
+    if($self->param('id') && $self->param('id')=~m/^(\d+)$/ && ($self->param('id') >= $self->session->param('ef_acid') ) ){
         $search{ac_id} = $1;
         my $sth = $self->resultset('Account')->search(\%search)->first;
-        %search = (
-            -and => [
-                    ac_min => {'>=' => $sth->ac_min},
-                    ac_max => {'<=' => $sth->ac_max}
+        if($sth){
+            %search = (
+                -and => [
+                        ac_min => {'>=' => $sth->ac_min},
+                        ac_max => {'<=' => $sth->ac_max}
+                ]
+            );
+        }else{
+            %search = (
+                        ac_id => $1
+            );
+        }
+    }elsif($self->param('ef_acid') && $self->param('ef_acid')=~m/^(\d+)$/){
+        $search{ac_id} = $1;
+        my $sth = $self->resultset('Account')->search(\%search)->first;
+        %search = ( 
+            -or => [
+                    ac_tree => {'like' => $sth->ac_tree . '%'},
+                    ac_parent => $sth->ac_id
             ]
         );
+
+    }else{
+        # show them nothing
+        $self->tt_params({ page => 'Your account has just been planted and has yet to grow into a tree' });
+        return $self->tt_process('default.html');
     }
 
 =pod
@@ -338,22 +404,209 @@ SELECT me.ac_id,CONCAT( REPEAT(' ', COUNT(p.ac_name) -1), me.ac_name) AS name,me
     my @rc = $self->resultset('Account')->search(\%search,{order_by => {-asc =>['ac_tree','ac_id']}})->all;
     my @rd = $self->resultset('People')->search->all;
     $self->tt_params({ accounts => \@rc, people => \@rd });
-    return $self->tt_process();
+    return $self->tt_process('Notice/C/Account/trees.tmpl');
+}
+
+=head3 list
+
+list the accounts
+
+=cut
+
+sub list: Runmode {
+    my ($self) = @_;
+    my %search;
+    #my $q = $self->query;
+    if($self->param('id') && $self->param('id')=~m/^(\d+)$/ && ($self->param('id') >= $self->session->param('ef_acid') ) ){
+        $search{ac_id} = $1;
+        my $sth = $self->resultset('Account')->search(\%search)->first;
+        if($sth){
+     # nested set
+          if(1==1){
+            %search = (
+                -and => [
+                        ac_min => {'>=' => $sth->ac_min},
+                        ac_max => {'<=' => $sth->ac_max}
+                ]
+            );
+          }
+     # db-heavy
+         if(1==0){
+            %search = ( ac_tree => {'like' => $sth->ac_tree . '%'});
+         }
+        }else{
+            %search = (
+                        ac_id => $1
+            );
+        }
+    }elsif($self->param('ef_acid') && $self->param('ef_acid')=~m/^(\d+)$/){
+        $search{ac_id} = $1;
+        my $sth = $self->resultset('Account')->search(\%search)->first;
+     # nested set
+          if(1==1){
+            %search = (
+                -and => [
+                        ac_min => {'>=' => $sth->ac_min},
+                        ac_max => {'<=' => $sth->ac_max}
+                ]
+            );
+          }
+     # db-heavy
+         if(1==0){
+            %search = ( ac_tree => {'like' => $sth->ac_tree . '%'});
+         }
+        #%search = ( -or => [ ac_tree => {'like' => $sth->ac_tree . '%'}, ac_parent => $sth->ac_id ]);
+
+    }else{
+        # show them nothing
+        $self->tt_params({ page => 'Your account has just been planted and has yet to grow into a tree' });
+        return $self->tt_process('default.html');
+    }
+    #my @rc = $self->resultset('Account')->search(\%search,{order_by => {-asc =>['ac_tree','ac_id']}})->all;
+    my @rc = $self->resultset('Account')->search(\%search,{order_by => {-asc =>['ac_min']}})->all;
+    $self->tt_params({ accounts => \@rc });
+    #return $self->tt_process($self->param('id'));
+    return $self->tt_process('Notice/C/Account/tree.tmpl');
 }
 
 
 =head3 delete
 
 Delete an account
+
+    This is buggy and does not clean up the ac_min ac_max
    
 =cut
 
 sub delete: Runmode {
     my ($self) = @_;
-    my %search;
-    #my $q = $self->query;
-     $self->tt_params({ message => 'Account delete is being written', error => 'Not deleted' });
-    return $self->tt_process('Notice/C/Account/main.tmpl');
+    my $q = $self->query;
+    my $type; #of domain
+    if( $self->param('id') ) {
+        my %find = ();
+
+        if( $self->param('id') ){
+            $find{'ac_id'}=$self->param('id');
+        }elsif( $self->param('sid') ){
+            $find{'ac_id'}=$self->param('sid');
+        }
+
+        #warn $self->param('id') . ' ' . $self->param('sid');
+
+        # have to limit this search to domains in their account
+        my $ef_acid;
+        our $ac_id;
+        $ac_id = $self->_acid;
+        unless($ac_id=~m/^\d+$/){
+            $self->tt_params({ message => 'I need to stop you from deleting your own account', error => 'Which is your account?' });
+            return $self->tt_process('Notice/C/Account/main.tmpl');
+        }
+
+        if($self->session->param('ef_acid')){
+            $ef_acid = $self->session->param('ef_acid');
+        }
+        elsif($self->param('ef_acid')){
+            $ef_acid = $self->param('ef_acid');
+        }
+     my $del = $self->resultset('Account')->search({
+            ac_id => $find{'ac_id'},
+        },{
+            columns => ['ac_id','ac_min','ac_max'],
+        })->first;
+
+
+    # Unless you are an admin then you should not 
+    #  delete an account unless 
+    #       all of its child accounts have been deleted (or there are none)
+    #        AND
+    #       all of its users have been deleted (or there are none)
+        
+=pod
+
+SELECT @myLeft := ac_min, @myRight := ac_max, @myWidth := ac_max - ac_min + 1
+FROM account
+WHERE ac_name = 'DELETE ME';
+
+DELETE FROM account WHERE min BETWEEN @myLeft AND @myRight;
+
+UPDATE account SET max = max - @myWidth WHERE max > @myRight;
+UPDATE account SET min = min - @myWidth WHERE min > @myRight;
+
+=cut
+
+        if($del && $del->ac_id && ( $del->ac_id eq $ef_acid ) && ( $ef_acid ne $ac_id) && ( $del->ac_id ne $ac_id) ){
+            my $min = $del->ac_min;
+            warn "min: " . $del->ac_min;
+            my $max = $del->ac_max;
+            warn "max: " . $del->ac_max;
+            my $width = $max - $min + 1;
+    warn "by deleting " . $del->ac_id . " we remove min: $min and max: $max ; with a width of $width";
+            if( $self->in_group('admin',$self->param('pe_id')) ){
+                  my $wipe = $self->resultset('Account')->search({
+                                ac_min => {'BETWEEN' => \"$min AND $max"}
+                            },{
+                                columns => ['ac_id'],
+                            });
+                  $wipe->delete;
+
+                 my $genocide = $self->resultset('People')->search({ pe_acid => $del->ac_id });
+                 warn "You need to:\n DELETE FROM people WHERE pe_acid = " . $del->ac_id;
+                 # $genocide->delete; #never a good idea
+            }
+            if($min && $max){
+                $del->delete();
+            }else{
+                warn "wow nelly! no loose cannons here!";
+            }
+            if($max){
+                my $fix_max = $self->resultset('Account')->search({
+                                    ac_max => {'>' => "$max"}
+                                },{
+                                    columns => ['ac_id','ac_min','ac_max'],
+                                });
+                while(my $f = $fix_max->next){
+                    my $new_max;
+                    if($f && $f->ac_max){
+                        my $new_max = $f->ac_max - $width;
+                        $f->update({ ac_max => $new_max });
+                    }else{
+                        warn "we have no new max for " . $f->ac_id;
+                    }
+                }
+            }
+            if($min){
+                my $fix_min = $self->resultset('Account')->search({
+                                    ac_min => {'>' => "$max"}
+                                },{
+                                    columns => ['ac_id','ac_min','ac_max'],
+                                });
+                while(my $f = $fix_min->next){
+                    my $new_min;
+                    if($f && $f->ac_min){
+                        $new_min = $f->ac_min - $width;
+                        $f->update({ ac_min => $new_min });
+                    }else{
+                        warn "we have no min for " . $f->ac_id;
+                    }
+                }
+            }
+            # We send them back to their own accoun
+             $self->param('ef_acid' => $ac_id);
+             $self->session->param('ef_acid' => $ac_id);
+            $self->session->param('message' => 'Account deleted ');
+            $self->session->param('error' => 'You have returned to your own account');
+        }else{
+            $self->session->param( message => 'Some Accounts are more solid than others - ', error => ' Not deleted');
+        }
+    }else{
+        $self->session->param( message => 'We might try that later', error => ' Not deleted' );
+    }
+        
+    #return $self->tt_process('Notice/C/Account/main.tmpl');
+    my $url;
+       $url = ($self->query->url);
+       #$surl = ($self->query->self_url);
+    return $self->redirect("$url/Account/");
 }
 
 
@@ -422,33 +675,67 @@ this is used by Account::new_child
 
 sub _list_children {
     my $self = shift;
-    my $p = shift;
-    my $t = shift;
+    my $p = shift;      # from this account down
+    my $t = shift;      # use the ac_tree
+    my $x = shift;      # eXclude the parent
+
     # we should use these parent/tree values if we have them or ELSE...
     my $ac_parent = '1';
     $ac_parent = $self->param('ac_parent') if $self->param('ac_parent');
     my $ac_tree = $self->param('ac_tree');
+    if($t){
+        $ac_tree = $t;
+    }
+    if($p){
+        $ac_parent = $p;
+    }
     #warn "parent: $ac_parent, tree: $ac_tree";
     $self->param(message => "ac_parent in _list_children is $ac_parent") if $self->param('debug') && $self->param('debug') >=1;
-    #my @children = ('1'); #we should pull the default from the database?
+    #my @children = ('1'); #should we pull the default from the database?
     my @children = (); #we should pull the default from the database?
     if($ac_tree=~m/^\d+(\.\d+)*$/){
         my $rs = $self->resultset('Account')->search({
             -or => [
-                ac_parent=>{'=',$ac_parent},
+                ac_parent=>$ac_parent,
                 ac_tree=>{ like => "$ac_tree.\%"}
-            ]},
-            { 'columns' => ['ac_tree'], order_by => {-asc =>['ac_id','ac_tree+0','ac_tree']}
+            ]},{ 
+                'columns' => ['ac_tree'], order_by => {-asc =>['ac_id','ac_tree+0','ac_tree']}
         });
         while(my $crs = $rs->next){
             push(@children,$crs->ac_tree);
             #my $old_msg = $self->param('message');
             #$self->param(message => "$old_msg");
         }
-    }else{
+    }elsif($ac_parent){
         $ac_parent = '1' unless $ac_parent=~m/^\d+$/; # again we should pull this from the database
-        my $rs = $self->resultset('Account')->search({
-                'ac_parent'=> "$ac_parent"},
+
+        my $prs = $self->resultset('Account')->search({
+                ac_id => $ac_parent,
+               },{
+                columns=>['ac_min','ac_max']
+        })->first;
+        #my %search = ( 'ac_parent'=> "$ac_parent" );
+        my %search;
+        if($prs && $prs->ac_min){
+            $search{'ac_min'} = {'>=' => $prs->ac_min};
+        }
+        if($prs && $prs->ac_max){
+            $search{'ac_max'} = {'<=' => $prs->ac_max};
+        }
+
+        # NTS you are here! we need to find all of the children using 
+        if($search{'ac_min'} && $search{'ac_max'}){
+            %search = ( 
+                -and => [
+                    'ac_min' => $search{'ac_min'},
+                    'ac_max' => $search{'ac_max'}
+                ]
+            );
+        }
+    
+    #warn Dumper(\%search);
+        my $rs = $self->resultset('Account')->search(
+                \%search,
                 {columns=>['ac_tree'], order_by => {-asc =>['ac_id','ac_tree+0','ac_tree']}
         });
         while(my $crs = $rs->next){
@@ -504,9 +791,31 @@ sub _new_child {
     my $ac_name     = $self->param('ac_name') ? $self->param('ac_name') : '';
     my $ac_notes    = $self->param('ac_notes') ? $self->param('ac_notes') : '';
     my $ac_useradd  = $self->param('ac_useradd') ? $self->param('ac_useradd') : '';
-    my @children = _list_children($self);
+
+    #SELECT ac_tree,ac_max FROM account WHERE ac_id = $ac_parent
+    my($parent_tree,$min,$max) = _tree_min_max($self);
+    
+    warn "parent $parent_tree, min $min, max $max";
+    my @offspring = _list_children($self); #all of them
+
+    # we do NOT include grandchildren so
+    my $tree_depth =$parent_tree ? $parent_tree : $self->param('ac_tree');
+    #$tree_depth=~s/[^\.]//g;
+    #my $generation = length($tree_depth);
+    my $generation = ($tree_depth=~tr/\.//);
+    my @children;
+    foreach my $child (@offspring){
+        my $count = ($child =~ tr/\.//);     
+        if($count == $generation+1){
+            push @children, $child;
+        }
+    }
+    warn "children:" . Dumper(\@children);
     my @last_child = ('0');
     @last_child = split /\./, $children[@children -1];
+    warn "last_child:" . Dumper(\@last_child);
+
+    #warn "min $ac_min max $ac_max parent $ac_parent name $ac_name notes $ac_notes useradd $ac_useradd";
    
     # If we are adding a grandchild rather than a new child..
     if($ac_parent eq $children[@children -1]){
@@ -515,8 +824,7 @@ sub _new_child {
     if(@last_child >=1){ $last_child[@last_child -1]++; } #NO! I don't want any zero accounts
     else{ push @last_child,'1'; } # If this account has  no children then this is the first one
     my ($ac_tree) = join('.', @last_child); #could probably do these split and join and increment with one map but this is clearer
-    #SELECT ac_tree,ac_max FROM account WHERE ac_id = $ac_parent
-    my($parent_tree,$min,$max) = _tree_min_max($self);
+    warn "ac_tree $ac_tree";
 
     # we could nest this new account at the front using 
     #unless($ac_min){ $ac_min = $min+1;}
@@ -548,6 +856,7 @@ sub _new_child {
                  ac_parent => "$ac_parent",
                  ac_useradd => "$ac_useradd"
                };
+    warn Dumper($data);
     my $comment = $self->resultset('Account')->create( $data )->update;
     my $ac_id = $comment->id;
     return ($ac_id,$ac_tree);

@@ -4,19 +4,14 @@
 [%- IF test; test; END -%]
 [%- #Wow! is this really the best way to do this? -%]
 [% FOREACH ac = children; IF ef_acid == ac.ac_id; ef_acid_ac_name = ac.ac_name; END; END #FOREACH  -%]
+[%- UNLESS ef_acid_ac_name; ef_acid_ac_name = children.0.ac_name; END; -%]
 
-
-<br />
-
-The main function here is to display a list of child accounts and enable a user to 'enter' that account, (change their effective_account_id)
-<br />
-
-<form method="post">
-<table>
+<br /> The main function here is to display a list of child accounts and enable a user to 'enter' that account, (change their effective_account_id) <br />
+<form method="post"><table>
 
 [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
     <tr class="[%- stripe -%]">
-       <td class="edit"><a class="black" href="[%- c.query.url -%]/Account">Your Account</a></td>
+       <td class="edit"><a class="black" href="[%- c.query.url -%]/Account?back=Return%20to%02your%20account">Your Account</a></td>
        <td>[%- IF edit -%]<select id="ac_select" name="pe_acid">
 
             [% IF accounts.size == 0 %]
@@ -53,18 +48,24 @@ The main function here is to display a list of child accounts and enable a user 
         No chid accounts found
     [%- ELSE -%]
         <select id="ac_child_account" name="set_acid">
-        <option value="[%- ac_id -%]">Your account</option>
+        <!-- option value="[%- ac_id -%]">Your account</option -->
+        [%- this_depth = children.0.ac_tree.split('\.').size + 1 -%]
+        [%- UNLESS this_depth; this_depth = 2; END -%]
         [% FOREACH ac = children -%]
-            [%- tree_padding='';tree_depth = ac.ac_tree; generation = tree_depth.match('(\.)', 1) -%]
-            [%- IF generation.size >=2 -%] 
-                [%-  FOREACH gen = generation -%]
-                    [%- tree_padding = "=$tree_padding" -%]
-                [%- END #FOREACH -%]
-            [%- END #IF -%]
-            [%- tree_padding = "$tree_padding&gt;" -%]
+            [%- #tree_padding='';tree_depth = ac.ac_tree; generation = tree_depth.match('(\.)', 1) # Y U no wrk? -%]
+            [%- tree_padding='';tree_depth = ac.ac_tree.split('\.'); generation = tree_depth.size -%]
+            [%- #here we make the padding depth relative to the ef_acid -%]
+            [%- pad = 0; WHILE pad < this_depth; g = tree_depth.pop; pad = pad + 1; END -%]
+            [%- FOREACH gen IN tree_depth -%]
+                [%- tree_padding = "=$tree_padding" -%]
+            [%- END #FOREACH -%]
+            [%- IF c.param('ef_acid') != ac.ac_id; tree_padding = "$tree_padding&gt;"; END -%]
             <option value="[% ac.ac_id %]" [% IF ef_acid == ac.ac_id; 'selected="selected"'; END %]> [%- tree_padding; ' '; 
-                IF ac.ac_name; ac.ac_name; ELSE; '['; ac.ac_id; ']'; END; 
-                IF ac.ac_name.length <= 1; ' - [Personal Account] '; END -%]</option>
+                IF ac.ac_name; ac.ac_name; ELSE; '('; ac.ac_id; ')'; END; 
+                IF ac.ac_name.length <= 1; ' - [Personal Account] '; END;
+            IF ac.ac_id == pe_acid; ' (Your Account)'; END;
+            -%] 
+</option>
         [% END #FOREACH %]
         </select>
     [% END # if accounts.size == 0 %]
@@ -79,7 +80,11 @@ The main function here is to display a list of child accounts and enable a user 
     <input type="submit" value="[%- change || 'Return to your account' -%]" name="back" class="edituser" onmouseover="this.className='edituser edituserhov'" onmouseout="this.className='edituser'" onclick="this.className='edituser'"/>
 [%- END #change back -%]
     <a class="small orange button" href="[%- c.query.url -%]/Account/edit/[%- ef_acid -%]" />Edit</a>&nbsp;
-    <a class="small red button" href="[%- c.query.url -%]/Account/delete/[%- ef_acid -%]" />Delete</a>
+    [%- IF ef_acid != ac_id -%]
+    <a class="small red button" href="[%- c.query.url -%]/Account/delete/[%- ef_acid || c.session.param('ef_acid') -%]" />Delete</a>
+    [%- ELSE #; ef_acid; '!='; ac_id -%]
+        
+    [%- END -%]
 </td>
     </tr>
 
@@ -91,14 +96,16 @@ The main function here is to display a list of child accounts and enable a user 
 <table>
 <tr>
     <td>Add a new
- <select name="what">
-<option value='child'>child</option>
-<option value='sibling'>sibling</option>
     [%- IF ef_acid != ac_id -%]
-<option value='uncle'>parent sibling</option>
-    [%- END -%]
+ <select name="what"> <!-- would it not be easier for the user if this simply selected TO _which_ account to add this new child ? -->
+<option value='child'>child</option>
+<!-- option value='sibling'>sibling</option>
+<option value='uncle'>parent sibling</option -->
 </select> 
-account to account [%- ef_acid -%] called:</td>
+    [%- ELSE -%]
+        <input type="hidden" name="what" value="child" />child 
+    [%- END -%]
+account to this &quot;[%- ef_acid_ac_name -%]&quot; ([%- c.param('ef_acid') -%]) account called:</td>
 <td><input type="text" name="ac_name" required /></td>
 <td><input class="small green button" type="submit" name="add" value="add" /></td>
 </tr>

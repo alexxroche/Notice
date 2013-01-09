@@ -280,9 +280,9 @@ sub sha512_filter {
                         my $ac_id = $ac->ac_id;
                         $self->param(ac_tree => $ac_tree);
                         $self->session->param(ac_tree => $ac_tree);
-                        unless($self->param('pe_acid')){
+                        unless($self->session->param('pe_acid')){
                             warn "RE-setting the pe_acid in Notice.pm";
-                            $self->param(pe_acid => $ac_id);
+                            $self->session->param(pe_acid => $ac_id);
                         }
                     }
                     $self->session->param(pe_id => $pe_id);
@@ -620,6 +620,75 @@ sub tt_post_process {
   };
   if($@){ warn $@; }
   return;
+}
+
+=head3 in_group
+
+find out if a user is a member
+defaults to $this user
+
+=cut
+
+sub in_group {
+    my $self = shift;
+    my $group = shift;
+    my $users = shift;
+    my $living_dangerously = shift; # do we let the sysadmin in? (I think not)
+    return 0 unless $group;
+    
+    if( $living_dangerously && (
+    $self->session->param('pe_id') && $self->session->param('pe_id')=~m/^1$/ ||
+    $self->session->param('pe_level') && $self->session->param('pe_level')=~m/^\d\d\d+$/ )
+    ){
+        #warn "They now let anyone in!"; # I remember when this place was exclusive
+        warn "admin bypass";
+        #return 1;
+    }
+
+    if( $living_dangerously ){
+        if(defined $self->cfg('admin')){
+            if( ref($self->cfg('admin')) eq 'ARRAY'){
+                ADMIN_SEARCH: foreach my $adm (@{ $self->cfg('admin') }){
+                    if( $adm && $users && $adm eq $users){ # can we say "overloaded" ?
+                        return 1;
+                        last ADMIN_SEARCH; # but we already returned
+                    }
+                }
+            }
+        }
+    }
+
+    # Here we hit the database to see if they are a member of $group
+    if( ref($users) eq 'ARRAY'){
+        GROUP_SEARCH: foreach my $pe_id (@{ $users }){
+            if($pe_id=~m/^\d+$/){ # not really our function to convert to pe_id from username
+                my $rc = $self->resultset('Group')->search({
+                        -and => [
+                            'gr_name' => "$group",
+                            'gg_peid' => $pe_id
+                        ],
+                        },{
+                        join => 'members',
+                    })->count;
+                if($rc){ return 1; }
+            }
+        }
+    }elsif($users=~m/^\d+$/){
+      #warn "checking pe_id $users is in the group $group";
+        my $rc = $self->resultset('Group')->search({
+                        -and => [
+                            'gr_name' => "$group",
+                            'gg_peid' => $users
+                        ],  
+                        },{
+                        join => 'members',
+                    })->count; #should be 0||1
+        if($rc){ return 1; }
+    }else{
+        warn "group: $group; user: $users";
+    }
+
+    return 0; # nope - not written yet, so fail safe
 }
 
 =head3 plt

@@ -1,0 +1,17 @@
+[%- IF username -%]
+ [% WRAPPER 'site_wrapper.tmpl' -%]
+        [%- page -%]
+ [% END # wrapper -%]
+[% ELSE %]
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>[% title || 'Welcome to Notice::Adendum' %]</title>
+    </head>
+    <body>
+        <h1>[% message %]</h1>
+        [%- body -%]
+        [%- page -%]
+    </body>
+</html>
+[% END %]
