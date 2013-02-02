@@ -1,0 +1,8 @@
+[%- IF p.pa_title -%]
+<!DOCTYPE html><html><head><title>[%- p.pa_title -%]</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><style type="text/css">[%- css -%]</style></head><body>
+[%- END -%]
+[%- body  -%]
+[%- page || p.pa_ge -%]
+[%- IF p.pa_title -%]
+</body></html>
+[%- END -%]

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>[%- title OR 'Notice::Pages' -%]</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel=stylesheet href="/css/pages.css" />
+ [%- UNLESS no_editor -%]
+  <script src="/ckeditor/ckeditor.js">
+    //var editor_data = CKEDITOR.instances.editor1.getData();
+    window.onload = function() {
+        CKEDITOR.replace( 'editor1' );
+    };
+  </script>
+ [%- END # no_editor -%]
+</head>
+<body>
+[%- page -%]
+[%- warning || warn -%]
+[%- message -%]
+[%- error -%]
+[%- USE Dumper -%]
+    <form method="post">
+     [%- UNLESS is_template -%]
+        <p>
+            <input type="hidden" name="id" value="[%- p.pa_id -%]" />
+            <span class="small">Name: <input type="text" name="name" title="It has to have a name" value="[%- p.pa_name || name -%]" required />
+            &nbsp; <a tabindex=99 class="red button" href="[%- c.query.url -%]/Pages/>Abandon or return to list</a>
+            <br />
+            </span>
+     [%- END # is_template - template has the buttons at the bottom of the page -%]
+            <textarea name="editor1" rows="39" cols="177" >[%- IF editor1; editor1.replace('% ]','%&#93;'); ELSE; p.pa_ge OR '&lt;p&gt;New Page.&lt;/p&gt;'; END -%]</textarea>
+ [%- UNLESS no_editor -%]
+            <script>
+                [%- IF is_template; "
+                CKEDITOR.config.height = 474; 
+                CKEDITOR.config.fullPage = true; 
+                "; END -%]
+                CKEDITOR.replace( 'editor1' );
+            </script>
+ [%- END # no_editor -%]
+
+        </p>
+        <p>
+        [%- UNLESS is_template -%]
+            <input class="small [%- IF p ; 'blue'; ELSE; 'green'; END -%] button" title="save for later" type="submit" value="[%- update OR 'Save' -%]" name="update" /> &nbsp;
+        [%- END # UNLESS -%]
+        [%- IF admin -%]
+            <input class="small [%- IF p.pa_published ; 'white'; ELSE; 'orange'; END -%] button" type="submit" title="Go live right now" value="[%- IF p.pa_published ; 'Update'; ELSE; 'Publish'; END -%]" name="publish" />
+        [%- END # admin check -%]
+        [%- UNLESS is_template -%]
+            <br />
+            <span class="x-small"><span class="under">Optional</span> Advanced settings</span><br />
+            <span class="small">
+            Tags: <textarea name="tags">[%- tags -%]</textarea>
+                Title: <input type="text" name="title" title="defaults to the name" value="[%- p.pa_title -%]" /> &nbsp;
+                Link: <input type="text" name="link" title="defaults to the name" value="[%- p.pa_link -%]" />
+                Template: 
+                [%- IF templates -%]
+                    <select name="templates">
+                        [%- FOREACH t = templates -%]
+                            <option value="[%- t.value -%]">[%- t.name -%]</option>
+                        [%- END -%]
+                    </select>
+                [%- ELSE -%]
+                     Default, (you could add one)
+                [%- END -%]
+            </span>
+                <br />
+            <span class="x-small">
+            Tags are in the form of #id,order; name,precident; .class,rank  (spaces are optional) <br />
+                You can have #id,inc or #id,inc7 where you want the whole page, (or more usually a stub) to be included rather than just a link.<br />
+                This is used for the copyright message in the footer.<br />
+            [%- man -%]
+            </span>
+          [%- END # is_tempalte -%]
+          [%- IF is_template -%]
+            <input type="hidden" name="old_name" value="[%- name -%]" />
+ <span class="small"> Template: <input type="text" name="name" title="It has to have a name" value="[%- p.pa_name || name -%]" required />
+            &nbsp; or <a tabindex=99 class="red button" href="[%- c.query.url -%]/Pages/template"
+                    >Abandon this TEMPLATE or return to list</a>
+            <br />
+            </span>
+          [%- END # IF is_template -%]
+
+        </p>
+    </form>
+</body>
+</html>

@@ -19,8 +19,9 @@ use Data::Dumper;
 my $dir_delim = '::'; # if a filename has this in it then we publish it in a sub-directory
                       # i.e.  contact::index would create contact/index.html
                       # NTS we need to implement this in sub view to match!
+my $default_tempalte_file = 'pages.html';
 
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 
 =head1 NAME
 
@@ -300,7 +301,7 @@ sub edit: Runmode {
                     $q->param('update') eq "Save" || 
                     $q->param('update') eq "Update"
                     ) 
-        ) || ( $is_an_admin && $q->param('publish') && $q->param('publish') eq "Publish" )
+        ) || ( $is_an_admin && $q->param('publish') && ( $q->param('publish') eq "Publish" || $q->param('publish') eq "Update" ) )
     ) {
         use DateTime qw /now/;
         my $now = DateTime->now();         # these three lines work but why bother?
@@ -667,7 +668,6 @@ sub view: Runmode {
 
     # look for a default template
     my $base_path = 'templates';
-    my $default_tempalte_file = 'pages.html';
 
     if (-e "$base_path/$default_tempalte_file"){
 
@@ -840,7 +840,9 @@ sub view: Runmode {
                 my $cpyrtd  = HTML::Element->new('~literal', 'text' => $now->year);
 
                 my $copyright_date = $tree->look_down('id' => qr/^copyright$/);
+                if($copyright_date){
                     $copyright_date->push_content($cpyrtd);
+                }
                 if($opt{publishing}){
                   { no warnings; 
                     $tree->look_down('id' => qr/^foot(er)?$/)->look_down( 
@@ -948,13 +950,209 @@ sub preview: Runmode {
 =head3 templates
 
     a list of temples 
+    # NOTE there can be more templates than pages!
+    # there can be one template for each page.
+    #
+    # the first thing we need to be able to do is edit the default template
+    #
+    # NOTE we are not dealing with paths properly, (yet)
+    # NOTE the WYSIWYG editor strips off some of the HTML, so we will have to add that back
 
 =cut
 
 sub template: Runmode {
     my ($self) = @_;
-    #return $self->tt_process('');
-    return 'This will be a template creation/editing page<br />(Took ' . $self->plt . ' ms)';
+    my $q = $self->query;
+    my $tempalte_file = $default_tempalte_file;
+    $self->tt_params({ is_template => 1 });
+    if($self->authen->username){
+        my $username = $self->authen->username;
+        $self->tt_params({ username => $username});
+    }
+    my $inc_all = 0; # do we include all files and not just Pages templates, (which are just html)
+    if ($q->param('inc_all') || ( $self->param('id') && $self->param('id') eq 'inc_all') ){
+        $inc_all = 1;
+        $self->tt_params({ inc_all => 1});
+    }
+
+     my $is_an_admin=0;
+
+    # the only people that can publish
+    #if( $self->in_group('Editor',"$username",1) ){  # this works but only because we have overloaded in_group
+    if( ! $is_an_admin && $self->in_group('Editor',$self->param('pe_id')) ){
+      #warn "in_group said yes";
+        $is_an_admin=1;
+    }
+    if($is_an_admin){
+        $self->tt_params({ admin => 1 });
+    }
+
+    # check that "template" does not have any XSS or '..'
+    if ($q->param('template')){
+        $tempalte_file = $q->param('template');
+#warn "template from query param $tempalte_file";
+    }elsif($self->param('sid') && $self->param('sid') ne ''){
+        $tempalte_file = $self->param('sid');
+#warn "editing $tempalte_file";
+    }
+
+    my $base_path = 'templates';
+    my $sub_dir = '';
+    my $file_or_dir_to_remove;
+
+#  ':id/:sid/:did?/:eid?/:*'=> { fid => 1},
+    if($self->param('id') && -d "$base_path/" . $self->param('id')){
+        $base_path .= '/' . $self->param('id');
+        $sub_dir .= $self->param('id');
+    }elsif($self->param('id') && $self->param('id') eq 'delete'){
+        if($self->param('sid')){
+            #warn "deleting " . $self->param('sid');
+            $file_or_dir_to_remove =  $self->param('sid');
+        }else{
+            warn "not deleted a nameless Pages template";
+            $self->tt_params({error => 'That seems overly nihilistic<br />' });
+        }
+    }
+    if($self->param('sid') && -d "$base_path/" . $self->param('sid')){
+        $base_path .= '/' . $self->param('sid');
+        $sub_dir .= '/' . $self->param('sid');
+    }
+    if($self->param('did') && -d "$base_path/" . $self->param('did')){
+        $base_path .= '/' . $self->param('did');
+        $sub_dir .= '/' . $self->param('did');
+    }
+    if($self->param('eid') && -d "$base_path/" . $self->param('eid')){
+        $base_path .= '/' . $self->param('eid');
+        $sub_dir .= '/' . $self->param('eid');
+    }
+    if($self->param('fid') && -d "$base_path/" . $self->param('fid')){
+        $base_path .= '/' . $self->param('fid');
+        $sub_dir .= '/' . $self->param('fid');
+    }
+    $sub_dir =~s/^\///;
+    my $file_rm = $file_or_dir_to_remove;
+    if($base_path && $file_or_dir_to_remove){ 
+        $file_or_dir_to_remove =  "$base_path/$file_or_dir_to_remove"; 
+    }
+    if(  ( -f "$file_or_dir_to_remove" || -d "$file_or_dir_to_remove") &&
+    $base_path !~m/\.\./ && $file_or_dir_to_remove !~m/\.\./ # NOTE this could be better
+    && $file_rm
+    ){
+       warn "deleting $file_or_dir_to_remove";
+       $self->tt_params({message => $file_rm . ' deleted (once we enable that)<br />' });
+    }elsif($file_or_dir_to_remove){
+       warn "NOT deleting $file_or_dir_to_remove";
+       $self->tt_params({error => 'Lets NOT and say that we did?<br />' });
+    }
+
+     if( $is_an_admin && $q->param('publish') && ( $q->param('publish') eq "Publish" || $q->param('publish') eq "Update" ) )
+     {
+        use DateTime qw /now/;
+        my $now = DateTime->now();         # these three lines work but why bother?
+        my %create_data = ( pa_updated => $now);
+        my @create_tags;
+        #my %create_data = ( ud_added => \'NOW()');   #this works, if the DB has the same time as the web server
+        if($q->param('name') ne $q->param('old_name')){
+        # we are doing a mv (and possibly an update);
+        }
+        my $existing_template;
+        if(-f "$base_path/" . $q->param('old_name')){
+            # we are updating or replacing something
+            open(TEMPLATE, "<$base_path/" . $q->param('old_name') );
+            while(my $line = <TEMPLATE>){
+                $existing_template .= $line;
+            }
+            close(TEMPLATE);
+        }
+        if($existing_template ne $q->param('editor1') ){
+            open FILE, ">", "$base_path/" . $q->param('name');
+            print FILE $q->param('editor1');
+            close(FILE);
+            $self->tt_params({ message=> '<span class="small red button">Template updated</span>' });
+        }else{
+            $self->tt_params({ error => 'No changes made', title => 'R U an epileptic monkey? Then stop pointlessly pressing buttons!' });
+        }
+
+        #foreach my $ak (keys %{ $q->{'param'} } ){
+        #    if(length($q->param($ak)) <= 100){
+        #        warn "$ak: " . $q->param($ak);
+        #    }else{
+        #        warn "$ak: (long)";
+        #    }
+        #}
+    }elsif( $q->param('publish') ){
+        return "Wait until you are out of short trousers";
+    }
+
+    # find a list of templates (with the option to edit TT.tmpl files as well
+    if (-e "$base_path/$tempalte_file"){
+
+        my $template;
+        open(TEMPLATE, "<$base_path/$tempalte_file");
+        while(<TEMPLATE>){
+            $template .= $_;
+        }
+        close(TEMPLATE);
+        $self->tt_params({ name => $tempalte_file });
+
+        if($self->param('id') eq 'edit'){
+            $self->tt_params({ editor1 => $template });
+            return $self->tt_process('Notice/C/Pages/edit.tmpl');
+        }elsif($self->param('id') eq 'edit_raw' || $self->param('id') eq 'editraw' || $self->param('id') eq 'raw_edit'){
+            #$template =~s/\[%/\&#91;\&#37;/g; $template =~s/%\]/\&#37;\&#93;/g;
+            #$template =~s/\[%/\[\%/g; $template =~s/%\]/% ]/g;
+            $template =~s/%\]/% ]/g;
+            $template = $q->escapeHTML( $template ) || '';
+            #$self->tt_config( EVAL_PERL => 1 );
+            $self->tt_params({ no_editor => 1 });
+            $self->tt_params({ editor1 => $template });
+            return $self->tt_process('Notice/C/Pages/edit.tmpl');
+            #return $self->tt_process('Notice/C/Pages/edit.tmpl',{ 'EVAL_PERL'=>1} );
+        }
+    }
+    # maybe this is a new template
+    if($self->param('id') && $self->param('id') eq 'edit'){
+            return $self->tt_process('Notice/C/Pages/edit.tmpl');
+    }elsif($self->param('id') eq 'edit_raw' || $self->param('id') eq 'editraw' || $self->param('id') eq 'raw_edit'){
+    #warn 'id: ' . $self->param('id');
+            $self->tt_params({ no_editor => 1 });
+            return $self->tt_process('Notice/C/Pages/edit.tmpl');
+    }
+
+    my %tmpl_list;
+    use Cwd;
+    my $dir = getcwd;
+    my $relative_path = $base_path;
+    my $fullpath = $dir . '/' . $relative_path;
+    if(-d "$fullpath" ){
+    #    eval {
+                #no warnings 'uninitialized';
+                opendir (LIST, "$fullpath") or die $!; # "failed to open $fullpath";
+                my $count = 0;
+                while(my $file = readdir(LIST)){
+                    $count++;
+                    next if ($file =~ m/^\./);
+                    next unless ($inc_all || $file =~ m/\.html$/);
+                    if (-d "$fullpath/$file"){
+                        push @{ $tmpl_list{dir} }, $sub_dir .'/'. $file;
+                    }else{
+                        $tmpl_list{$count}{pa_name} = $file;
+                    }
+                }
+                closedir(LIST);
+    #    };
+       #warn Dumper(\%tmpl_list);
+     #   if(@_){
+        if(!%tmpl_list && !$count){
+            warn "bad things in $fullpath " . $!;
+            $self->tt_params({ warning => $! });
+            #%tmpl_list = `ls $fullpath`;
+        }
+    }else{
+        $self->tt_params({ warning => $fullpath . ' templates directory missing ' });
+    }
+
+    return $self->tt_process({ pages => \%tmpl_list});
 }
 
 =head3 unpublish
@@ -1088,6 +1286,7 @@ sub delete: Runmode {
             }
             $message .= " (and tags cleared)";
          }
+         $message .= "<br />";
          $self->session->param('message' => $message );
          my $url;
          $url = ($self->query->url);

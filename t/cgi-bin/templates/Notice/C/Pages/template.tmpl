@@ -1,0 +1,78 @@
+[%- IF username -%]
+ [% WRAPPER 'site_wrapper.tmpl' -%]
+  [% IF ! pages -%]
+    <br />
+  [%- page -%]
+ To start off with you should <a class="bold green" href="[% c.query.url -%]/Pages/template/edit/">add a Template</a>.<br>
+ [%- ELSE -%]
+<span class="warn">Be careful when you </span>
+ <a class="small green button" href="[% c.query.url -%]/Pages/template/edit/new/">add a Template</a> or anything else in the templates section. 
+<span class="warn">These templates are _always_ "live"</span>
+<style type="text/css">
+.page_list {
+    /*
+    min-height: 10px; //clear float
+    border: 1px solid #000;
+    margin: 2em;
+    width: 10em;
+    padding: 5px;
+    */
+    display: block;
+}
+
+.width_padless {
+    width: 159px;
+    display: inline-block;
+}
+.width_pad {
+    width: 200px;
+    display: inline-block;
+}
+
+.page_list li {
+    display: inline;
+    /*
+    display: block;
+    float: left;
+    width: 50%;
+    */
+
+
+}
+</style>
+[%- #USE Dumper; Dumper.dump(stubs) -%]
+    [% FOREACH p = pages.dir; id = p.pa_id; NEXT IF ( p.pa_id OR p.value.pa_name) -%]
+        <br /><a class="blue" href="[% c.query.url -%]/Pages/template/[%- p -%]/?inc_all=1">[%- p -%]</a>
+    [%- END # FOREACH direcory -%]
+<ul class="page_list">
+    [% FOREACH p = pages; id = p.pa_id; NEXT UNLESS ( p.pa_id OR p.value.pa_name) -%]
+    [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]
+
+        <li>
+            <ul class="[%- stripe -%]">
+                <li class="width_pad [%- stripe -%]">
+            <a class="width_pad[%- IF stubs.$id; 'less'; END -%] blue" href="[% c.query.url -%]/Pages/view/[%- p.pa_id || p.value.pa_name -%]">[%- p.pa_link || p.pa_name || p.pa_title || p.pa_id || p.value.pa_name -%]</a>
+            [%- IF stubs.$id; '(TT)'; ELSE; '&nbsp'; END -%] 
+            </li><li class="[%- stripe -%]">
+            <a class="small orange button" href="[% c.query.url -%]/Pages/template/edit/[%- p.pa_name || p.value.pa_name -%]">Edit</a> 
+            </li><li class="[%- stripe -%]">
+            <a title=" Bypass the nice WYSIWYG editor to get to the yummy raw HTML "
+              class="small orange button" href="
+                [%- c.query.url -%]/Pages/template/edit_raw/[%- p.value.pa_name -%]"><span class="y">Raw Edit</span></a> 
+            </li><li class="[%- stripe -%]">
+            <a class="small red button" href="[% c.query.url -%]/Pages/template/delete/[%- p.pa_id || p.value.pa_name -%]">Delete</a> 
+                </li>
+            </ul>
+        </li>
+    [%- END -%]
+</ul>
+    <br />
+[%- UNLESS inc_all -%]
+    <a class="small button" href="[% c.query.self_url -%]/?inc_all=1">Show all files and directories</a>
+[%- END # inc_all -%]
+    [%- pagination -%]
+  [% END # IF -%]
+ [% END # wrapper -%]
+[% ELSE %]
+ 404 Page not found.. maybe you want to <a class="black" href="[% c.query.url -%]/Login">Login</a>?
+[% END %]
