@@ -1,6 +1,7 @@
 [%- IF username -%]
  [% WRAPPER 'site_wrapper.tmpl' -%]
  <a class="small green button" href="[% c.query.url -%]/Pages/edit/">add a Page</a><br>
+<span class="warn">The publish button for each page can be found on the editor page, IF you are an editor</span>
   [% IF ! pages -%]
     <br />
   [%- page -%]

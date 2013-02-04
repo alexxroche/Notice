@@ -20,8 +20,9 @@ my $dir_delim = '::'; # if a filename has this in it then we publish it in a sub
                       # i.e.  contact::index would create contact/index.html
                       # NTS we need to implement this in sub view to match!
 my $default_tempalte_file = 'pages.html';
+my $base_path = 'templates';
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 =head1 NAME
 
@@ -50,9 +51,10 @@ We present the body of the page in http://ckeditor.com
  http://www.tinymce.com/
  or
  http://markitup.jaysalvat.com/examples/html/
- or a single textarea if you like that sort of thing.
+ or
+ codemirror.
+ The editor falls back to a single textarea if you browser does not do js
 )
-
 
 If we have a direct request from a page that has not been published
  we return a 404 Page not found, even if the page has been written.
@@ -74,16 +76,9 @@ journalist group can add and edit pages.
 
 =head4 TODO
 
-main page:
-    Show which pages are stubs
-
 editor:
     prune tags - right now that does not happen! (but you can delete them all and start again)
     make tags unique (each page can only have "menu,15" once, not "menu,15;menu,12;menu;menu,inc"
-
-templates:
-    Write and edit templates
-    Set a template for a particular page
 
 Display helpful "chmod 744 $www_path; chown $httpd_user $www_path"
 
@@ -312,22 +307,28 @@ sub edit: Runmode {
           # might be better to pull this from an array, but there must be a
           # better DBIx::Class way to know which collums we are looking for
           if(
-            $ak eq 'link' ||
             $ak eq 'name' ||
-            $ak eq 'title'
+            $ak eq 'template'
            ){
                 if($q->param($ak) ne ''){
                     $create_data{"pa_$ak"} = $q->param($ak);
+                }elsif($ak eq 'template'){
+                    $create_data{"pa_$ak"} = \'Null';
                 }
+           }elsif(
+            $ak eq 'link' ||
+            $ak eq 'title'
+           ){
+                $create_data{"pa_$ak"} = $q->param($ak);
            }elsif(
             $ak eq 'editor1'
            ){
-                if($q->param($ak) ne ''){
+                if($q->param($ak) ne ''){ # if we want to delete the page then just delete it
                     $create_data{"pa_ge"} = $q->param($ak);
                 }
            # we should not need this check
-           #}elsif($ak ne 'tags' && $ak ne 'update' && $ak ne 'id'){
-           #  warn "Notice::C::Pages - something is up $ak: " . $q->param($ak);
+           }elsif($ak ne 'tags' && $ak ne 'update' && $ak ne 'id'){
+             warn "Notice::C::Pages - something is up $ak: " . $q->param($ak);
            }
         }
         if( $self->param('pe_id') ){
@@ -374,6 +375,8 @@ sub edit: Runmode {
 
                 if( ( $create_data{'pa_ge'} && $create_data{'pa_ge'} ne $rc->pa_ge ) ||
                     ( $create_data{'pa_title'} && $create_data{'pa_title'} ne $rc->pa_title ) ||
+                    ( $create_data{'pa_template'} && $create_data{'pa_template'} ne $rc->pa_template ) ||
+                    ( ! $create_data{'pa_template'} && $create_data{'pa_template'} ne $rc->pa_template ) ||
                     ( $create_data{'pa_name'} && $create_data{'pa_name'} ne $rc->pa_name ) ||
                     ( $create_data{'pa_link'} && $create_data{'pa_link'} ne $rc->pa_link )
                      ){
@@ -527,7 +530,7 @@ sub edit: Runmode {
 
         # we know where, so check that it exists and that we can write to it
         if( ( -d "$www_path" ) && ( ( -e "$www_path/$filename" && -w "$www_path/$filename" ) || ( -w "$www_path") ) ){
-            # NTS YOU ARE HERE
+          
             my $page_html;
             $page_html = $self->view;
             open(HTML,">$www_path/$filename") or do { $self->tt_params({ error => 'failed to open file' }); return $self->tt_process(); };
@@ -555,6 +558,31 @@ sub edit: Runmode {
         } 
 
     } 
+
+    my @tmpl_list;
+    use Cwd;
+    my $dir = getcwd;
+    my $fullpath = $dir . '/' . $base_path;
+    if(-d "$fullpath" ){
+        opendir (LIST, "$fullpath") or die $!; # "failed to open $fullpath";
+     warn "checking $fullpath for templates";
+        my $count = 0;
+        while(my $file = readdir(LIST)){
+            $count++;
+            next if ($file =~ m/^\./);
+            next unless $file =~ m/\.html$/;
+            if (-f "$fullpath/$file"){
+                push @tmpl_list, {name => $file, value => $file};
+            }
+        }
+        closedir(LIST);
+        if(@tmpl_list){
+            $self->tt_params({ templates => \@tmpl_list });
+        }
+    warn Dumper(\@tmpl_list);
+    }else{
+        warn "$fullpath does not exists";
+    }
 
     #return $self->tt_process();
 
@@ -667,24 +695,43 @@ sub view: Runmode {
 
 
     # look for a default template
-    my $base_path = 'templates';
-
-    if (-e "$base_path/$default_tempalte_file"){
-
-        my $template;
-        open(TEMPLATE, "<$base_path/$default_tempalte_file");
-        while(<TEMPLATE>){
-            $template .= $_;
-        }
-        close(TEMPLATE); # as it is READ ONLY at this location!
-
-
+       # If you want pages that have a template set to a file that does not exists
+       # to render using the default page, then 
+    my $missing_templates_use_default = 0;
+    my $template;
 
         if($pa_id && $pa_id=~m/^\d+$/){
         # Now we collect the actual page that we are looking for from the database
             my $page = $self->resultset('Page')->search({ pa_id => $pa_id })->first;
             if($page && $page->pa_ge){
                 my $stub;
+
+                if(defined $page->pa_template){
+                    if (-e "$base_path/" . $page->pa_template){
+                        open(TEMPLATE, "<$base_path/" . $page->pa_template);
+                        while(<TEMPLATE>){
+                            $template .= $_;
+                        }
+                        close(TEMPLATE); # as it is READ ONLY at this location!
+                    }elsif($missing_templates_use_default && -e "$base_path/$default_tempalte_file"){
+                        open(TEMPLATE, "<$base_path/$default_tempalte_file");
+                        while(<TEMPLATE>){
+                            $template .= $_;
+                        }
+                        close(TEMPLATE); # as it is READ ONLY at this location!
+                    }else{
+                        $template='';
+                    }
+                }else{
+                    if(-e "$base_path/$default_tempalte_file"){
+                        open(TEMPLATE, "<$base_path/$default_tempalte_file");
+                        while(<TEMPLATE>){
+                            $template .= $_;
+                        }
+                        close(TEMPLATE); # as it is READ ONLY at this location!
+                    }
+                }
+
                 my $trc = $self->resultset('PageTag')->search({ pt_paid => $pa_id });
                 TAG: while( my $t = $trc->next){
                     if($t->pt_inc){
@@ -694,17 +741,17 @@ sub view: Runmode {
                 if($stub){ # This is to be included in other pages as a whole section 
                     $template = $page->pa_ge; # so we show what that stub might look like
                 }else{
-                    my $page_data = $page->pa_ge;
-                    if($template){
+                  my $page_data = $page->pa_ge;
+                  if($template){
         # Now we need to extract all of the tags and their id,name and classes
 
                     use HTML::TreeBuilder::XPath;
                     my $tree = HTML::TreeBuilder::XPath->new;
                     # soon we are going to have the option of a custom template per page
-                    if (-e "$base_path/$default_tempalte_file"){
-                        $tree->parse_file("$base_path/$default_tempalte_file");
-                    }else{
+                    if ($template ne ''){
                         $tree->parse_content("$template");
+                    }elsif (-e "$base_path/$default_tempalte_file"){
+                        $tree->parse_file("$base_path/$default_tempalte_file");
                     }
 
                     { no warnings; 
@@ -825,12 +872,21 @@ sub view: Runmode {
                     }
                     my $page_title = HTML::Element->new('~literal', 'text' => "$this_title");
                     my $title = $tree->look_down( sub { $_[0]->tag() eq 'title'});
-                    $title->push_content($page_title);
-                    #$title->replace_with_content($page_title); # Not what we need here
+                    if($title){
+                        $title->push_content($page_title);
+                        #$title->replace_with_content($page_title); # Not what we need here
+                    }
 
                     my $page_body = HTML::Element->new('~literal', 'text' => "$page_data");
                     my $span = $tree->look_down('id' => 'page');
-                    $span->push_content($page_body);
+                    if($span){
+                        $span->push_content($page_body);
+                    }else{
+                        my $pan = $tree->find('body');
+                        if($pan){
+                            $pan->push_content($page_body);
+                        }
+                    }
 
                 use DateTime qw /now/;
                 my $now = DateTime->now();         # these three lines work but why bother?
@@ -859,9 +915,12 @@ sub view: Runmode {
                     my $back_css = HTML::Element->new('~literal', 'text' => "$this_css");
                     my $style = $tree->look_down( sub { $_[0]->tag() eq 'style'});
                     if(!$style || $style->is_empty){
+                        $back_css = HTML::Element->new('~literal', 'text' => "<style type=\"text/css\">$this_css</style>");
                         $style = $tree->find('head');
-                        $style->push_content($back_css);
-                    }else{
+                        if($style){
+                            $style->push_content($back_css);
+                        }
+                    }elsif($style){
                         $style->push_content($back_css);
                     }
 
@@ -876,9 +935,11 @@ sub view: Runmode {
 
                     my $plt_html = HTML::Element->new('~literal', 'text' => '<span class="pageLoadTime">(Took ' . $self->plt . ' ms)</span>');
                     my $foot_div = $tree->look_down('id' => 'footer');
-                    $foot_div->push_content($plt_html); #WORKS
-                    #$foot_div->unshift_content($plt_html); #WORKS
-                    #$foot_div->insert_element($plt_html); # WORKS
+                    if($foot_div){
+                        $foot_div->push_content($plt_html); #WORKS
+                        #$foot_div->unshift_content($plt_html); #WORKS
+                        #$foot_div->insert_element($plt_html); # WORKS
+                    }
                 }
 
         # Now we create the page from the template and the data
@@ -893,9 +954,9 @@ sub view: Runmode {
                     $tree->destroy; #for the RAM!
 
                         #$template=~s/\<page \/\>/$page_data/;
-                    }else{
-                        $template= $page_data;
-                    }
+                  }else{
+                      $template= $page_data;
+                  }
                 }
             }else{
                 $surl=~s/Pages.*/Pages/;
@@ -904,13 +965,11 @@ sub view: Runmode {
                 return $self->tt_process('error.tmpl');
                 $template=~s/\<page \/\>/YOUR PAGE HERE, once we find it/;
             }
-        }
-
-
+       # }
         $self->tt_params({ page => $template });
     }elsif($pa_id=~m/^\d+$/){
         warn "$base_path/$default_tempalte_file not  found";
-        my $this_css = qq | #preview { position: absolute; left: 0; top: 0; display: block; height: 125px; width: 125px; background: url(/images/TLpreview.png) no-repeat; text-indent: -999em; z-index: 1031; text-decoration: none;} |;
+        my $this_css = qq | /* css is cool */ #preview { position: absolute; left: 0; top: 0; display: block; height: 125px; width: 125px; background: url(/images/TLpreview.png) no-repeat; text-indent: -999em; z-index: 1031; text-decoration: none;} |;
         $self->tt_params({ css => $this_css });
 
         my $back_url = $surl;

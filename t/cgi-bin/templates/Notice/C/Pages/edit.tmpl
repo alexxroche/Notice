@@ -3,6 +3,7 @@
 <head>
   <title>[%- title OR 'Notice::Pages' -%]</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="/js/jquery.js"></script>
   <link rel=stylesheet href="/css/pages.css" />
  [%- UNLESS no_editor -%]
   <script src="/ckeditor/ckeditor.js">
@@ -24,11 +25,11 @@
         <p>
             <input type="hidden" name="id" value="[%- p.pa_id -%]" />
             <span class="small">Name: <input type="text" name="name" title="It has to have a name" value="[%- p.pa_name || name -%]" required />
-            &nbsp; <a tabindex=99 class="red button" href="[%- c.query.url -%]/Pages/>Abandon or return to list</a>
+            &nbsp; <a tabindex=99 class="red button" href="[%- c.query.url -%]/Pages/">Abandon or return to list</a>
             <br />
             </span>
      [%- END # is_template - template has the buttons at the bottom of the page -%]
-            <textarea name="editor1" rows="39" cols="177" >[%- IF editor1; editor1.replace('% ]','%&#93;'); ELSE; p.pa_ge OR '&lt;p&gt;New Page.&lt;/p&gt;'; END -%]</textarea>
+            <textarea name="editor1" rows="37" cols="177" >[%- IF editor1; editor1.replace('% ]','%&#93;'); ELSE; p.pa_ge OR '&lt;p&gt;New Page.&lt;/p&gt;'; END -%]</textarea>
  [%- UNLESS no_editor -%]
             <script>
                 [%- IF is_template; "
@@ -56,13 +57,19 @@
                 Link: <input type="text" name="link" title="defaults to the name" value="[%- p.pa_link -%]" />
                 Template: 
                 [%- IF templates -%]
-                    <select name="templates">
+                    <select name="templates" onchange="$('input#template').val($(this).val());">
+                            <option value="">None</option>
                         [%- FOREACH t = templates -%]
-                            <option value="[%- t.value -%]">[%- t.name -%]</option>
+                            <option value="[%- t.value -%]" [% IF t.name == p.pa_template; 'selected="selected"'; END -%]>[%- t.name -%]</option>
                         [%- END -%]
                     </select>
+                    <input id="template" style="margin-left: -108px; width: 87px; height: 1.2em; border: 0;" name="template" value="[%- p.pa_template -%]" />
                 [%- ELSE -%]
-                     Default, (you could add one)
+                     <select name="templates" onchange="$('input#template').val($(this).val());">
+                            <option value="">None</option>
+                            <option value="pages.html" selected>Default (pages.html)</option>
+                    </select>
+                    <input id="template" style="margin-left: -163px; width: 140px; height: 1.2em; border: 0;" name="template" value="[%- p.pa_template -%]" />
                 [%- END -%]
             </span>
                 <br />
