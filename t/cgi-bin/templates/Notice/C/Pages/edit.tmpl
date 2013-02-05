@@ -4,6 +4,7 @@
   <title>[%- title OR 'Notice::Pages' -%]</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script type="text/javascript" src="/js/jquery.js"></script>
+    <script type="text/javascript" src="/js/jquery.simpleCombo.js"></script>
   <link rel=stylesheet href="/css/pages.css" />
  [%- UNLESS no_editor -%]
   <script src="/ckeditor/ckeditor.js">
@@ -12,6 +13,21 @@
         CKEDITOR.replace( 'editor1' );
     };
   </script>
+  <script type="text/javascript">
+    $(function() {
+        // Turn selects into combo boxes
+        $('select.combo').simpleCombo();
+        // Show the selection
+        $('select.combo')
+            .closest('td').after('<td><span><\/span><\/td>').end()
+            .change(function() {
+                $(this).parent().next('td').find('span').text('Selection: ' + $(this).val());
+            }).change();
+        // hide the input text (both of these work on their own)
+        $("input#template").hide();
+        $("input#template").each(function(){ this.type = 'hidden' });
+    });
+    </script>
  [%- END # no_editor -%]
 </head>
 <body>
@@ -57,7 +73,7 @@
                 Link: <input type="text" name="link" title="defaults to the name" value="[%- p.pa_link -%]" />
                 Template: 
                 [%- IF templates -%]
-                    <select name="templates" onchange="$('input#template').val($(this).val());">
+                    <select class="combo" name="templates" onchange="$('input#template').val($(this).val());">
                             <option value="">None</option>
                         [%- FOREACH t = templates -%]
                             <option value="[%- t.value -%]" [% IF t.name == p.pa_template; 'selected="selected"'; END -%]>[%- t.name -%]</option>
@@ -65,7 +81,7 @@
                     </select>
                     <input id="template" style="margin-left: -108px; width: 87px; height: 1.2em; border: 0;" name="template" value="[%- p.pa_template -%]" />
                 [%- ELSE -%]
-                     <select name="templates" onchange="$('input#template').val($(this).val());">
+                     <select class="combo" name="templates" onchange="$('input#template').val($(this).val());">
                             <option value="">None</option>
                             <option value="pages.html" selected>Default (pages.html)</option>
                     </select>

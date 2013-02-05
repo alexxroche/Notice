@@ -267,8 +267,9 @@ sub edit: Runmode {
     if($self->authen->username){
         $username = $self->authen->username;
         $self->tt_params({ username => $username});
+    }else{
+        return $self->tt_process('default.tmpl',{ message => 'You have to be authenticated to do that, (log back in)' });
     }
-    #$self->tt_params({ message => 'Add a book or document, (or even a web page)' });
     my $q = $self->query();
     if($q->param('id') && $q->param('id')=~m/^(\d+)$/ ){
             $pa_id = $1;
@@ -496,7 +497,7 @@ sub edit: Runmode {
     }
 
     # here we do the actual publishing (if they are an Editor )
-    if( $is_an_admin && $q->param('publish') && $q->param('publish') eq "Publish"){
+    if( $is_an_admin && $q->param('publish') && ( $q->param('publish') eq "Publish" || $q->param('publish') eq "Update" )){
        $opt{publishing} = 1;
        my $www_path = '';
         if(defined $self->cfg('www_path')){
@@ -565,7 +566,7 @@ sub edit: Runmode {
     my $fullpath = $dir . '/' . $base_path;
     if(-d "$fullpath" ){
         opendir (LIST, "$fullpath") or die $!; # "failed to open $fullpath";
-     warn "checking $fullpath for templates";
+     #warn "checking $fullpath for templates";
         my $count = 0;
         while(my $file = readdir(LIST)){
             $count++;
@@ -579,7 +580,7 @@ sub edit: Runmode {
         if(@tmpl_list){
             $self->tt_params({ templates => \@tmpl_list });
         }
-    warn Dumper(\@tmpl_list);
+    #warn Dumper(\@tmpl_list);
     }else{
         warn "$fullpath does not exists";
     }
@@ -738,7 +739,7 @@ sub view: Runmode {
                         $stub = $t->pt_inc;
                     }
                 }
-                if($stub){ # This is to be included in other pages as a whole section 
+                if($stub && $template eq ''){ # This is to be included in other pages as a whole section 
                     $template = $page->pa_ge; # so we show what that stub might look like
                 }else{
                   my $page_data = $page->pa_ge;
@@ -901,8 +902,21 @@ sub view: Runmode {
                 }
                 if($opt{publishing}){
                   { no warnings; 
-                    $tree->look_down('id' => qr/^foot(er)?$/)->look_down( 
-                        sub { $_[0]->attr('class') eq 'container' })->push_content($published);
+                    #my $footer = $tree->look_down('id' => qr/^foot(er)?$/)->look_down( 
+                    #    sub { $_[0]->attr('class') eq 'container' })->push_content($published);
+                    my $footer = $tree->look_down('id' => qr/^foot(er)?$/);
+                      if($footer){
+                        my $cont = $footer->look_down( sub { $_[0]->attr('class') eq 'container' });
+                        if($cont){
+                            $cont->push_content($published);
+                        }
+                      }else{
+                        my $foot = $tree->find('body');
+                        if($foot){
+                            #$foot->unshift_content($published); # add to the start
+                            $foot->push_content($published);
+                        }
+                      }
                   }
                 }else{
                     #$tree->look_down('id' => qr/^foot(er)?$/)->look_down(
