@@ -288,7 +288,35 @@
 <div id="bodyblock">
 <span class="warning">[% IF warning; '&lt;WARNING&gt;'; warning; '&lt;/WARNING&gt;'; END %]</span>
 <table id="body">
-<tr><td>
+<tr><td id="menu">
+<span id="left_close">
+<script type="text/javascript">
+    function toggle_menu() {
+        if($('a#left_close').hasClass('closed')){
+            $('a#left_close').attr('style',"background-position: 0px 0px;position: relative;");
+            $('a#left_close').removeClass('closed');
+            $('div#menu').removeClass('hidden'); 
+            $('td#left_close').removeClass('visible');
+            $('span.top_logo').removeClass('hidden');
+        }else{
+            $('a#left_close').attr('style',"background-position: 0px -18px; left: 0");
+            $('a#left_close').addClass('closed');
+            $('div#menu').addClass('hidden');
+            $('span.top_logo').addClass('hidden');
+            $('td#left_close').addClass('visible');
+        }
+     }
+   $(document).ready(function() {
+        $('a#left_close').bind('click',function(event){ toggle_menu(); });
+        if (navigator.userAgent.match(/Firefox/)){
+            $('.faq_a').attr('style',"display: none;");
+        }
+        $('.questionimage').mouseover(function(event){ $('.faq_a' + $(this).id).removeClass('hidden'); });
+    });
+</script>
+<a id="left_close" class="blue" title="Show/Hide menu" style="background-position: 0px 0px; right: 5px;">Show/Hide</a>
+</span>
+
 <div id="menu">
     Navigation:
     <ul>

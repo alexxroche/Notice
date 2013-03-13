@@ -37,5 +37,9 @@ $CFG{session_timeout} = '+1h';
 $CFG{key} = 'NoticeNoticeNoticeNotice_key1234';
 $CFG{iv} = '1234567890ABCDEF';
 $CFG{admin} = ['notice-dev@alexx.net','a@b.com'];
+$CFG{no_reply} = 'no-reply@bin.example.com';
+$CFG{cpny_shrt} = 'Notice';
+$CFG{cpny_domain} = 'example.com';
+
 
 return \%CFG;
