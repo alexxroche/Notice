@@ -147,7 +147,7 @@ h3 { margin: 5px 0; }
 	padding: 5px;
 }
 
-div #menu {
+div#menu {
 	border: 1px solid #666;
 	margin: 0 0 0 0 !important;
 	padding: 5px;
@@ -318,13 +318,11 @@ li.selected, a.selected { color: #900; }
 .bold { font-size: 101%; font-weight: bold; }
 
 span#left_close {
-    min-width: 360px;
-    width: 360px;
     left: 109px;
- position: absolute;
+    position: fixed;
 }
 
-a#left_close { top: 5px; right: 5px;
+a#left_close { top: 0px; right: 0px;
 background-position: 0px 0px; 
 z-index: 10;
 display: block;

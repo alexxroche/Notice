@@ -1060,13 +1060,11 @@ table td.button {
 .footer, #footer { width: 100%; position: absolute; bottom: 4px; }
 
 span#left_close {
-    min-width: 360px;
-    width: 360px;
     left: 109px;
  position: absolute;
 }
 
-a#left_close { top: 5px; right: 5px;
+a#left_close { top: 0px; right: 0px;
 background-position: 0px 0px;
 z-index: 10;
 display: block;

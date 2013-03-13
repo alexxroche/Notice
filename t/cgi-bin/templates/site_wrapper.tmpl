@@ -296,10 +296,12 @@
             $('a#left_close').attr('style',"background-position: 0px 0px;position: relative;");
             $('a#left_close').removeClass('closed');
             $('div#menu').removeClass('hidden'); 
+            $('span#left_close').attr('style',"left: 111px; position: fixed");
             $('td#left_close').removeClass('visible');
             $('span.top_logo').removeClass('hidden');
         }else{
-            $('a#left_close').attr('style',"background-position: 0px -18px; left: 0");
+            $('a#left_close').attr('style',"background-position: 0px -18px; position: absolute; left: 0");
+            $('span#left_close').attr('style',"left: 3px;");
             $('a#left_close').addClass('closed');
             $('div#menu').addClass('hidden');
             $('span.top_logo').addClass('hidden');
