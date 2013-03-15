@@ -22,7 +22,7 @@ my $dir_delim = '::'; # if a filename has this in it then we publish it in a sub
 my $default_tempalte_file = 'pages.html';
 my $base_path = 'templates';
 
-our $VERSION = 0.09;
+our $VERSION = 0.10;
 
 =head1 NAME
 
@@ -99,10 +99,14 @@ Override or add to configuration supplied by Notice::cgiapp_init.
 
 sub setup {
     my ($self) = @_;
-    $self->authen->protected_runmodes(qr/!view|!site/);
+    #$self->authen->protected_runmodes(qr/!view|!site/); # BAD
+    $self->authen->protected_runmodes(qr/^(?!view|!site)/);
     $surl = ($self->query->self_url);
     $surl =~s/\?.*$//; #strip any GET values
     $self->tt_params({ submenu => \%submenu });
+    if(!$self->in_group('Editor',$self->param('pe_id')) ){ 
+        return "These pages are under review by the Editor";
+    }
 }
 
 =head2 TABLES
@@ -153,10 +157,11 @@ sub main: StartRunmode {
     my ($self) = @_;
     my $q = $self->query();
     my $message;
-    if($self->authen->username){
+    if($self->authen->username && $self->in_group('Editor',$self->param('pe_id')) ){ 
         my $username = $self->authen->username;
         $self->tt_params({ username => $username});
     }else{
+        return "This module is only open to Editors at this time";
         $self->tt_params({ dest => 'Addendum', authen_login => 'main'});
     }
 
@@ -171,7 +176,9 @@ sub main: StartRunmode {
         $self->session->param('error' => '');
     }
 
-
+    my $ac_id=0;
+    if($self->param('ef_acid')){ $ac_id = $self->param('ef_acid'); }
+    elsif($self->param('ac_id')){ $ac_id = $self->param('ac_id'); }
 
     $self->tt_params({
         page => 'Here you can mange the static part of the site - the public part. This is a CMS for Notice<br />'
@@ -188,7 +195,8 @@ sub main: StartRunmode {
       : 1;
 
     my %limits;# = ( join => 'AddendumReader' );
-    my %search;# = ( -or => [  ud_owner => $pe_id, ur_reader => $pe_id ] );
+    #my %search;# = ( -or => [  ud_owner => $pe_id, ur_reader => $pe_id ] );
+    my %search = ( pa_acid => $ac_id );
 
     # There must be a way to do these two searches with only one hit to the DB
     my $total_rows = $self->resultset('Page')->search( \%search, \%limits )->count;
@@ -264,11 +272,11 @@ sub edit: Runmode {
     my $pa_id;
 
     my $username;
-    if($self->authen->username){
+    if($self->authen->username && $self->in_group('Editor',$self->param('pe_id'))){
         $username = $self->authen->username;
         $self->tt_params({ username => $username});
     }else{
-        return $self->tt_process('default.tmpl',{ message => 'You have to be authenticated to do that, (log back in)' });
+        return $self->tt_process('default.tmpl',{ message => 'You have to be an authenticated Editor to do that, (log back in)' });
     }
     my $q = $self->query();
     if($q->param('id') && $q->param('id')=~m/^(\d+)$/ ){
@@ -290,6 +298,7 @@ sub edit: Runmode {
     if($is_an_admin){
         $self->tt_params({ admin => 1 });
     }
+    my $ac_id=0;
 
 
     if( ( $q->param('update') && ( 
@@ -331,6 +340,13 @@ sub edit: Runmode {
            }elsif($ak ne 'tags' && $ak ne 'update' && $ak ne 'id'){
              warn "Notice::C::Pages - something is up $ak: " . $q->param($ak);
            }
+        }
+        if($self->param('ef_acid')){ 
+                $create_data{'pa_acid'} = $self->param('ef_acid'); 
+                $ac_id = $self->param('ef_acid'); 
+        }elsif($self->param('ac_id')){ 
+                $create_data{'pa_acid'} = $self->param('ac_id'); 
+                $ac_id = $self->param('ac_id'); 
         }
         if( $self->param('pe_id') ){
                 $create_data{'pa_owner'} = $self->param('pe_id');
@@ -500,7 +516,24 @@ sub edit: Runmode {
     if( $is_an_admin && $q->param('publish') && ( $q->param('publish') eq "Publish" || $q->param('publish') eq "Update" )){
        $opt{publishing} = 1;
        my $www_path = '';
-        if(defined $self->cfg('www_path')){
+
+       my $cfg = $self->resultset('ConfData')->search({
+        -and => [
+            'cfd_key' => "www_data",
+            'cfd_acid' => $ac_id,
+         ],
+       },{
+        columns => ['cfd_value'],
+       });
+        my ($greeting,$welcome);
+        while(my $v = $cfg->next){
+            if($v->cfd_value && $v->cfd_value ne ''){
+                $www_path = $v->cfd_value;
+            }
+        }
+
+        # if this copy of Notice is just for one copy of Pages then we can save the above DB call and just pull from cfg
+        if(!$www_path && defined $self->cfg('www_path')){
             if( ref($self->cfg('www_path')) eq 'ARRAY'){ # not sure why we would have an array
                 PATH_SEARCH: foreach my $wpath (@{ $self->cfg('www_path') }){
                         $www_path = $wpath; # I'm just using the first one
@@ -512,7 +545,7 @@ sub edit: Runmode {
                     $www_path = $self->cfg('www_path');
             }
             #else{ $www_path = '/var/www/html'; } # not sure this is a good idea
-        }else{
+        }elsif(!$www_path){
             $www_path = '/var/www/htdoc/site';
         }
         my $filename; # lets build it
@@ -523,7 +556,11 @@ sub edit: Runmode {
         my $html_path;
         if($filename=~m/$dir_delim/){
             my @full_path = split (/$dir_delim/, $filename);
-            $html_path .= join('\/', @full_path);
+            $html_path .= join('/', @full_path);
+            $html_path =~s/\.\./ WE HAVE NO BANANAS TODAY /;
+            unless($www_path=~m/\/$/ || $html_path=~m/^\//){
+                $html_path = '/' . $html_path;
+            }
             $www_path .= $html_path;
             $filename = $full_path[ @full_path -1 ];
             $www_path=~s/\/?$filename\/?$//;
@@ -545,7 +582,9 @@ sub edit: Runmode {
             if($html_path!~m/^\/$/){
                 $html_path .= '/';
             }
-            $html_path .= $filename;
+            if(! $html_path || $html_path!~m/$filename$/){
+                $html_path .= $filename;
+            }
             $self->tt_params({message=>'Page '.$filename.' published <a href="'.$html_path.'"><span class="warning">LIVE</span> to '.$filename.'</a>'});
         }else{
             my $message = 'We seem to have a write premission problem - no right ';
@@ -561,18 +600,38 @@ sub edit: Runmode {
     } 
 
     my @tmpl_list;
-    use Cwd;
-    my $dir = getcwd;
-    my $fullpath = $dir . '/' . $base_path;
-    if(-d "$fullpath" ){
-        opendir (LIST, "$fullpath") or die $!; # "failed to open $fullpath";
-     #warn "checking $fullpath for templates";
+    my $template_path = '';
+    my $ac_id=0;   
+    if($self->param('ef_acid')){ $ac_id = $self->param('ef_acid'); }
+    elsif($self->param('ac_id')){ $ac_id = $self->param('ac_id'); }
+
+    my $cfg = $self->resultset('ConfData')->search({
+            -and => [
+                'cfd_key' => "pages_template_path",
+                'cfd_acid' => $ac_id,
+             ],
+           },{
+            columns => ['cfd_value'],
+       });
+    while(my $v = $cfg->next){
+        if($v->cfd_value && $v->cfd_value ne ''){
+            $template_path = $v->cfd_value;
+        }
+    }
+    if(! -d "$template_path"){
+        use Cwd;
+        my $dir = getcwd;
+        $template_path = $dir . '/' . $base_path;
+    }
+    if(-d "$template_path" ){
+        opendir (LIST, "$template_path") or die $!; # "failed to open $template_path";
+     #warn "checking $template_path for templates";
         my $count = 0;
         while(my $file = readdir(LIST)){
             $count++;
             next if ($file =~ m/^\./);
             next unless $file =~ m/\.html$/;
-            if (-f "$fullpath/$file"){
+            if (-f "$template_path/$file"){
                 push @tmpl_list, {name => $file, value => $file};
             }
         }
@@ -582,7 +641,7 @@ sub edit: Runmode {
         }
     #warn Dumper(\@tmpl_list);
     }else{
-        warn "$fullpath does not exists";
+        warn "$template_path does not exists";
     }
 
     #return $self->tt_process();
@@ -609,6 +668,7 @@ sub edit: Runmode {
         }
     }
     $self->tt_params({ man => "Use $dir_delim to create sub-directories, i.e. Name: [ contact::index ] will create contact/index.html when published" });
+    $self->param('no_clean' => 1 );
     return $self->tt_process();
 }
 
@@ -1038,9 +1098,12 @@ sub template: Runmode {
     my $q = $self->query;
     my $tempalte_file = $default_tempalte_file;
     $self->tt_params({ is_template => 1 });
-    if($self->authen->username){
+    if($self->authen->username && $self->in_group('Editor',$self->param('pe_id'))){
         my $username = $self->authen->username;
         $self->tt_params({ username => $username});
+    }else{
+        return "and you are?"; # we should NEVER get here
+        warn "VERY BAD STUFF in Notice::Pages::template";
     }
     my $inc_all = 0; # do we include all files and not just Pages templates, (which are just html)
     if ($q->param('inc_all') || ( $self->param('id') && $self->param('id') eq 'inc_all') ){
@@ -1069,7 +1132,35 @@ sub template: Runmode {
 #warn "editing $tempalte_file";
     }
 
+
+    my $template_path = '';
+    my $ac_id=0;
+    if($self->param('ef_acid')){ $ac_id = $self->param('ef_acid'); }
+    elsif($self->param('ac_id')){ $ac_id = $self->param('ac_id'); }
+
+    my $cfg = $self->resultset('ConfData')->search({
+            -and => [
+                'cfd_key' => "pages_template_path",
+                'cfd_acid' => $ac_id,
+             ],
+           },{
+            columns => ['cfd_value'],
+       });
+    while(my $v = $cfg->next){
+        if($v->cfd_value && $v->cfd_value ne ''){
+            $template_path = $v->cfd_value;
+        }
+    }
+
+    # If there is just one account then the templates are relative to index.cgi that is running Notice.
     my $base_path = 'templates';
+
+    # If this is a child or sister account it may have its own template location, (though to save on
+    # disk space you can always symlink the two locations
+    if($template_path){
+        $base_path = $template_path;
+    }
+
     my $sub_dir = '';
     my $file_or_dir_to_remove;
 
@@ -1107,7 +1198,7 @@ sub template: Runmode {
     if($base_path && $file_or_dir_to_remove){ 
         $file_or_dir_to_remove =  "$base_path/$file_or_dir_to_remove"; 
     }
-    if(  ( -f "$file_or_dir_to_remove" || -d "$file_or_dir_to_remove") &&
+    if(defined $file_or_dir_to_remove && ( -f "$file_or_dir_to_remove" || -d "$file_or_dir_to_remove") &&
     $base_path !~m/\.\./ && $file_or_dir_to_remove !~m/\.\./ # NOTE this could be better
     && $file_rm
     ){
@@ -1137,9 +1228,11 @@ sub template: Runmode {
             }
             close(TEMPLATE);
         }
-        if($existing_template ne $q->param('editor1') ){
+        if(!$existing_template || $existing_template ne $q->param('editor1') ){
             open FILE, ">", "$base_path/" . $q->param('name');
-            print FILE $q->param('editor1');
+            print FILE $q->param('editor1') || $self->tt_params({ error => 'Could not write the new template' });
+            $self->tt_params({ editor1 => $q->param('editor1') });
+            $self->tt_params({ name => $q->param('name') });
             close(FILE);
             $self->tt_params({ message=> '<span class="small red button">Template updated</span>' });
         }else{
@@ -1177,6 +1270,7 @@ sub template: Runmode {
             $template =~s/%\]/% ]/g;
             $template = $q->escapeHTML( $template ) || '';
             #$self->tt_config( EVAL_PERL => 1 );
+            $self->param('no_clean' => 1 );
             $self->tt_params({ no_editor => 1 });
             $self->tt_params({ editor1 => $template });
             return $self->tt_process('Notice/C/Pages/edit.tmpl');
@@ -1193,20 +1287,24 @@ sub template: Runmode {
     }
 
     my %tmpl_list;
-    use Cwd;
-    my $dir = getcwd;
-    my $relative_path = $base_path;
-    my $fullpath = $dir . '/' . $relative_path;
-    if(-d "$fullpath" ){
+    my $template_path;
+    if(-d "$base_path"){
+        $template_path = $base_path;
+    }else{
+        use Cwd;
+        my $dir = getcwd;
+        $template_path = $dir . '/' . $base_path
+    }
+    if(-d "$template_path" ){
     #    eval {
                 #no warnings 'uninitialized';
-                opendir (LIST, "$fullpath") or die $!; # "failed to open $fullpath";
+                opendir (LIST, "$template_path") or die $!; # "failed to open $template_path";
                 my $count = 0;
                 while(my $file = readdir(LIST)){
                     $count++;
                     next if ($file =~ m/^\./);
                     next unless ($inc_all || $file =~ m/\.html$/);
-                    if (-d "$fullpath/$file"){
+                    if (-d "$template_path/$file"){
                         push @{ $tmpl_list{dir} }, $sub_dir .'/'. $file;
                     }else{
                         $tmpl_list{$count}{pa_name} = $file;
@@ -1217,12 +1315,12 @@ sub template: Runmode {
        #warn Dumper(\%tmpl_list);
      #   if(@_){
         if(!%tmpl_list && !$count){
-            warn "bad things in $fullpath " . $!;
+            warn "bad things in $template_path " . $!;
             $self->tt_params({ warning => $! });
-            #%tmpl_list = `ls $fullpath`;
+            #%tmpl_list = `ls $template_path`;
         }
     }else{
-        $self->tt_params({ warning => $fullpath . ' templates directory missing ' });
+        $self->tt_params({ warning => $template_path . ' templates directory missing ' });
     }
 
     return $self->tt_process({ pages => \%tmpl_list});
@@ -1237,7 +1335,17 @@ sub template: Runmode {
 sub unpublish: Runmode {
     my ($self,$del) = @_;
     my $q = $self->query();
+    unless($self->authen->username && $self->in_group('Editor',$self->param('pe_id'))){
+        return "You are not an Editor";
+    }
     my $pa_id;
+    my $ac_id=0;
+    if($self->param('ef_acid')){
+            $ac_id = $self->param('ef_acid');
+    }elsif($self->param('ac_id')){
+            $ac_id = $self->param('ac_id');
+    }
+
     if($self->param('id') && $self->param('id')=~m/^(\d+)$/ ){
         $pa_id = $1;
     }elsif($self->param('sid') && $self->param('sid')=~m/^(\d+)$/){
@@ -1249,56 +1357,74 @@ sub unpublish: Runmode {
     if($rc && $rc->pa_name){
 
         my $www_path = '';
-            if(defined $self->cfg('www_path')){
-                if( ref($self->cfg('www_path')) eq 'ARRAY'){ # not sure why we would have an array
-                    PATH_SEARCH: foreach my $wpath (@{ $self->cfg('www_path') }){
-                            $www_path = $wpath; # I'm just using the first one
-                            last PATH_SEARCH;
-                            # maybe you want to store the path split into an array, for some reason
-                            $www_path .= '/' . $wpath;
-                    }
-                }elsif( $self->cfg('www_path') ne ''){
-                        $www_path = $self->cfg('www_path');
-                }
-                #else{ $www_path = '/var/www/html'; } # not sure this is a good idea
-            }else{
-                $www_path = '/var/www/htdoc/site';
-            }   
-            my $filename; # lets build it
-            $filename = $rc->pa_name ? $rc->pa_name . '.html' : 'index.html';
-            $filename =~s/\s+/ /g;
-            $filename =~s/ /_/g;
 
-
-            my $html_path;
-            if($filename=~m/$dir_delim/){
-                my @full_path = split (/$dir_delim/, $filename);
-                $html_path .= join('\/', @full_path);
-                $www_path .= $html_path;
-                $filename = $full_path[ @full_path -1 ];
-                $www_path=~s/\/?$filename\/?$//;
-            }   
-
-            # we know where, so check that it exists and that we can write to it
-            if( -d "$www_path" && -e "$www_path/$filename" && -w "$www_path/$filename" ){
-                unlink("$www_path/$filename") or do { $self->tt_params({ error => 'failed to delete live page' }); return $self->tt_process('default.tmpl'); };
-
-                my $going_live = $self->resultset('Page')->search({ pa_id => $pa_id })->first;
-                $going_live->update({ pa_published => 0 }) unless $del; # if we are doing a delete this is pointless
-                return 0 if $del;
-                #$self->session->param('message' => 'Page Un-published ');
-                $self->session->param('error' => ' Page Un-published; but can be re-published when it is ready');
-                  my $url;
-                $url = ($self->query->url);
-                return $self->redirect("$url/Pages/");
-            }else{
-              if( $del ){
-                    return 'file not found';
-              }else{
-                $self->tt_params({ error => 'failed to find page to un-publish' }); 
-                return $self->tt_process('default.tmpl');
-              }
+        my $cfg = $self->resultset('ConfData')->search({
+        -and => [
+            'cfd_key' => "www_data",
+            'cfd_acid' => $ac_id,
+         ],
+       },{
+        columns => ['cfd_value'],
+       }); 
+        my ($greeting,$welcome);
+        while(my $v = $cfg->next){
+            if($v->cfd_value && $v->cfd_value ne ''){
+                $www_path = $v->cfd_value;
             }
+        }
+
+        if(!$www_path && defined $self->cfg('www_path')){
+            if( ref($self->cfg('www_path')) eq 'ARRAY'){ # not sure why we would have an array
+                PATH_SEARCH: foreach my $wpath (@{ $self->cfg('www_path') }){
+                        $www_path = $wpath; # I'm just using the first one
+                        last PATH_SEARCH;
+                        # maybe you want to store the path split into an array, for some reason
+                        $www_path .= '/' . $wpath;
+                }
+            }elsif( $self->cfg('www_path') ne ''){
+                    $www_path = $self->cfg('www_path');
+            }
+            #else{ $www_path = '/var/www/html'; } # not sure this is a good idea
+        }elsif(!$www_path){
+            $self->tt_params({ error => "I don't know where the Pages are located - a sysadmin should set www_path for your account" }); 
+            return $self->tt_process('default.tmpl');
+            #$www_path = '/var/www/htdoc/site';
+        }   
+        my $filename; # lets build it
+        $filename = $rc->pa_name ? $rc->pa_name . '.html' : 'index.html';
+        $filename =~s/\s+/ /g;
+        $filename =~s/ /_/g;
+
+
+        my $html_path;
+        if($filename=~m/$dir_delim/){
+            my @full_path = split (/$dir_delim/, $filename);
+            $html_path .= join('\/', @full_path);
+            $www_path .= $html_path;
+            $filename = $full_path[ @full_path -1 ];
+            $www_path=~s/\/?$filename\/?$//;
+        }   
+
+        # we know where, so check that it exists and that we can write to it
+        if( -d "$www_path" && -e "$www_path/$filename" && -w "$www_path/$filename" ){
+            unlink("$www_path/$filename") or do { $self->tt_params({ error => 'failed to delete live page' }); return $self->tt_process('default.tmpl'); };
+
+            my $going_live = $self->resultset('Page')->search({ pa_id => $pa_id })->first;
+            $going_live->update({ pa_published => 0 }) unless $del; # if we are doing a delete this is pointless
+            return 0 if $del;
+            #$self->session->param('message' => 'Page Un-published ');
+            $self->session->param('error' => ' Page Un-published; but can be re-published when it is ready');
+              my $url;
+            $url = ($self->query->url);
+            return $self->redirect("$url/Pages/");
+        }else{
+          if( $del ){
+                return 'file not found';
+          }else{
+            $self->tt_params({ error => 'failed to find page to un-publish' }); 
+            return $self->tt_process('default.tmpl');
+          }
+        }
 
     }else{
         if( $del ){
