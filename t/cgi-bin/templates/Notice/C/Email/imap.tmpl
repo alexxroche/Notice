@@ -1,31 +1,50 @@
 [% WRAPPER site_wrapper.tmpl %]
  [% USE Dumper %]
-        <h1>[% heading %]</h1>
         <span class="body">[% body %]</span>
         <span class="page">[% page %]</span>
  [% IF error=='' %]
-  [% IF heading; '<h1>'; heading; '</h1>'; END %]
-<table class="email">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
 <tr valign="top">
-        <th class="ip"><a href="$page?sort=ipp_name$col_order&amp;ud=$ud">Alias</a></th>
-        <th class="ip"></th>
-        <th class="ip">Destination</th>
-        <th class="ip">Edit</th>
-        <!--th class="ip"><a href="$page?sort=ipp_VLAN$col_order&amp;ud=$ud">destination</a></th-->
-     </tr>
-      [% FOREACH f = alias %]
+    <td class="content" height="2">
+<table class="ip">
+      <tr>
+        <th class="ip"><a href="[%- c.query.url -%]?sort=ea$col_order">Account</a></th>
+[%- IF pe_level >= 500 -%]
+   <th class="ip">Server</th>
+[%- END #IF level 500 -%]
+   <th class="ip">Quota (Megabytes)</th>
+[%- IF pe_level >= 10 -%]
+        <th class="ip">Home</th>
+        <th class="ip">User ID</th>
+        <th class="ip">Group ID</th>
+[%- END #IF level 10 -%]
+[%- IF pe_level >= 4 -%]
+    <th class="ip_center" colspan="3">Action</th>
+[%- END #IF level 4 -%]
+      </tr>
+
+  [% FOREACH e = imap %]
          <tr class="[% loop.parity %] nowrap">
-           <td>[% f.ea_userid  or '' %]@[% key = 'do_name'; f.domains.$key || c.param('id'); %]</td>
-            <td> =&gt; </td>
-           <td>[% f.ea_touser %]@[% f.ea_at %]</td>
+[%- # im_userid  im_doid im_passwd  im_home  im_uid  im_gid  im_server  im_quota  im_peid  im_pkid  im_auth  im_mode  im_dir_mode -%]
+           <td>[% e.im_userid  or '' %]@[% key = 'do_name'; e.domains.$key || c.param('id'); %]</td>
+[%- IF pe_level >= 500 -%]
+           <td>[% e.im_server %]</td>
+[%- END #IF level 500 -%]
+           <td>[% e.im_quota %]</td>
+           <td>[% e.im_home %]</td>
+           <td>[% e.im_uid %]</td>
+           <td>[% e.im_gid %]</td>
            <td class="nowrap">
-        <form method="POST" action="/cgi-bin/index.cgi/email/edit_alias/[% f.ea_userid %]/[% f.ea_doid %]/">
-        <input class="edit button green" type="submit" name="Edit" value="Edit Details" />
+        <form method="POST" action="[%- c.query.url -%]/email/imap">
+        <input type="hidden" name="userid" value="[%- e.im_userid -%]" />
+        <input type="hidden" name="doid" value="[%- e.im_doid -%]" />
+        <input class="small red button" type="submit" name="Delete" value="Delete" />
         </form>
        </td>
         </tr>
     [% END #FOREACH %]
 </table>
- [% #Dumper.dump(alias) %]
+[%- pagination -%]
+ [% #Dumper.dump(imap) %]
  [% END #IF %]
 [% END #WRAPPER %]

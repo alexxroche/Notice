@@ -432,14 +432,82 @@ sub imap: Runmode{
     }elsif($q->param('id')){
         $opt{do_name} = $q->param('id');
     }
+    my $pe_level = 100;
+    if($self->param('pe_level') && $self->param('pe_level')=~m/^\d+$/){
+            $pe_level = $self->param('pe_level');
+    }elsif($self->session->param('pe_level') && $self->session->param('pe_level')=~m/^\d+$/){
+            $pe_level = $self->session->param('pe_level');
+    }
 
-    $message =qq |You have no IMAP4 or POP3 accounts|;
-    if($opt{do_name}){ $message .=qq | under the domain $opt{do_name}|; }
-    $opt{error} = 'Not written yet';
-    
+    $self->tt_params({ pe_level => $pe_level });
+
+    if($self->in_group('HR',$self->param('pe_id'))){
+
+        if($q->param('Delete')){
+
+           if($q->param('doid') && $q->param('doid')=~m/^\d+$/ &&
+              $q->param('userid') && $q->param('userid')=~m/.+$/){
+                # lets check that it exists
+                #$self->tt_params({ body => 'Deleting ' . $q->param('userid') . ' of domain ID ' . $q->param('doid') });
+                $body = 'Deleting ' . $q->param('userid') . ' of domain ID ' . $q->param('doid');
+            }
+        }elsif($q->param('Add')){
+# NOTE this has not been written yet
+            my %create_data;
+            foreach my $ak (keys %{ $q->{'param'} } ){
+                if(
+                $ak eq 'userid' ||
+                $ak eq 'doid'
+                ){ 
+                    $create_data{"im_$ak"} = $q->param($ak);
+                }
+            }
+        }
+
+        my $rows_per_page =
+        defined $q->param('rpp') && $q->param('rpp')=~m/^\d{1,3}$/ && $q->param('rpp') <= 100
+          ? $q->param('rpp')
+           : 30;
+
+        my $page = defined $q->param('page') && $q->param('page')=~m/^\d+$/ ? $q->param('page') : 1;
+
+        my %limits = ( join => ['domains'] );
+        my %search =();
+        if( defined $q->param('email') && $q->param('email')=~m/^(.+)\@(.+)$/){
+           %search =  ( -and => [ im_userid => $1, do_name => $2 ]);
+        }
+
+        # There must be a way to do these two searches with only one hit to the DB
+        my $total_rows = $self->resultset('Imap')->search(\%search, \%limits )->count;
+            # Lets bypass pagination if the results are few
+        if($total_rows <= $rows_per_page){ $page = 1; }
+        if($page >= int( $rows_per_page * $total_rows ) ){ $page = int( $total_rows / $rows_per_page ); }
+        $limits{page} = $page;
+        $limits{rows} = $rows_per_page;
+        $message .= $total_rows . " containers found ";
+
+        if($total_rows > $rows_per_page || defined $q->param('debug')){
+            my $pagination = $self->_page($page,$rows_per_page,$total_rows);
+            $self->tt_params({ pagination => $pagination });
+        }
+
+        my @rs = $self->resultset('Imap')->search( \%search, \%limits );
+        $self->tt_params({ imap => \@rs });
+
+        if($total_rows > $rows_per_page || defined $q->param('debug')){
+            my $pagination = $self->_page($page,$rows_per_page,$total_rows);
+            $self->tt_params({ pagination => $pagination });
+        }
+
+
+    }else{
+        $message =qq |You have no IMAP4 or POP3 accounts|;
+        if($opt{do_name}){ $message .=qq | under the domain $opt{do_name}|; }
+        $opt{error} = ' ';
+    $self->tt_params({ error => $opt{error} });
+    }
 
     $self->tt_params({
-    error   => $opt{error},
     message => $message,
     body    => $body,
           });
