@@ -2,6 +2,7 @@ package Notice::C::Email;
 
 use warnings;
 use strict;
+use lib 'lib';
 use base 'Notice';
 use Data::Dumper;
 
@@ -432,7 +433,7 @@ sub imap: Runmode{
     }elsif($q->param('id')){
         $opt{do_name} = $q->param('id');
     }
-    my $pe_level = 100;
+    my $pe_level = 1;
     if($self->param('pe_level') && $self->param('pe_level')=~m/^\d+$/){
             $pe_level = $self->param('pe_level');
     }elsif($self->session->param('pe_level') && $self->session->param('pe_level')=~m/^\d+$/){
@@ -440,8 +441,10 @@ sub imap: Runmode{
     }
 
     $self->tt_params({ pe_level => $pe_level });
+    my %limits = ( join => ['domains'] );
 
     if($self->in_group('HR',$self->param('pe_id'))){
+        $self->tt_params({ pe_level => $pe_level + 10 });
 
         if($q->param('Delete')){
 
@@ -449,7 +452,15 @@ sub imap: Runmode{
               $q->param('userid') && $q->param('userid')=~m/.+$/){
                 # lets check that it exists
                 #$self->tt_params({ body => 'Deleting ' . $q->param('userid') . ' of domain ID ' . $q->param('doid') });
-                $body = 'Deleting ' . $q->param('userid') . ' of domain ID ' . $q->param('doid');
+                my %find =  ( -and => [ im_userid => $q->param('userid'), im_doid => $q->param('doid') ]);
+                my $del = $self->resultset('Imap')->search(\%find ,{ columns => ['im_userid','im_doid'], })->first;
+                if($del && $del->im_doid && ( $del->im_doid eq $q->param('doid') && $del->im_userid && ( $del->im_userid eq $q->param('userid') ) )){
+                    # create imaphistory entry (so that we can undo the delete) NOTE NTS
+                    $body = 'Deleted ' . $q->param('userid') . ' of ' . $del->im_home;
+                    $del->delete;
+                }else{
+                    $body = '<span class="error">Could not find' . $q->param('userid');
+                }
             }
         }elsif($q->param('Add')){
 # NOTE this has not been written yet
@@ -471,7 +482,6 @@ sub imap: Runmode{
 
         my $page = defined $q->param('page') && $q->param('page')=~m/^\d+$/ ? $q->param('page') : 1;
 
-        my %limits = ( join => ['domains'] );
         my %search =();
         if( defined $q->param('email') && $q->param('email')=~m/^(.+)\@(.+)$/){
            %search =  ( -and => [ im_userid => $1, do_name => $2 ]);
@@ -615,6 +625,179 @@ eval {
  };
  if($@){
         #maybe  MIME::Entity is not installed
+    my $message='';
+    if($subject){
+        $message = "From: $from\nTo: $to\nSubject: $subject\n\n$body";
+    }else{
+        $message = $from;
+    }
+    open(MAIL,"|$mailprog -t") or warn "Can't open $mailprog";
+    my $return = print MAIL $message;
+    close(MAIL);
+    return($return);
+    #`echo $message|$mailprog -t`;
+ }
+
+}
+
+=head3 _sender
+
+a new way to send email
+    the same as &_send but uses newer perl modules
+    and can send HTML email (yuck).
+
+=cut
+
+sub _sender {
+    my ($self,$from,$to,$subject,$body,$attach,$sign,$encrypt) = @_;
+    my $mailprog='sendmail'; #actually it is exim here through the joys of symlinks
+
+    if( ref($to) eq 'ARRAY'){ $to = join(",", @{ $to }); }
+
+ eval {
+    use Email::Sender::Simple qw(sendmail);
+    my $email;
+    my $looks_like_html = 0; #set to >0 to force evil HTML email 
+                             # and set to 0 to guess
+                             # and set to -1 to force sensible text/plain email.
+    if( ( ref($from) eq 'HASH' || ref($from) eq 'REF' ) && defined $from->{body}){
+        $to = $from->{to};
+        $subject = $from->{subject};
+        $body = $from->{body};
+        $from = $from->{from};
+        $sign = $from->{sign}; #PGP key to use (default $from)
+        $encrypt = $from->{encrypt}; #PGP key to use (default $to)
+        return(-1) unless $body;
+        return(-2) unless $from;
+        return(-3) unless $to;
+    }elsif((! $body || ref($body) eq 'ARRAY') && ref($from) eq 'SCALAR'){
+        if( ! $subject){
+            my $sender='';
+            HEAD: foreach my $line (split("\n", $from)){
+                if( ! $subject && $line=~m/^\s*Subject\s?:\s*(.+)$/){ $subject = $1; next HEAD; }
+                elsif( ! $to   && $line=~m/^\s*To\s?:\s*(.+)$/){ $to = $1; next HEAD; }
+                elsif(!$sender && $line=~m/^\s*From\s?:\s*(.+)$/){ $sender = $1; next HEAD;}
+                #last HEAD if $line=~m/^\s*$/;
+                $body .= $line;
+            }
+            if($sender){
+                if(!$body){
+                    $body = $from;
+                }
+                $from = $sender;
+            }
+        }
+       # $email = MIME::Entity->build(From    => $from,
+       #                               To      => $to,
+       #                               Subject => $subject,
+       #                               Data    => $body);
+    }
+    if($body=~m/[\<|\&lt;]/){
+        $looks_like_html += 1;
+    }
+
+    if($looks_like_html && $looks_like_html>=1){
+        use Email::MIME::CreateHTML;
+        #use HTML::Strip;
+        #my $hs = HTML::Strip->new();
+        #my $plain_text = $hs->parse( $body );
+        #$hs->eof;
+        use HTML::FormatText;
+        my $plain_text = HTML::FormatText->format_string(
+        $body,
+        leftmargin => 0, 
+        rightmargin => 72
+        #rightmargin => 76 # http://tools.ietf.org/html/rfc2045#section-6.8 suggests 76 would be good
+        );
+        # http://search.cpan.org/~bbc/Email-MIME-CreateHTML-1.030/lib/Email/MIME/CreateHTML.pm#COOKBOOK
+        # If you want your images to remain as links (rather than be embedded in the email) disable the embed option
+        # $email = Email::MIME->create_html(header => [ blah ], body=>$body, embed => 0);
+        $email = Email::MIME->create_html(
+                header => [
+                        From => $from,
+                        To => $to,
+                        Subject => $subject,
+                ],
+                body => $body,
+                text_body => $plain_text
+        );
+    }else{
+      use Email::Simple;
+      use Email::Simple::Creator;
+      $email = Email::Simple->create(
+        header => [
+          To      => $to,
+          From    => $from,
+          Subject => $subject
+        ],
+        body => $body
+      );
+    }
+
+    if ($attach) {
+        # NOTE this functionality has not been checked
+        use Email::MIME qw(parts_add);
+        use IO::All;
+        my @parts = $email->parts; #collect the existing message
+        if(ref($attach) eq 'HASH'){
+            foreach my $att (keys %{ $attach }){
+                my $filename = Email::MIME->invent_filename($attach->{$att}{type}), # "report.pdf",
+                my $file_type = $attach->{$att}{file};
+                my $doc_name = $attach->{$att}{file};
+                $doc_name =~s{^.*/}{};
+                unless($file_type=~s/\.(\w{3,4})$/$1/){ $file_type = 'text/plain'; }
+                my $content_type = $attach->{$att}{type} || $file_type;
+                if($file_type=~m/([txt|rtf|html])/i){
+                    $content_type = 'plain/' . lc($1);
+                }
+                elsif($file_type=~m/([pdf|json|html])/i){
+                    $content_type = 'application/' . lc($1);
+                }
+                elsif($file_type=~m/([exe|com])/i){
+                    $content_type = 'application/octet-stream';
+                }# add your type of MIME (Multipurpose Internet Mail Extensions) here 
+    # detects the MIME type from a file
+        use File::Type qw(mine_type);
+        my $ft = File::Type->new();
+        $content_type = $ft->mime_type($attach->{$att}{file});
+    # NOTE find a perl module that detects the correct encoding for that file
+    # NOTE stop doing this all by hand!
+                my @new_part = (
+                    Email::MIME->create(
+                      attributes => {
+                          filename     => $filename, # "report.pdf",
+                          content_type => $content_type, # $attach->{$att}{type}, # "application/pdf","text/plain"
+                          encoding     => "quoted-printable",
+                          name         => $doc_name, #"2004-financials.pdf",
+                      },
+                      body => io( $attach->{$att}{file} )->all,
+                    ),
+                  );
+                $email->parts_add( \@new_part );
+            }
+        }
+        #$email->parts_set( \@parts );
+    }
+
+    if( ( ref($from) eq 'HASH' || ref($from) eq 'REF' ) && defined $from->{x_headers}){
+        XFE: foreach my $x_header (@{$from->{x_headers}}){
+            my($xhlh,$xhrh) = split(/=>/, $x_header);
+            next XFE unless $xhrh;
+            next XFE unless $xhlh=~m/^(Sender|X-.+)/;
+            $email->header_str_set( $xhlh=>$xhrh ); #Email::MIME
+        }
+    }
+
+    use Try::Tiny;
+    try {
+      sendmail($email);
+    } catch {
+      warn "Falling back to pipe as sending failed: $_";
+    };
+ };
+ if($@){
+    warn $@;
+        #maybe  Email::Sender::Simple is not installed
     my $message='';
     if($subject){
         $message = "From: $from\nTo: $to\nSubject: $subject\n\n$body";

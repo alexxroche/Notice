@@ -1,0 +1,60 @@
+[%- UNLESS username; no_wrapper=1; style='style="padding:12px"'; END -%]
+[% WRAPPER 'site_wrapper.tmpl' -%]
+<div id="page_content" [%- style -%]>
+<link rel=stylesheet href="/css/notice.css" />
+[%- IF ajax_msg -%]<span class="message">[%- ajax_msg -%]</span>[%- END # ajax_msg -%]
+
+Welcome! If you have received one or more emails then you can past each into the form below.
+You can chose to include your email address <strong>_if_</strong> you would like to be kept informed.<br />
+<br />
+This automated abuse processor will verify that the message was sent from our system, collect any logs that we may have
+and identify the culperit. Thie kama will be reduced, (and with enough of a reduction they will no longer be able to send email from our system.)
+All of this will be logged into our Request Tracker (RT) abuse queue. If you have supplied your email address it will automatically send you a copy of the messages that our support team add.<br />
+<br />
+If you do not receive a message from us then it is probably because the abuse came from someone else that was pretending to be us. We will pass on any reports of abuse to the relevant sysadmin where we think that it is appropriate.
+<br /><br />
+<strong>Remember</strong> we _need_ the full email header from the message, (the body of the email is actually irrelevent to us, but you can include the first few lines. Large messages will be truncated and attachments will be ignored.)<br />
+
+        [%- #INCLUDE 'Notice/C/Abuse/form.tmpl' -%]
+<div id="abuse_form" class="table">
+ <form method="post" enctype="multipart/form-data">
+  <div id="af_content">
+    <textarea cols="70%" rows="10" name="complaint" placeholder="Paste in email headers"></textarea><br />
+    OR upload an email file
+    <input name="complaint" type="file"/>
+  </div>
+  <div id="ab_reporters_email">
+    (Optionally) Your email address: <input type="text" name="reporter" />
+  </div>
+  <div id="ab_feels">
+  (Optionally) you can let us know how you feel about the abuse:
+   <ul>
+    <li>Not relevent <input type="radio" name="feeling" value="n/a" />
+    <li>Just FYI <input type="radio" name="feeling" value="FYI" />
+    <li>testing or checking <input type="radio" name="feeling" value="testing" />
+    <li>Beyond livid <input type="radio" name="feeling" value="beyond livid" />
+    <li>Spitting nails <input type="radio" name="feeling" value="spitting nails" />
+    <li>Very put-out <input type="radio" name="feeling" value="very put out" />
+    <li>Rather miffed <input type="radio" name="feeling" value="rather miffed" />
+    <li>in tears  ;`( <input type="radio" name="feeling" value="in tears" />
+    <li>hurt <input type="radio" name="feeling" value="hurt" />
+    <li>meh *shrug* <input type="radio" name="feeling" value="meh *shrug*" />
+    <li>Don't mind <input type="radio" name="feeling" value="don't mind" />
+    <li>amused <input type="radio" name="feeling" value="amused" />
+    <li>ROFL LOL <input type="radio" name="feeling" value="ROFL LOL" />
+    <li>'other' <input type="radio" name="feeling" value="other" />
+    <li>How do I turn this damn selection thing off? I didn't mean to pick any of them! <input type="radio" name="feeling" value="" />&lt;&lt; then pick this one
+    </ul>
+ </div>
+ <div id="vent">
+    (Optionally) you can add a note but be warned - this will be recorded and _can_ be used in evidence against you. Remember that, "This too shall pass" and given enough time it will seem less important. While _how_ you report may worry you more and more. We take abuse very seriously, but if it happens to be you that is being silly we /may/ use you as an example of how _not_ to behave.<br />
+    <textarea cols="50%" rows="5" name="vent" placeholder="be gentle on yourself and others"></textarea>
+ </div>
+ <div id="af_submit">
+    <input class="small green button" type="submit" name="Report" value="Report Abuse" />
+ </div>
+</form>
+You do <strong>_not_</strong> have to include your own email address in the report, (if you delete to "To: " or "Cc:" or "Bcc:" field from the headers we can still register it as a valid abuse complaint.
+</div>
+</div>
+[% END # wrapper -%]
