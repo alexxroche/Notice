@@ -452,15 +452,7 @@ sub imap: Runmode{
               $q->param('userid') && $q->param('userid')=~m/.+$/){
                 # lets check that it exists
                 #$self->tt_params({ body => 'Deleting ' . $q->param('userid') . ' of domain ID ' . $q->param('doid') });
-                my %find =  ( -and => [ im_userid => $q->param('userid'), im_doid => $q->param('doid') ]);
-                my $del = $self->resultset('Imap')->search(\%find ,{ columns => ['im_userid','im_doid'], })->first;
-                if($del && $del->im_doid && ( $del->im_doid eq $q->param('doid') && $del->im_userid && ( $del->im_userid eq $q->param('userid') ) )){
-                    # create imaphistory entry (so that we can undo the delete) NOTE NTS
-                    $body = 'Deleted ' . $q->param('userid') . ' of ' . $del->im_home;
-                    $del->delete;
-                }else{
-                    $body = '<span class="error">Could not find' . $q->param('userid');
-                }
+                $body = 'Deleting ' . $q->param('userid') . ' of domain ID ' . $q->param('doid');
             }
         }elsif($q->param('Add')){
 # NOTE this has not been written yet

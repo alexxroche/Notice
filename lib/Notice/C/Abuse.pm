@@ -1,13 +1,13 @@
 package Notice::C::Abuse;
 
 #use warnings;
-no warnings;
+no warnings; # DateTime::Format::Strptime causing deprecation msgs to be thrown
 use strict;
 use lib 'lib';
 use base 'Notice';
 use Data::Dumper;
-my $fallback_address = 'notice-dev@alexx.net';
-my $abuse_address = 'abuse@strongbox.info';
+my $fallback_address = 'root@localhost';
+my $abuse_address = 'abuse@example.com'; #usual connected to an RT queue
 my %submenu = (
    0 => [
         '1' => { peer=> 1, name=> 'Abuse', rm => 'Abuse', class=> 'navigation'},
@@ -30,7 +30,7 @@ abuse messages to the RT (request tracker) abuse queue.
 
 =head1 DESCRIPTION
 
-Each message that is sent by a user from my SMTP server has an X-ESRT added
+Each message that is sent by an authenticated user from my SMTP server has an X-ESRT header added.
 This "Email Service Revocation Token". (Example exim4 config sample included).
 This means that the headers of any message can be used to verify 
 
@@ -38,19 +38,23 @@ How this works:
 
 the X-ESRT is a hash of "a secret string,host_name,auth_id,time-of-day"
 So along with the ESRT we need the 
-  ${hmac{sha1}{ESRT_SECRET}{${primary_hostname},$authenticated_id,$tod_log}}
-
-The 
     hostname
     senders_id
     and the time when the message was sent, (from the MTA point-of-view).
+    (note that time-zone can be an issue, so use GMT!)
 
 Thankfully all of this is in a normal header.
 
 Notice will check in its config for ESRT_SECRET and if it does not find one
 it will endeavour to find the nearest exim config and extract it.
 
+Becuase of this simple verification we can determin spoofed spam withouth
+having to bother with DKIM. Also this script can, if it has access grab 
+the MTA log lines for the offending message and include them in the Abuse ticket.
+
 =head3 HASH
+
+  ${hmac{sha1}{ESRT_SECRET}{${primary_hostname},$authenticated_id,$tod_log}}
 
 The default is hmac sha1 in the form:
     echo -n "value" | openssl dgst -sha1 -hmac "key"
@@ -81,6 +85,8 @@ X-ESRT: {hmac-sha512}really-really-long-string-here_but-at-least-it-is-more-secu
 This needs a cool-down so that people do not spam us with abuse requests
 (and where we have log entries, they do not thrash our server with grep)
 
+(oh and you will have to add the "upload spam file".
+
 =head1 METHODS
 
 =head2 SUBCLASSED METHODS
@@ -102,8 +108,7 @@ sub setup {
 
 =head3 main
 
-  * This is going to display a submission form
-  * /var/www/sites/www.alexx.net/www/aif/ISP/exim_ESRT_test
+  * This has policy and a submission form
 
 =cut
 
@@ -124,18 +129,6 @@ sub main: StartRunmode {
         }); 
     }
     #foreach my $ak (keys %{ $q->{'param'} } ){ warn "$ak = " . $q->param($ak); }
-
-=pod
-
-    feeling = FYI at ../../lib/Notice/C/Abuse.pm line 120.
-complaint = From: them
-To: me
-X-ESRT: 1234567890 at ../../lib/Notice/C/Abuse.pm line 120.
-Report = Report Abuse at ../../lib/Notice/C/Abuse.pm line 120.
-vent = I did not subscribe at ../../lib/Notice/C/Abuse.pm line 120.
-reporter = complain@winger.com at ../../lib/Notice/C/Abuse.pm line 120.
-
-=cut
 
 # you are here about to parse the form (we want to find the X-ESRT as fast as possible and if it is not there
     my $r = $self->_check_ESTR($q->param('complaint'));
@@ -182,7 +175,7 @@ reporter = complain@winger.com at ../../lib/Notice/C/Abuse.pm line 120.
                     $new_ticket .= 'peid: ' . $pe_id;
                 }
 
-                unless($from){ $from = '"Anonymous" <bin@alexx.net>'; }
+                unless($from){ $from = '"Anonymous" <bin@example.com>'; }
                 my $site = 'from //notice.strongbox.info/Abuse';
                 unless($subject){ $subject = "Failed Abuse report $site"; }
                 # we /could/ extract the subject from the headers in the report!
@@ -254,7 +247,7 @@ abuse-comment@example.com -> |/usr/sbin/rt-mailgate --queue 'Abuse' --action com
 
     unless($from){ 
         #$from = '"Anonymous" <>'; 
-        $from = '"Anonymous" <bin@alexx.net>'; 
+        $from = '"Anonymous" <bin@example.com>'; 
     }
     my $site = 'from //notice.strongbox.info/Abuse';
     unless($subject){ $subject = "Abuse report $site"; }
@@ -658,6 +651,7 @@ __END__
 =head1 BUGS AND LIMITATIONS
 
 There are no known problems with this module.
+Though it is old and was written in a rush, (feel free to fix the obvious mistakes.)
 Please fix any bugs or add any features you need. You can report them through GitHub.
 
 =head1 SEE ALSO
@@ -680,8 +674,7 @@ Alexx Roche, C<alexx@cpan.org>
 Copyright (C) 2011 Alexx Roche
 
 This program is free software; you can redistribute it and/or modify it
-under the following license: Eclipse Public License, Version 1.0
-or the Artistic License.
+under the following license:  The MIT License (MIT) or the Artistic License.
 
 See http://www.opensource.org/licenses/ for more information.
 
