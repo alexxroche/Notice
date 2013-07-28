@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+  <title>[%- title OR 'Notice::Config::css' -%]</title>
+  [%- IF is_admin -%]
+  <link rel=stylesheet href="/css/pages.css" />
+ [%- UNLESS no_editor -%]
+  <link rel=stylesheet href="/codemirror/css/codemirror.css" />
+  <script src="/codemirror/js/codemirror.js">
+  </script>
+  <script src="/codemirror/js/css.js"></script>
+     <link rel="stylesheet" href="/codemirror/doc/docs.css">
+    <link rel="stylesheet" href="/codemirror/theme/neat.css">
+    <link rel="stylesheet" href="/codemirror/theme/elegant.css">
+    <link rel="stylesheet" href="/codemirror/theme/erlang-dark.css">
+    <link rel="stylesheet" href="/codemirror/theme/night.css">
+    <link rel="stylesheet" href="/codemirror/theme/monokai.css">
+    <link rel="stylesheet" href="/codemirror/theme/cobalt.css">
+    <link rel="stylesheet" href="/codemirror/theme/eclipse.css">
+    <link rel="stylesheet" href="/codemirror/theme/rubyblue.css">
+    <link rel="stylesheet" href="/codemirror/theme/lesser-dark.css">
+    <link rel="stylesheet" href="/codemirror/theme/xq-dark.css">
+    <link rel="stylesheet" href="/codemirror/theme/ambiance.css">
+    <link rel="stylesheet" href="/codemirror/theme/blackboard.css">
+    <link rel="stylesheet" href="/codemirror/theme/vibrant-ink.css">
+    <link rel="stylesheet" href="/codemirror/theme/solarized.css">
+    <link rel="stylesheet" href="/codemirror/theme/twilight.css">
+    <link rel="stylesheet" href="/codemirror/theme/twilight.css">
+  <style type="text/css">
+    .CodeMirror { background: #f8f8f8; border: 1px solid black; font-size:13px; min-width:100%; min-height: 497px;}
+  </style>
+<script type="text/javascript" language="javascript">
+    window.onload=function() { selectTheme(); };
+    //document.addEventListener('DOMContentLoaded',function(){ slectTheme(); })
+   //$(document).ready(function() { selectTheme(); });
+</script>
+ [%- END # no_editor -%]
+  [%- END # is_admin -%]
+</head>
+<body>
+[%- warning || warn || error -%]
+[%- message -%]
+[%- USE Dumper -%]
+        [%- IF is_admin -%]
+    <form method="post">
+        <input type="hidden" name="id" value="[%- name -%]" />
+        <span class="small">Name: <input type="text" name="name" title="It has to have a name" value="[%- name -%]" required [% IF name; 'readonly'; END %] />
+            &nbsp; <a tabindex=99 class="red button" href="[%- c.query.url -%]/Config/"><span class="white">Abandon or return</span></a> &nbsp; 
+        [%- END #IF is_admin -%]
+            [%- msg -%]
+        [%- IF is_admin -%]
+            <br /><br />
+        </span>
+        <textarea id="code" name="code" rows="30" cols="152" >[%- editor1 -%]</textarea>
+<br />
+            <input class="small [%- IF editor1; 'orange'; ELSE; 'green'; END -%] button" type="submit" title="Go live right now" value="[%- IF editor1; 'Update'; ELSE; 'Add'; END -%]" name="update" />
+
+&nbsp; &nbsp; &nbsp; 
+Select a theme: <select onchange="selectTheme()" id=select>
+    <option>default</option>
+    <option>ambiance</option>
+    <option>blackboard</option>
+    <option>cobalt</option>
+    <option>eclipse</option>
+    <option>elegant</option>
+    <option>erlang-dark</option>
+    <option>lesser-dark</option>
+    <option>monokai</option>
+    <option>neat</option>
+    <option>night</option>
+    <option selected>rubyblue</option>
+    <option>solarized dark</option>
+    <option>solarized light</option>
+    <option>twilight</option>
+    <option>vibrant-ink</option>
+    <option>xq-dark</option>
+</select>
+
+<script>
+  var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    lineNumbers: true
+  });
+  var input = document.getElementById("select");
+  function selectTheme() {
+    var theme = input.options[input.selectedIndex].innerHTML;
+    editor.setOption("theme", theme);
+  }
+  var choice = document.location.search &&
+               decodeURIComponent(document.location.search.slice(1));
+  if (choice) {
+    input.value = choice;
+    editor.setOption("theme", choice);
+  }
+</script>
+    </form>
+        [%- END # admin check -%]
+</body>
+</html>

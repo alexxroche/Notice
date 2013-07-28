@@ -1,0 +1,22 @@
+[% WRAPPER 'site_wrapper.tmpl' %]
+        <h1>
+    [% main_welcome %]
+</h1>
+ [% IF is_admin %]
+<form method="post">
+   Welcome message <input type="text" size="100" name="welcome" value="[% main_welcome %]" />
+[%-IF ac_name OR ac_id; ' for '; ac_name; ' ('; ac_id; ')'; END -%]
+<br />
+    <textarea name="message" cols="170" rows="15" >[% main_message %]</textarea>
+  [%- IF main_message OR main_welcome -%]
+    <input class="small orange button" type="submit" name="update" value="Update" />
+  [%- ELSE -%]
+    <input class="small green button" type="submit" name="add" value="Add" />
+  [%- END -%]
+</form>
+<!-- we should update this display using js -->
+[% main_message -%]
+ [% ELSE %]
+    Admin can edit the post-login page here
+ [% END %]
+[% END %]

@@ -1,0 +1,25 @@
+<div id="billing">
+ We have an admin view or break-down for each rental or product<br />
+<br />
+ We also have a user view that agregates as much as possible. Any comparable components that are linked under a single rental are combined and reduced.
+<br />
+e.g. If the user has a "standard product" that may combine dial-up (yes I know) and 10 Meg of IMAP space. This will also include an associated email address. Now they may have invoiked a signup promotion and they may have access to the studetn 10% discount. They may have also decided that they are going to need more space from the start and paid for additional space, so for them the "standard product" would be dial-up + 
+100 Meg of IMAP space, the first 10Meg of which, for the first year is at 15% off and the other 90Meg is at 10% off, (until they are no longer a student.) 
+</div>
+<hr>
+<div id="db_outline">
+for this the products table will need components table that links back to other tables, or defines services.
+<br />
+The rental table will need to mirror the products by having a rent_row table
+</div>
+<hr>
+
+<div id="product_price">
+Here you can select the product to price up
+
+
+
+<select name="product">
+[% products %]
+</select>
+</div>

@@ -1,0 +1,20 @@
+[% WRAPPER 'site_wrapper.tmpl' %]
+    [%- IF is_admin AND page.length >= 71 #length of message (overload much?) -%]
+     <form method="post" enctype="multipart/form-data">
+        <input id="select_file" type="file" name="img" required />
+        <input id="upload_button" class="small green button" type="submit" name="upload" value="Upload" title="Upload an image for this account" />
+     </form>
+    [%- END -%]
+  <h2>Logo [%- IF is_admin - %] and other Images [%- END -%] Control</h2>
+<div id="MainDiv"><div id="MainCont">
+ [%- page; error; debug %]
+ </div>
+    [%- IF admin OR is_admin -%]
+     <form method="post" enctype="multipart/form-data">
+        <input id="select_file" type="file" name="img" required />
+        <input id="upload_button" class="small green button" type="submit" name="upload" value="Upload" title="Upload an image for this account" />
+     </form>
+    [%- END -%]
+
+ </div>
+[% END #WRAPPER %]
