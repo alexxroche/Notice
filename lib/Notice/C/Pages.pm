@@ -570,9 +570,10 @@ sub edit: Runmode {
         if( ( -d "$www_path" ) && ( ( -e "$www_path/$filename" && -w "$www_path/$filename" ) || ( -w "$www_path") ) ){
           
             my $page_html;
-            $page_html = $self->view;
+            $page_html = $self->view($pa_id);
             open(HTML,">$www_path/$filename") or do { $self->tt_params({ error => 'failed to open file' }); return $self->tt_process(); };
-            print HTML $page_html;
+            #print HTML $$page_html; # I think that this is wrong
+            print HTML scalar $page_html;
             close(HTML);
 
             my $going_live = $self->resultset('Page')->search({ pa_id => $pa_id })->first;
@@ -601,9 +602,6 @@ sub edit: Runmode {
 
     my @tmpl_list;
     my $template_path = '';
-    my $ac_id=0;   
-    if($self->param('ef_acid')){ $ac_id = $self->param('ef_acid'); }
-    elsif($self->param('ac_id')){ $ac_id = $self->param('ac_id'); }
 
     my $cfg = $self->resultset('ConfData')->search({
             -and => [
@@ -743,9 +741,8 @@ The idea is that the output of view will be written as a static file.
 =cut
 
 sub view: Runmode {
-    my ($self) = @_;
+    my ($self,$pa_id) = @_;
     my $q = $self->query();
-    my $pa_id;
     if($self->param('id') && $self->param('id')=~m/^(\d+)$/ ){
         $pa_id = $1;
     }elsif($self->param('sid') && $self->param('sid')=~m/^(\d+)$/){
@@ -1041,7 +1038,7 @@ sub view: Runmode {
             }
        # }
         $self->tt_params({ page => $template });
-    }elsif($pa_id=~m/^\d+$/){
+    }elsif($pa_id && $pa_id=~m/^\d+$/){
         warn "$base_path/$default_tempalte_file not  found";
         my $this_css = qq | /* css is cool */ #preview { position: absolute; left: 0; top: 0; display: block; height: 125px; width: 125px; background: url(/images/TLpreview.png) no-repeat; text-indent: -999em; z-index: 1031; text-decoration: none;} |;
         $self->tt_params({ css => $this_css });
@@ -1123,16 +1120,6 @@ sub template: Runmode {
         $self->tt_params({ admin => 1 });
     }
 
-    # check that "template" does not have any XSS or '..'
-    if ($q->param('template')){
-        $tempalte_file = $q->param('template');
-#warn "template from query param $tempalte_file";
-    }elsif($self->param('sid') && $self->param('sid') ne ''){
-        $tempalte_file = $self->param('sid');
-#warn "editing $tempalte_file";
-    }
-
-
     my $template_path = '';
     my $ac_id=0;
     if($self->param('ef_acid')){ $ac_id = $self->param('ef_acid'); }
@@ -1164,7 +1151,7 @@ sub template: Runmode {
     my $sub_dir = '';
     my $file_or_dir_to_remove;
 
-#  ':id/:sid/:did?/:eid?/:*'=> { fid => 1},
+#  ':id/:sid/:did?/:eid?/:fid?/*'=> {},
     if($self->param('id') && -d "$base_path/" . $self->param('id')){
         $base_path .= '/' . $self->param('id');
         $sub_dir .= $self->param('id');
@@ -1180,20 +1167,38 @@ sub template: Runmode {
     if($self->param('sid') && -d "$base_path/" . $self->param('sid')){
         $base_path .= '/' . $self->param('sid');
         $sub_dir .= '/' . $self->param('sid');
+    }elsif($self->param('sid') && $self->param('sid') ne ''){
+        $tempalte_file = $self->param('sid');
     }
     if($self->param('did') && -d "$base_path/" . $self->param('did')){
         $base_path .= '/' . $self->param('did');
         $sub_dir .= '/' . $self->param('did');
+    }elsif($self->param('did') && $self->param('did') ne ''){
+        $tempalte_file = $self->param('did');
     }
     if($self->param('eid') && -d "$base_path/" . $self->param('eid')){
         $base_path .= '/' . $self->param('eid');
         $sub_dir .= '/' . $self->param('eid');
+    }elsif($self->param('eid') && $self->param('eid') ne ''){
+        $tempalte_file = $self->param('eid');
     }
     if($self->param('fid') && -d "$base_path/" . $self->param('fid')){
         $base_path .= '/' . $self->param('fid');
         $sub_dir .= '/' . $self->param('fid');
+    }elsif($self->param('fid') && $self->param('fid') ne ''){
+        $tempalte_file = $self->param('fid');
     }
     $sub_dir =~s/^\///;
+    $sub_dir =~s/^\/\//\//g;
+
+    # check that "template" does not have any XSS or '..'
+    if ($q->param('template')){
+        $tempalte_file = $q->param('template');
+#warn "template from query param $tempalte_file";
+    #}elsif($self->param('sid') && $self->param('sid') ne ''){
+    #    $tempalte_file = $self->param('sid');
+    }
+
     my $file_rm = $file_or_dir_to_remove;
     if($base_path && $file_or_dir_to_remove){ 
         $file_or_dir_to_remove =  "$base_path/$file_or_dir_to_remove"; 
@@ -1229,12 +1234,20 @@ sub template: Runmode {
             close(TEMPLATE);
         }
         if(!$existing_template || $existing_template ne $q->param('editor1') ){
-            open FILE, ">", "$base_path/" . $q->param('name');
-            print FILE $q->param('editor1') || $self->tt_params({ error => 'Could not write the new template' });
-            $self->tt_params({ editor1 => $q->param('editor1') });
-            $self->tt_params({ name => $q->param('name') });
-            close(FILE);
-            $self->tt_params({ message=> '<span class="small red button">Template updated</span>' });
+            open FILE, ">", "$base_path/" . $q->param('name') or $self->tt_params({ message => '<span class="small red button">Unable to read' . $q->param('name') . '</span>' });
+            if(tell(FILE) != -1){
+                print FILE $q->param('editor1') || $self->tt_params({ message => '<span class="small red button">Could not write the new template</span>' });
+                $self->tt_params({ editor1 => $q->param('editor1') });
+                $self->tt_params({ name => $q->param('name') });
+                #if(!$!){
+                    close(FILE);
+                    $self->tt_params({ message=> '<span class="small blue button">Template updated</span>' });
+                #}else{
+                #    $self->tt_params({ message=> '<span class="small red button">Failed to update template</span>' });
+                #}
+            }else{
+               $self->tt_params({ message=> '<span class="small red button">Looks like you do not have write permission for that</span>' });
+            }
         }else{
             $self->tt_params({ error => 'No changes made', title => 'R U an epileptic monkey? Then stop pointlessly pressing buttons!' });
         }
@@ -1287,7 +1300,6 @@ sub template: Runmode {
     }
 
     my %tmpl_list;
-    my $template_path;
     if(-d "$base_path"){
         $template_path = $base_path;
     }else{
@@ -1296,21 +1308,38 @@ sub template: Runmode {
         $template_path = $dir . '/' . $base_path
     }
     if(-d "$template_path" ){
+            if($sub_dir){
+                $self->tt_params({ path => $sub_dir . '/' });
+            }
     #    eval {
                 #no warnings 'uninitialized';
-                opendir (LIST, "$template_path") or die $!; # "failed to open $template_path";
+              #warn "reading DIR $template_path";
                 my $count = 0;
-                while(my $file = readdir(LIST)){
+                #opendir (LIST, "$template_path") or die $!; # "failed to open $template_path";
+                ##my @files = sort readdir(LIST);
+                ##foreach my $file (@files){
+                #foreach my $file (sort readdir LIST ){
+                ##while(my $file =  readdir(LIST)){
+                #while( defined( my $file = glob($template_path) ) ){ 
+                while( defined( my $file = glob($template_path . '/*' ) ) ){ 
                     $count++;
+                    $file=~s{^$template_path/}{}; #required for glob
                     next if ($file =~ m/^\./);
                     next unless ($inc_all || $file =~ m/\.html$/);
+                    #warn "checking to see if -d $template_path/$file";
                     if (-d "$template_path/$file"){
-                        push @{ $tmpl_list{dir} }, $sub_dir .'/'. $file;
+                        if($sub_dir && $sub_dir ne ''){
+                            # we use $sub_dir rather than $template_path because we don't want the leading ~cgi-bin/templates/
+                            # Overload much? Why not splash out on another array for directories?
+                            push @{ $tmpl_list{dir} }, $sub_dir .'/'. $file;
+                        }else{
+                            push @{ $tmpl_list{dir} }, $file;
+                        }
                     }else{
                         $tmpl_list{$count}{pa_name} = $file;
                     }
                 }
-                closedir(LIST);
+                #closedir(LIST);
     #    };
        #warn Dumper(\%tmpl_list);
      #   if(@_){
