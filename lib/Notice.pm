@@ -6,7 +6,7 @@ our %opt; # nice to have them
 $opt{D}=0;
 use lib 'lib';
 
-our $VERSION = 3.12;
+our $VERSION = 3.14;
 
 use Notice::DB;
 our $page_load_time = time;
@@ -87,6 +87,8 @@ sub cgiapp_init {
   if(-f 'config/config.pl'){
     use CGI::Application::Plugin::ConfigAuto (qw/cfg/);
     #$self->cfg_file('config/config.pl'); #only needed if ommited from Notice::Dispatch
+    $self->param('cfg_file' => 'config/config.pl');
+    #   my $app = WebApp->new(PARAMS => { cfg_file => 'config.pl' });
     %CFG = $self->cfg;
   }elsif(-f '../config/config.pl'){
     use CGI::Application::Plugin::ConfigAuto (qw/cfg/);
@@ -95,8 +97,8 @@ sub cgiapp_init {
     use CGI::Application::Plugin::ConfigAuto (qw/cfg/);
     %CFG = $self->cfg;
   }else{
-    warn('Default config');
-        
+    warn('PROBABLY An %INC or PATH ERROR: Falling back to Default config'); 
+
     $CFG{db_schema} = 'Notice::DB';
     $CFG{db_dsn} = "dbi:mysql:database=notice";
     $CFG{db_user} = "notice_adminuser";
@@ -160,6 +162,7 @@ sub cgiapp_init {
 
 
 sub sha512_filter {
+  # what no crypt-scrypt or even Digest-Bcrypt ?
     my $param = lc shift || 'base64';
     my $plain = shift;
     my $salt = shift || $CFG{'iv'} || $CFG{'salt'} || 'salt4life';
@@ -308,7 +311,9 @@ sub sha512_filter {
                         ],
                         'hidden' => { '<=', '0'}, #catagorie ?? IT IS Category !
                         },{
-                        columns => ['menu','hidden',{ name => 'modules.mo_name AS name'},{ rm => 'modules.mo_runmode AS rm'} ],
+                        columns => [
+                            'menu','hidden',{ name => 'modules.mo_name AS name'},
+                            { rm => 'modules.mo_runmode AS rm'}, { search => 'modules.mo_search AS search'} ], 
                         join => 'modules',
                         order_by => {-asc =>['pref','mo_default_hierarchy','menu+0']}
                         });
@@ -316,7 +321,6 @@ sub sha512_filter {
                     my @menu_order; #and this will be the order that they want them displayed in
 
                     #warn Dumper($menu_rs);
-                    # GOT HERE! NTS
 
                     #my $menu_cols = $menu_rs->all;
                     # NOTE we may have to sort these 
@@ -334,9 +338,10 @@ sub sha512_filter {
                         my $hidden   = $menu_rs[$i]->{_column_data}{hidden} || '';
                         my $rm       = $menu_rs[$i]->{_column_data}{rm};
                         my $menu_name= $menu_rs[$i]->{_column_data}{name};
-                        if($menu_name && $rm){
+                        my $search   = $menu_rs[$i]->{_column_data}{search} || '';
+                        if($menu_name && $rm && ! $menu{$menu}){
                           push @menu_order, $menu;
-                          $menu{$menu} = {hidden => "$hidden", rm => "$rm", name => "$menu_name", class => "$menu_class"};
+                          $menu{$menu}={hidden=>"$hidden", rm=>"$rm", name=>"$menu_name", class=>"$menu_class", search=>"$search"};
                         }
                     }
 
@@ -367,7 +372,7 @@ sub sha512_filter {
                     }
 =cut
 
-                    my $menu_dump = Dumper(\%menu);
+                    #my $menu_dump = Dumper(\%menu);
                     $self->param(menu => \%menu);
                     $self->param(menu_order => \@menu_order);
                     $self->session->param(menu => \%menu);
@@ -435,18 +440,18 @@ sub sha512_filter {
             # $self->param('i18n' => $lang_region[@lang_region - 1]);
             #my @lang_list = split(/;/, $self->param('ALL_HTTP'));
             #warn $self->param('ALL_HTTP');
-            if($ENV{HTTP_ACCEPT_LANGUAGE}=~m/^([^,]+)/){
+            if($ENV{HTTP_ACCEPT_LANGUAGE} && $ENV{HTTP_ACCEPT_LANGUAGE}=~m/^([^,]+)/){
                 my $HTTP_ACCEPT_LANGUAGE = $1;
                 $HTTP_ACCEPT_LANGUAGE =~s/-/_/;
                 $self->param('i18n' => $HTTP_ACCEPT_LANGUAGE);
                 #warn "HTTP_ACCEPT_LANGUAGE = " .$self->param('i18n');
-            }elsif($ENV{LANGUAGE}=~m/^([^,:]+)/){
+            }elsif($ENV{LANGUAGE}  && $ENV{LANGUAGE}=~m/^([^,:]+)/){
                 $self->param('i18n' => $1);
                 #warn "LANGUAGE = " .$self->param('i18n');
-            }elsif($ENV{LANG}=~m/^([^\.]+)/){
+            }elsif($ENV{LANG} && $ENV{LANG}=~m/^([^\.]+)/){
                 $self->param('i18n' => $1);
                 #warn "LANG= " . $self->param('i18n');
-            }elsif($ENV{GDM_LANG}=~m/^([^\.]+)/){
+            }elsif($ENV{GDM_LANG} && $ENV{GDM_LANG}=~m/^([^\.]+)/){
                 $self->param('i18n' => $1);
                 #warn "GDM_LANG= " .$self->param('i18n');
             }elsif($CFG{'default_lang'}){ 
@@ -460,7 +465,18 @@ sub sha512_filter {
           #  foreach my $env (keys %ENV){ my $line = "$env = $ENV{$env}"; if($line=~m/lang/i){ warn $line; }} 
         $self->tt_params({caller  => $self->param('caller')});
         $self->tt_params({REMOTE_ADDR  => $ENV{REMOTE_ADDR}});
-        $self->tt_params({title => 'Notice CRaAM  ' . $runmode ." - $known_as AT ". $ENV{REMOTE_ADDR}});
+        my $title = 'Notice CRaAM  '; 
+        if(defined $runmode){
+                $title  .= $runmode; 
+        } 
+        if(defined $known_as){ 
+                $title  .= " - $known_as AT ";
+        }
+        if(defined $ENV{REMOTE_ADDR}){
+            $title .= $ENV{REMOTE_ADDR};
+        }
+        $self->tt_params({title => $title });
+        #$self->tt_params({title => 'Notice CRaAM  ' . $runmode ." - $known_as AT ". $ENV{REMOTE_ADDR}});
     }else{
         $self->tt_params({title => 'Notice CRaAM -' . $known_as . ' ON '. $ENV{REMOTE_ADDR}});
     }
@@ -487,15 +503,33 @@ This lets us hook in the security module, (if it is installed)
 
 sub cgiapp_prerun {
     my $self = shift;
+    my $this_rm = shift;
     eval {
         require Notice::Security;
         Notice::Security->new();
         #Notice::Security->import();
-        my $breach = $self->Notice::Security::prerun_callback();
-        if($breach){ 
+        my ($breach) = $self->Notice::Security::prerun_callback();
+        # NOTE why do we bother returning from Security? Why not do all of this there?
+        if($breach && 1 eq 'secure'){
             if(ref($breach) eq 'HASH' || UNIVERSAL::isa($breach, 'HASH')){ 
                 warn Dumper($breach); 
-            }else{ warn $breach; } 
+            }else{ 
+            my $now = 'Fri, 11 Jan 2013 10:49:34 GMT';
+                warn "There was an attempted breach ";
+                $self->teardown();
+                $self->header_props(-type  =>  'text/html; charset=UTF-8',
+                   -annoyance_level => 'high',
+                   -status => '405 Method Not Allowed',
+                   #-date => $now,
+                   -nph => 1,
+                   -connection => 'close',
+                   -content_length => '720',
+                   -reported   => 'you betcha');
+                print $self->_send_headers();
+                #return $self->start_html($$breach); #does this work?
+                return print $$breach;
+                exit;
+            } 
             return; 
         }
     };
@@ -504,7 +538,7 @@ sub cgiapp_prerun {
         #$self->tt_params({ warning => 'naughty naught got caughty'});
         $self->tt_params({ warning => 'Security breach'});
     }else{
-        warn "back from sec" if $opt{D}>=10;
+        #warn "back from sec" if $opt{D}>=10;
     }
 
     # This is where we dynamically set the css
@@ -545,6 +579,54 @@ sub cgiapp_prerun {
         $self->param('css' => $user_css);
         $self->tt_params({'css' => $user_css});
     }
+    # the css location should be ac_to_tree($ac_tree) ( i.e. 1.23.6.7 => css/1/1.23/1.23.6/1.23.6.7/main.css
+
+    # here we enable the search boxes depending on which modules are installed and which are enabled for this ef_peid
+
+    my %search;
+    if($self->param('menu_order')){
+        foreach my $m (@{ $self->param('menu_order') } ){
+            #warn "menu order: " . Dumper($menu);
+            my %menu = %{ $self->param('menu') };
+            if($menu{$m}{search}){
+                $search{$menu{$m}{search}} = 1;
+                #warn "adding search: " . $menu{$m}{search};
+            }
+                
+    # NTS here we need to know which search to include for this RM
+    #        warn "menu item " . Dumper($menu{$menu});
+    # we also want to be able to then disable it on a per user basis
+    # You can hard-code a search like V_this_V;
+    #  $search{ppl} = 1 if $m eq '7.1';
+        }
+    }
+    # we have to check __TT_PARAMS because the module itself may have enabled a search function
+    if(%search){
+        if($self->{__TT_PARAMS}{'search'}){
+            %search = ( %search, %{ $self->{__TT_PARAMS}{'search'} });
+        #warn "2 Notice seach: " . Dumper(\%search);
+        }
+        $self->tt_params({ search  => \%search });
+    }
+    # here we set the top logo
+    if(defined $CFG{www_path} && defined $acid){
+        my $logo_dir = '/images';
+        my $logo_path = $CFG{www_path} . $logo_dir;
+        my $top_logo = 'top_logo.png';
+        if(-f "$logo_path/top_logo_$acid.png"){
+            $top_logo = "top_logo_${acid}.png";
+        }elsif(-f "$logo_path/top_logo_$acid.jpeg"){
+            $top_logo = "top_logo_${acid}.jpeg";
+        }elsif(-f "$logo_path/top_logo_$acid.jpg"){
+            $top_logo = "top_logo_${acid}.jpg";
+        }elsif(-f "$logo_path/top_logo_$acid.gif"){
+            $top_logo = "top_logo_${acid}.gif";
+        }
+        $self->tt_params({ top_logo  => "/images/$top_logo" });
+    }
+    # the problem with having this in Notice.pm is that when you change ef_acid you get one page lag
+    # as this is run before ef_acid is updated
+    
 }
 
 =head3 cgiapp_postrun
@@ -595,7 +677,7 @@ sub tt_post_process {
         #$$htmlref =~s/(<body.*<\w+)(>.*<\/body>)/$1 class="red" $2/sig;
     }
     $$htmlref =~s/Alexx Roche/Alexx Roche <br\/>NOT Cleaned by HTML::Clean/;
-  }else{
+  }elsif(! $self->param('no_clean')){
    eval {
     require HTML::Clean;
     my $h = HTML::Clean->new($htmlref);
@@ -791,6 +873,7 @@ sub login : Runmode {
         $self->tt_params({ authen_login => $runmode });
     }
   }
+    # NTS add in the ?blah=blah so that we don't lose the GET data
   $self->tt_params({ dest => $dest });
 
   my $user = $self->authen->username;
@@ -936,6 +1019,20 @@ sub _page {
         $pager->total_entries($rows);
         $pager->entries_per_page($limit);
         $pager->current_page($offset);
+        my $self_url;
+        #my $self_url = $q->self_url;
+        #if($self_url!~m/.*\/index.cgi\/([^\/]*)\/?.*/){
+        unless($q->self_url=~m/.*\/index.cgi\/([^\/]*)\/?.*/){
+            if($ENV{'PATH_INFO'}){
+                $self_url = $ENV{'PATH_INFO'} || undef;
+             # $q->{'url', $self_url}; # maybe perldoc CGI offers a way to change the URL
+            }else{
+                $self_url = $q->{'.path_info'};
+            }
+        #}else{
+        #    $self_url = '';
+        }
+        
         my $first = $pager->first;
         my $last  = $pager->last;
          my $message;
@@ -944,9 +1041,27 @@ sub _page {
 
         unless ( $offset eq $pager->first_page ) {
             $q->param( 'page', $offset - $offset );
-            $message .= q{<a class="blue" title="first page" href="} . $q->self_url . q{">&lt;&lt;</a> };
+            $message .= q{<a class="blue" title="first page" href="};
+            if($self_url && $self_url ne ''){
+                $message .= $q->url . $self_url . '?';
+                foreach my $ak (keys %{ $q->{'param'} } ){
+                    $message .=  $ak . '=' .$q->param($ak). ';';
+                }
+            }else{
+                $message .= $q->self_url;
+            }   
+            $message .= q{">&lt;&lt;</a> };
             $q->param( 'page', $offset - 1 );
-            $message .= q{<a class="blue" title="previous page" href="} . $q->self_url . q{">&lt;</a> };
+            $message .= q{<a class="blue" title="previous page" href="};
+            if($self_url && $self_url ne ''){
+                $message .= $q->url . $self_url . '?';
+                foreach my $ak (keys %{ $q->{'param'} } ){
+                    $message .=  $ak . '=' .$q->param($ak). ';';
+                }
+            }else{
+                $message .= $q->self_url;
+            }   
+            $message .= q{">&lt;</a> };
         }
 
         # we don't want the pagination to be too long so first, .. $page +/- 5 ... last_page
@@ -963,7 +1078,17 @@ sub _page {
             $message .= q{ <a class="};
             if($_ == $offset){ $message .= 'black orange'; $phf = '['; $phl = ']'; }
             else{ $message .= 'blue'; }
-            $message .= q{" href="} . $q->self_url . q{">} . $phf . $this_page . $phl . "</a> ";
+            # if we could change the url in $q->url then we would not need the next 8 lines
+            if($self_url && $self_url ne ''){
+                $message .= q{" href="} . $q->url . $self_url . '?';
+                foreach my $ak (keys %{ $q->{'param'} } ){
+                    $message .=  $ak . '=' .$q->param($ak). ';';
+                }
+                $message .= q{">} . $phf . $this_page . $phl . "</a> ";
+                #$message .= q{" href="} . $q->self_url . q{">} . $phf . $this_page . $phl . "</a> ";
+            }else{
+                $message .= q{" href="} . $q->self_url . q{">} . $phf . $this_page . $phl . "</a> ";
+            }
           } else {
             $message .= '.';
           }
@@ -974,9 +1099,27 @@ sub _page {
 
         unless ( $offset eq $pager->last_page ) {
             $q->param( 'page', $offset + 1 );
-            $message .= q{ <a class="blue" title="next page" href="} . $q->self_url . q{">&gt;</a> };
+            $message .= q{ <a class="blue" title="next page" href="};
+            if($self_url && $self_url ne ''){
+                $message .= $q->url . $self_url . '?';
+                foreach my $ak (keys %{ $q->{'param'} } ){
+                    $message .=  $ak . '=' .$q->param($ak). ';';
+                }
+            }else{
+                $message .= $q->self_url;
+            }
+            $message .= q{">&gt;</a> };
             $q->param( 'page', $pager->last_page );
-            $message .= q{ <a class="blue" title="last page" href="} . $q->self_url . q{">&gt;&gt;</a>};
+            $message .= q{ <a class="blue" title="last page" href="};
+            if($self_url && $self_url ne ''){
+                $message .= $q->url . $self_url . '?';
+                foreach my $ak (keys %{ $q->{'param'} } ){
+                    $message .=  $ak . '=' .$q->param($ak). ';';
+                }
+            }else{
+                $message .= $q->self_url;
+            }
+            $message .= q{">&gt;&gt;</a>};
         }
 
         $message .= '</span>';
@@ -984,6 +1127,37 @@ sub _page {
     }
 
 }
+
+=head3 _get_template
+
+because we don't want HTML in here we collect the tt_$runmode
+if it exists or the requested template. If they happen to give us vars then those get used as well.
+
+=cut
+
+sub _get_template {
+    my $self = shift;
+    my $tmpl = shift;
+    my $vars = shift;
+    return unless $self;
+    my $file = $self->tt_template_name;
+    $file=~s/_get_template.tmpl$//;
+    #warn "Request template: $file${tmpl}.tmpl";
+    use Template;
+     my $tt = Template->new({
+           INCLUDE_PATH => './templates',
+           EVAL_PERL    => 1,
+       }) || die $Template::ERROR, "\n";
+    #warn $self->tt_template_name();
+    #return $self->tt_process('Notice/C/Strongbox/_verify_userid.tmpl', {message => $message});
+    my $tt_vars;
+    if(defined $vars){ $tt_vars = $vars};
+    my $return;
+    if(defined $tmpl){ $file .= $tmpl . '.tmpl'; }
+    $tt->process($file, $tt_vars, \$return) || warn $!;
+    return $return;
+}
+
 
 1;
 
@@ -1041,7 +1215,7 @@ Alexx Roche, C<alexx@cpan.org>
 Copyright (C) 2001-2012 Alexx Roche
 
 This program is free software; you can redistribute it and/or modify it
-under the following license: Eclipse Public License, Version 1.0
+under the following license: Apache License, Version 2.0
 or the Artistic License, Version 2.0
 
 See http://www.opensource.org/licenses/ for more information.
