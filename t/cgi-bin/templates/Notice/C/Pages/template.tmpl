@@ -31,6 +31,7 @@
 
 .page_list li {
     display: inline;
+    margin: 0 0 0 10px;
     /*
     display: block;
     float: left;
@@ -41,9 +42,11 @@
 }
 </style>
 [%- #USE Dumper; Dumper.dump(stubs) -%]
-    [% FOREACH p = pages.dir; id = p.pa_id; NEXT IF ( p.pa_id OR p.value.pa_name) -%]
+  [%- IF pages.dir # DO NOT OVERLOAD! we should have @pages AND @dirs -%]
+    [% FOREACH p = pages.dir.sort; id = p.pa_id; NEXT IF ( p.pa_id OR p.value.pa_name) -%]
         <br /><a class="blue" href="[% c.query.url -%]/Pages/template/[%- p -%]/?inc_all=1">[%- p -%]</a>
     [%- END # FOREACH direcory -%]
+  [%- END # pages.dir -%]
 <ul class="page_list">
     [% FOREACH p = pages; id = p.pa_id; NEXT UNLESS ( p.pa_id OR p.value.pa_name) -%]
     [%- IF stripe == 'stripe'; stripe = 'strip'; ELSE; stripe = 'stripe'; END -%]

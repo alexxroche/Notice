@@ -6,11 +6,41 @@
     <script type="text/javascript" src="/js/jquery.js"></script>
     <script type="text/javascript" src="/js/jquery.simpleCombo.js"></script>
   <link rel=stylesheet href="/css/pages.css" />
+ [%- IF no_editor AND is_template -%]
+        <script type="text/javascript">
+<!--
+function insertTab(o, e) {
+    if(document.getElementById('tabenabled').checked){
+        var kC = e.keyCode ? e.keyCode : e.charCode ? e.charCode : e.which;
+        if (kC == 9 && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+            var oS = o.scrollTop;
+            if (o.setSelectionRange){
+                var sS = o.selectionStart;
+                var sE = o.selectionEnd;
+                o.value = o.value.substring(0, sS) + " " + o.value.substr(sE);
+                o.setSelectionRange(sS + 1, sS + 1);
+                o.focus();
+            }else if (o.createTextRange){
+                document.selection.createRange().text = " ";
+                e.returnValue = false;
+            }
+            o.scrollTop = oS;
+            if (e.preventDefault){
+                e.preventDefault();
+            }
+            return false;
+        }
+    }
+    return true;
+}
+// -->
+</script>
+ [%- END -%]
  [%- UNLESS no_editor -%]
   <script src="/ckeditor/ckeditor.js">
     //var editor_data = CKEDITOR.instances.editor1.getData();
     window.onload = function() {
-        CKEDITOR.replace( 'editor1' );
+        CKEDITOR.replace( 'editor1', { customConfig : '/ckeditor/keep_indent.js' });
     };
   </script>
   <script type="text/javascript">
@@ -42,21 +72,31 @@
             <input type="hidden" name="id" value="[%- p.pa_id -%]" />
             <span class="small">Name: <input type="text" name="name" title="It has to have a name" value="[%- p.pa_name || name -%]" required />
             &nbsp; <a tabindex=99 class="red button" href="[%- c.query.url -%]/Pages/">Abandon or return to list</a>
+        [%- UNLESS is_template -%]
+            <input class="small [%- IF p ; 'blue'; ELSE; 'green'; END -%] button" title="save for later" type="submit" value="[%- update OR 'Save' -%]" name="update" /> &nbsp;
+        [%- END # UNLESS -%]
+        [%- IF admin -%]
+            <input class="small [%- IF p.pa_published ; 'white'; ELSE; 'orange'; END -%] button" type="submit" title="Go live right now" value="[%- IF p.pa_published ; 'Update'; ELSE; 'Publish'; END -%]" name="publish" />
+        [%- END # admin check -%]
             <br />
             </span>
      [%- END # is_template - template has the buttons at the bottom of the page -%]
-            <textarea name="editor1" rows="37" cols="177" >[%- IF editor1; editor1.replace('% ]','%&#93;'); ELSE; p.pa_ge OR '&lt;p&gt;New Page.&lt;/p&gt;'; END -%]</textarea>
+            <textarea [%- IF is_template -%] onkeydown="insertTab(this, event);" [%- END -%] name="editor1" rows="37" cols="177" >[%- IF editor1; editor1.replace('% ]','%&#93;'); ELSE; p.pa_ge OR '&lt;p&gt;New Page.&lt;/p&gt;'; END -%]</textarea>
  [%- UNLESS no_editor -%]
             <script>
                 [%- IF is_template; "
                 CKEDITOR.config.height = 474; 
                 CKEDITOR.config.fullPage = true; 
-                "; END -%]
-                CKEDITOR.replace( 'editor1' );
+                "; ELSE -%]
+                CKEDITOR.config.height = 465;
+                [%- END -%]
+                CKEDITOR.replace( 'editor1', { customConfig : '/ckeditor/keep_indent.js' });
             </script>
  [%- END # no_editor -%]
 
+     [%- UNLESS is_template -%]
         </p>
+     [%- END -%]
         <p>
         [%- UNLESS is_template -%]
             <input class="small [%- IF p ; 'blue'; ELSE; 'green'; END -%] button" title="save for later" type="submit" value="[%- update OR 'Save' -%]" name="update" /> &nbsp;
@@ -101,8 +141,11 @@
  <span class="small"> Template: <input type="text" name="name" title="It has to have a name" value="[%- p.pa_name || name -%]" required />
             &nbsp; or <a tabindex=99 class="red button" href="[%- c.query.url -%]/Pages/template"
                     >Abandon this TEMPLATE or return to list</a>
-            <br />
             </span>
+            [%- IF no_editor  -%]
+            Enable Tab in Text area <input id="tabenabled" type="checkbox" checked="checked" value="" name="tabenabled">
+            [%- END # IF no_editor -%]
+            <br />
           [%- END # IF is_template -%]
 
         </p>
