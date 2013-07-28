@@ -130,9 +130,38 @@ input, textarea, select {
 	
 select { padding: 0 0px; }
 
-.navigation {
-	color: #00CCCC;
+/* NAVIGATION MENU */
+
+.navigation { color: #00CCCC; }
+
+div#menu ul.selected, div#menu ul li.selected, div#menu ul li a.selected {
+    background-color: #cad8ed;
+    color: #990000 !important;
+    /* 
+    color: #990000;
+    */
+    background-image: url(/images/arrow.gif);
+    background-repeat: no-repeat;
+    background-position: 0px 4px;
 }
+div#menu a.child { margin: auto; padding-left: 20px; }
+
+div#menu ul li { margin: 0; padding: 0; list-style-type: none; }
+div#menu ul li a {
+    display: block;
+    text-decoration: none;
+    border-bottom: 1px solid #B8C2DC;
+    font-size: 0.9em;
+    padding-right: 0.7em;
+    padding-bottom: 0.4em;
+    padding-left: 0.7em;
+    padding-top: 0.3em;
+}
+div#menu ul li a:hover  { background-color: #D6DEF5; }
+div#menu ul li a:visited { color: #00275B; }
+div#menu  a:link, div#menu  a:active { color:#00275B; }
+div#menu ul li ul { margin: auto; padding-left:10px; list-style-type: circle; }
+
 
 blockquote {
 	margin: 0;
