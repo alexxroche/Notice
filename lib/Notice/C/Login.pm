@@ -33,13 +33,13 @@ sub setup {
 
 =head2 RUN MODES
 
-=head3 index
+=head3 main
 
   * This runmode manages login attempts
 
 =cut
 
-sub index: StartRunmode {
+sub main: StartRunmode {
   my $self   = shift;
   my $url = $self->query->url;
 
@@ -56,10 +56,67 @@ sub index: StartRunmode {
       $url =~ s/^http/https/;
       return $self->redirect($url);
     }
-    return $self->my_login_form;
+    #return $self->my_login_form;
+    return $self->login;
   }
 }
 
+
+sub form: Runmode {
+  my $self   = shift;
+  my $url = $self->query->url;
+
+  my ($PATH_INFO,$info,$runmode);
+  if($ENV{'PATH_INFO'}){
+    $PATH_INFO = $ENV{'PATH_INFO'} || undef;
+    (undef, $info, $runmode) = split(/\//, $PATH_INFO);
+  }
+  my $dest= $self->query->param('destination') || 'main';
+  if ($info){   
+    $dest = $info;
+    if($runmode){
+        $dest .= "/$runmode";
+        $self->tt_params({ authen_login => $runmode });
+    }
+  }
+    # NTS add in the ?blah=blah so that we don't lose the GET data
+  $self->tt_params({ dest => $dest });
+ 
+  my $user = $self->authen->username;
+  if (1==0 && $user) {
+    if($dest){ $url .= '/' . $dest; }
+    $url=~s/\/login\/?$//g;
+    return $self->redirect("$url");
+    exit;
+  } else {
+    my $authen_username = '';
+    if($self->query){
+        my $query       = $self->query;
+        #my $credentials = $self->authen->credentials;
+        $authen_username = $query->param('authen_username');
+        unless($authen_username){
+            $authen_username = $query->cookie('CAPAUTHTOKEN');
+            $self->tt_params({ authen_rememberuser => 'checked="checked"' });
+            #warn "got username from cookie " . $authen_username;
+        }
+    }
+    $self->tt_params({ authen_username => $authen_username });
+    my $url = $self->query->self_url;
+    my $warning = $self->authen->login_attempts;
+    if($warning && $warning ne '' && $warning=~m/^\d+$/){
+        $warning = '<span class="red error">Invalid username or password (login attempt ' . $warning . ')</span>';
+        $self->tt_params({ login_warning => $warning });
+    }
+    # This should be an option pulled from the DB config table
+    unless ($url =~ /^https/) {
+      $url =~ s/^http/https/;
+      if( defined $ENV{'HTTP_X_REQUESTED_WITH'}){ $self->header_type('none'); return $self->tt_process('login_form.tmpl'); }
+      return $self->tt_process('login.tmpl');
+    }
+    if( defined $ENV{'HTTP_X_REQUESTED_WITH'}){ return $self->tt_process('login_form.tmpl'); }
+    return $self->tt_process('login.tmpl');
+  }
+}
 
 # Private methods go here. Start their names with an _ so they are skipped
 # by Pod::Coverage.
